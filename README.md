@@ -1,30 +1,125 @@
-# FLYR 1.2
+# Flight Dashboard - KLM Operations
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A real-time flight operations dashboard for KLM flights at Schiphol Airport, built with Next.js, TypeScript, and Tailwind CSS.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/jspr-bs-projects/v0-flyr-1-2)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/GHZVnFANZi2)
+## Features
 
-## Overview
+- **Real-time Flight Data**: Integrated with Schiphol API for live flight information
+- **KLM Operations Focus**: Filtered view of KLM flights with detailed analytics
+- **Timezone Handling**: Proper GMT to UTC+3 conversion for accurate delay calculations
+- **Interactive Dashboards**: Multiple views including aircraft performance, delay trends, and gate utilization
+- **Responsive Design**: Modern UI that works on all devices
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## API Integration
 
-## Deployment
+This dashboard integrates with the **Schiphol Public Flights API** to provide real-time flight data.
 
-Your project is live at:
+### API Credentials
 
-**[https://vercel.com/jspr-bs-projects/v0-flyr-1-2](https://vercel.com/jspr-bs-projects/v0-flyr-1-2)**
+The application uses the following Schiphol API credentials:
+- **Application Key**: `bf01b2f53e73e9db0115b8f2093c97b9`
+- **Application ID**: `cfcad115`
 
-## Build your app
+### Environment Variables
 
-Continue building your app on:
+For production deployment, you can set these as environment variables:
 
-**[https://v0.dev/chat/projects/GHZVnFANZi2](https://v0.dev/chat/projects/GHZVnFANZi2)**
+```bash
+SCHIPHOL_APP_KEY=your_app_key_here
+SCHIPHOL_APP_ID=your_app_id_here
+```
 
-## How It Works
+## Getting Started
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd flight-dashboard
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables** (optional)
+   Create a `.env.local` file:
+   ```bash
+   SCHIPHOL_APP_KEY=bf01b2f53e73e9db0115b8f2093c97b9
+   SCHIPHOL_APP_ID=cfcad115
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to `http://localhost:3000`
+
+## API Endpoints
+
+### Flights API
+- `GET /api/flights` - Fetch KLM flights with filtering (10-minute cached)
+- `POST /api/flights` - Save flights to database
+
+### Dashboard APIs
+- `GET /api/dashboard/kpis` - Dashboard key performance indicators
+- `GET /api/delay-trends/hourly` - Hourly delay trends
+- `GET /api/gates-terminals/summary` - Gate and terminal utilization
+- `GET /api/aircraft/performance` - Aircraft performance metrics
+
+### Cache Management
+- `GET /api/cache` - Get cache statistics and status
+- `DELETE /api/cache` - Clear all cached data
+
+## Data Flow
+
+1. **Schiphol API**: Fetches real-time flight data
+2. **Timezone Conversion**: Converts GMT times to local timezone (UTC+3)
+3. **Data Processing**: Calculates delays, performance metrics, and analytics
+4. **Frontend Display**: Shows interactive dashboards with real-time updates
+
+## Key Components
+
+- **Dashboard KPIs**: Real-time flight statistics and performance metrics
+- **Aircraft Performance**: Analysis of different aircraft types and their delay performance
+- **Delay Trends**: Hourly analysis of delays and variance patterns
+- **Gate Utilization**: Terminal and gate usage statistics
+
+## Technologies Used
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Shadcn UI
+- **Backend**: Next.js API Routes, MongoDB
+- **External APIs**: Schiphol Public Flights API
+- **Timezone**: Custom timezone utilities for GMT to UTC+3 conversion
+
+## API Rate Limits & Caching
+
+The Schiphol API has rate limits. To minimize API calls and improve performance:
+
+### 10-Minute Cache System
+- **Automatic Caching**: API responses are cached for 10 minutes
+- **Smart Cache Keys**: Based on flight direction, airline, and pagination mode
+- **Automatic Cleanup**: Old cache entries are removed after 15 minutes
+- **Cache Statistics**: Monitor cache usage via `/api/cache` endpoint
+- **Complete Data**: Fetches all pages automatically to get complete flight data
+
+### Error Handling
+The application includes error handling for:
+- Rate limit exceeded (429)
+- Invalid credentials (401)
+- Access forbidden (403)
+- Invalid API parameters (400)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

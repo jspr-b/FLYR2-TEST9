@@ -1,59 +1,167 @@
 "use client"
 
-import { useState } from "react"
-import { BarChart3, LineChart, Info } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Info, BarChart3, TrendingUp } from "lucide-react"
+import { fetchFlights } from "@/lib/api"
+import { FlightResponse } from "@/types/flight"
+import { calculateDelayMinutes, extractLocalHour } from "@/lib/timezone-utils"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
-// Mock data representing realistic KLM delay patterns throughout the day
-const hourlyDelayData = [
-  { hour: "05:00", avgDelay: 3.2, flights: 4, variance: "Low" },
-  { hour: "06:00", avgDelay: 5.1, flights: 8, variance: "Low" },
-  { hour: "07:00", avgDelay: 12.3, flights: 10, variance: "Medium" },
-  { hour: "08:00", avgDelay: 22.4, flights: 14, variance: "High" },
-  { hour: "09:00", avgDelay: 18.7, flights: 12, variance: "High" },
-  { hour: "10:00", avgDelay: 8.9, flights: 9, variance: "Medium" },
-  { hour: "11:00", avgDelay: 6.2, flights: 7, variance: "Low" },
-  { hour: "12:00", avgDelay: 9.1, flights: 8, variance: "Medium" },
-  { hour: "13:00", avgDelay: 11.5, flights: 10, variance: "Medium" },
-  { hour: "14:00", avgDelay: 15.8, flights: 11, variance: "Medium" },
-  { hour: "15:00", avgDelay: 19.2, flights: 13, variance: "High" },
-  { hour: "16:00", avgDelay: 16.4, flights: 12, variance: "Medium" },
-  { hour: "17:00", avgDelay: 13.7, flights: 9, variance: "Medium" },
-  { hour: "18:00", avgDelay: 10.3, flights: 8, variance: "Low" },
-  { hour: "19:00", avgDelay: 7.8, flights: 6, variance: "Low" },
-  { hour: "20:00", avgDelay: 4.5, flights: 4, variance: "Low" },
-  { hour: "21:00", avgDelay: 2.1, flights: 2, variance: "Low" },
-]
+interface HourlyDelayData {
+  hour: string
+  avgDelay: number | null
+  flights: number | null
+  variance: "Low" | "Medium" | "High"
+}
 
 export function DelayTrendsChart() {
   const [selectedHour, setSelectedHour] = useState<string | null>(null)
   const [viewType, setViewType] = useState<"delay" | "flights">("delay")
+  const [isLoading, setIsLoading] = useState(true)
+  const [hourlyDelayData, setHourlyDelayData] = useState<HourlyDelayData[]>([])
 
-  const maxDelay = Math.max(...hourlyDelayData.map((d) => d.avgDelay))
-  const maxFlights = Math.max(...hourlyDelayData.map((d) => d.flights))
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        // Fetch real flight data with KLM filter
+        const flightsResponse = await fetchFlights({
+          flightDirection: "D",
+          scheduleDate: new Date().toISOString().split('T')[0],
+          isOperationalFlight: true,
+          prefixicao: "KL"
+        })
+        
+        const flights = flightsResponse.flights
+        
+        // Handle empty data gracefully
+        if (!flights || flights.length === 0) {
+          const initialHourlyDelayData: HourlyDelayData[] = [
+            { hour: "No flights", avgDelay: null, flights: 0, variance: "Low" }
+          ]
+          setHourlyDelayData(initialHourlyDelayData)
+          return
+        }
+        
+        // Calculate hourly delay data from flight data
+        const hourGroups = flights.reduce((acc, flight) => {
+          // Extract hour using corrected timezone utility
+          const scheduleHourLocal = extractLocalHour(flight.scheduleDateTime)
+          const hourKey = `${scheduleHourLocal.toString().padStart(2, '0')}:00`
+          
+          if (!acc[hourKey]) {
+            acc[hourKey] = { flights: [], delays: [] }
+          }
+          
+          acc[hourKey].flights.push(flight)
+          // Calculate delay using timezone utility
+          const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
+          acc[hourKey].delays.push(delayMinutes)
+          
+          return acc
+        }, {} as Record<string, { flights: any[], delays: number[] }>)
+        
+        // Transform to chart data format
+        const hourlyData: HourlyDelayData[] = Object.entries(hourGroups).map(([hour, data]) => {
+          const avgDelay = data.delays.length > 0 ? data.delays.reduce((a, b) => a + b, 0) / data.delays.length : 0
+          
+          // Determine variance based on delay
+          let variance: "Low" | "Medium" | "High" = "Low"
+          if (avgDelay > 15) variance = "High"
+          else if (avgDelay > 5) variance = "Medium"
+          
+          return {
+            hour,
+            avgDelay: avgDelay > 0 ? avgDelay : null,
+            flights: data.flights.length,
+            variance
+          }
+        }).sort((a, b) => {
+          // Sort by hour (extract hour number for sorting)
+          const hourA = parseInt(a.hour.split(':')[0])
+          const hourB = parseInt(b.hour.split(':')[0])
+          return hourA - hourB
+        })
+        
+        setHourlyDelayData(hourlyData)
+      } catch (error) {
+        console.error("Error fetching hourly delay data:", error)
+        // Fallback to placeholder data on error
+        const errorData: HourlyDelayData[] = [
+          { hour: "Error loading data", avgDelay: null, flights: null, variance: "Low" }
+        ]
+        setHourlyDelayData(errorData)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-  const getBarHeight = (value: number, max: number) => {
+    fetchData()
+  }, [])
+
+  const maxDelay = Math.max(...hourlyDelayData.map((d) => d.avgDelay || 0))
+  const maxFlights = Math.max(...hourlyDelayData.map((d) => d.flights || 0))
+
+  const getBarHeight = (value: number | null, max: number) => {
+    if (!value || max === 0) return 4
     return Math.max((value / max) * 200, 4) // Minimum 4px height
   }
 
-  const getDelayColor = (delay: number, variance: string) => {
+  const getDelayColor = (delay: number | null, variance: string) => {
+    if (!delay) return "bg-gray-300 hover:bg-gray-400"
     if (variance === "High") return "bg-red-500 hover:bg-red-600"
     if (delay > 15) return "bg-orange-500 hover:bg-orange-600"
     if (delay > 8) return "bg-yellow-500 hover:bg-yellow-600"
     return "bg-green-500 hover:bg-green-600"
   }
 
-  const getFlightColor = (flights: number) => {
+  const getFlightColor = (flights: number | null) => {
+    if (!flights) return "bg-gray-300 hover:bg-gray-400"
     if (flights > 12) return "bg-blue-600 hover:bg-blue-700"
     if (flights > 8) return "bg-blue-500 hover:bg-blue-600"
     if (flights > 5) return "bg-blue-400 hover:bg-blue-500"
     return "bg-blue-300 hover:bg-blue-400"
   }
 
+  const formatValue = (value: number | null) => {
+    return value !== null ? value.toString() : "n/v"
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 animate-pulse">
+        <div className="h-6 bg-gray-200 rounded mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded mb-6"></div>
+        <div className="flex items-end justify-center gap-4 h-64">
+          {[...Array(17)].map((_, index) => (
+            <div key={index} className="w-8 bg-gray-200 rounded-t" style={{ height: `${Math.random() * 200 + 4}px` }}></div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-1">Hourly Delay Patterns</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">Hourly Delay Patterns</h2>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center cursor-pointer ml-1">
+                    <Info className="w-4 h-4 text-muted-foreground" aria-label="Delay info" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs text-sm">
+                  <b>How delays are shown:</b>
+                  <br />
+                  Delays in this chart include both <b>scheduled delays</b> (known and published in advance) and <b>real-time/operational delays</b> (due to unforeseen events). If you see a delay for a future flight, it may be a scheduled delay, not a last-minute operational issue.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <p className="text-sm text-gray-600">Click bars for detailed breakdown</p>
         </div>
         <div className="flex items-center gap-2 mt-4 sm:mt-0">
@@ -74,7 +182,7 @@ export function DelayTrendsChart() {
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
-            <LineChart className="h-4 w-4" />
+            <TrendingUp className="h-4 w-4" />
             Volume
           </button>
         </div>
@@ -96,7 +204,10 @@ export function DelayTrendsChart() {
                 <div key={index} className="flex flex-col items-center group cursor-pointer">
                   <div className="text-center mb-2">
                     <span className="text-xs sm:text-sm font-medium text-gray-900">
-                      {viewType === "delay" ? `${data.avgDelay.toFixed(1)}m` : data.flights}
+                      {viewType === "delay" 
+                        ? (data.avgDelay ? `${data.avgDelay.toFixed(1)}m` : "n/v")
+                        : formatValue(data.flights)
+                      }
                     </span>
                   </div>
                   <div
@@ -105,7 +216,10 @@ export function DelayTrendsChart() {
                     }`}
                     style={{ height: `${height}px` }}
                     onClick={() => setSelectedHour(isSelected ? null : data.hour)}
-                    title={`${data.hour}: ${viewType === "delay" ? `${data.avgDelay.toFixed(1)} min avg delay` : `${data.flights} flights`}`}
+                    title={`${data.hour}: ${viewType === "delay" 
+                      ? (data.avgDelay ? `${data.avgDelay.toFixed(1)} min avg delay` : "n/v")
+                      : `${formatValue(data.flights)} flights`
+                    }`}
                   />
                   <span className="text-xs text-gray-600 mt-2 transform -rotate-45 origin-center whitespace-nowrap">
                     {data.hour}
@@ -134,11 +248,11 @@ export function DelayTrendsChart() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                     <div>
                       <span className="text-blue-700 font-medium">Average Delay:</span>
-                      <p className="text-blue-900">{data.avgDelay.toFixed(1)} minutes</p>
+                      <p className="text-blue-900">{data.avgDelay ? `${data.avgDelay.toFixed(1)} minutes` : "n/v"}</p>
                     </div>
                     <div>
                       <span className="text-blue-700 font-medium">Total Flights:</span>
-                      <p className="text-blue-900">{data.flights} departures</p>
+                      <p className="text-blue-900">{formatValue(data.flights)} departures</p>
                     </div>
                     <div>
                       <span className="text-blue-700 font-medium">Variance Level:</span>

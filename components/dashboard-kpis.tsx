@@ -2,98 +2,495 @@
 
 import Link from "next/link"
 import { Plane, Clock, AlertTriangle, TrendingUp, TrendingDown, Building2, Activity, AlertCircle } from "lucide-react"
+import { useState, useEffect } from "react"
+import { FlightResponse } from "@/types/flight"
+import { calculateDelayMinutes, extractLocalHour } from "@/lib/timezone-utils"
+
+// Types for real data structure
+interface KPIData {
+  label: string
+  value: string
+  change: string
+  changeType: "positive" | "negative" | "neutral"
+  icon: any
+  color: string
+  bgColor: string
+  href: string
+  status: "good" | "warning" | "critical"
+}
+
+interface DelayHour {
+  hour: string
+  delay: number | null
+  flights: number | null
+  status: "critical" | "warning" | "good"
+}
+
+interface AircraftPerformance {
+  type: string
+  delay: number | null
+  flights: number | null
+  status: "good" | "fair" | "poor"
+  category: string
+}
+
+interface GateData {
+  gate: string
+  pier: string
+  flights: number | null
+  utilization: number | null
+  status: "critical" | "high" | "medium"
+}
+
+// API functions for specialized endpoints
+async function fetchDashboardKPIs() {
+  try {
+    const response = await fetch('/api/dashboard/kpis')
+    if (!response.ok) throw new Error('Failed to fetch dashboard KPIs')
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching dashboard KPIs:', error)
+    return null
+  }
+}
+
+async function fetchAircraftPerformance() {
+  try {
+    const response = await fetch('/api/aircraft/performance')
+    if (!response.ok) throw new Error('Failed to fetch aircraft performance')
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching aircraft performance:', error)
+    return null
+  }
+}
+
+async function fetchGatesTerminalsSummary() {
+  try {
+    const response = await fetch('/api/gates-terminals/summary')
+    if (!response.ok) throw new Error('Failed to fetch gates/terminals summary')
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching gates/terminals summary:', error)
+    return null
+  }
+}
+
+async function fetchDelayTrendsHourly() {
+  try {
+    const response = await fetch('/api/delay-trends/hourly')
+    if (!response.ok) throw new Error('Failed to fetch delay trends')
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching delay trends:', error)
+    return null
+  }
+}
+
+// Aircraft type mapping function
+function getAircraftDisplayName(type: string): string {
+  const aircraftMap: Record<string, string> = {
+    // Airbus Aircraft
+    '332': 'Airbus A330-200',
+    '333': 'Airbus A330-300',
+    '32N': 'Airbus A320neo',
+    '32Q': 'Airbus A321neo',
+    'A332': 'Airbus A330-200',
+    'A333': 'Airbus A330-300',
+    'A32N': 'Airbus A320neo',
+    'A32Q': 'Airbus A321neo',
+    
+    // Boeing Aircraft
+    '772': 'Boeing 777-200ER',
+    '773': 'Boeing 777-300ER',
+    '77W': 'Boeing 777-300ER',
+    '789': 'Boeing 787-9',
+    '78W': 'Boeing 787-10',
+    '781': 'Boeing 787-10',
+    '73H': 'Boeing 737-700',
+    '738': 'Boeing 737-800',
+    '73W': 'Boeing 737-900',
+    '73J': 'Boeing 737-900',
+    'B772': 'Boeing 777-200ER',
+    'B773': 'Boeing 777-300ER',
+    'B789': 'Boeing 787-9',
+    'B738': 'Boeing 737-800',
+    
+    // Embraer Aircraft (KLM Cityhopper)
+    'E70': 'Embraer E170',
+    'E75': 'Embraer E175',
+    'E90': 'Embraer E190',
+    'E7W': 'Embraer E195-E2',
+    'E195': 'Embraer E195',
+    'E170': 'Embraer E170',
+    'E175': 'Embraer E175',
+    'E190': 'Embraer E190',
+    '295': 'Embraer E195-E2',
+  }
+  
+  return aircraftMap[type] || type
+}
+
+// Aircraft manufacturer mapping function
+function getAircraftManufacturer(type: string): string {
+  if (type === 'Unknown') return "Unknown"
+  
+  const manufacturerMap: Record<string, string> = {
+    // Airbus Aircraft
+    '332': 'Airbus', // A330-200
+    '333': 'Airbus', // A330-300
+    '32N': 'Airbus', // A320neo
+    '32Q': 'Airbus', // A321neo
+    
+    // Boeing Aircraft
+    '772': 'Boeing', // 777-200ER
+    '773': 'Boeing', // 777-300ER
+    '77W': 'Boeing', // 777-300ER (alternative code)
+    '789': 'Boeing', // 787-9
+    '78W': 'Boeing', // 787-10
+    '781': 'Boeing', // 787-10 (alternative code)
+    '73H': 'Boeing', // 737-700
+    '738': 'Boeing', // 737-800
+    '73W': 'Boeing', // 737-900
+    '73J': 'Boeing', // 737-900 (alternative code)
+    
+    // Embraer Aircraft (KLM Cityhopper)
+    'E70': 'Embraer', // E170
+    'E75': 'Embraer', // E175
+    'E90': 'Embraer', // E190
+    'E7W': 'Embraer', // E195-E2
+    '295': 'Embraer', // E195-E2 (Fixed: 295 is actually Embraer)
+  }
+  
+  return manufacturerMap[type] || "Unknown"
+}
+
+function getAircraftCapacity(type: string): number | null {
+  const capacityMap: Record<string, number> = {
+    // Airbus Aircraft
+    '332': 268, // Airbus A330-200
+    '333': 292, // Airbus A330-300
+    '32N': 180, // Airbus A320neo
+    '32Q': 232, // Airbus A321neo
+    
+    // Boeing Aircraft
+    '772': 314, // Boeing 777-200ER
+    '773': 408, // Boeing 777-300ER
+    '77W': 408, // Boeing 777-300ER (alternative code)
+    '789': 290, // Boeing 787-9
+    '78W': 335, // Boeing 787-10
+    '781': 335, // Boeing 787-10 (alternative code)
+    '73H': 126, // Boeing 737-700
+    '738': 162, // Boeing 737-800 (2-class)
+    '73W': 178, // Boeing 737-900
+    '73J': 178, // Boeing 737-900 (alternative code)
+    
+    // Embraer Aircraft (KLM Cityhopper)
+    'E70': 76,  // Embraer 170
+    'E75': 82,  // Embraer 175 (average of 76-88)
+    'E90': 96,  // Embraer 190 (dual-class)
+    'E7W': 120, // Embraer 195-E2
+    '295': 120, // Embraer E195-E2 (Fixed: 295 is actually Embraer)
+  }
+  return capacityMap[type] || null
+}
 
 export function DashboardKPIs() {
-  const kpiData = [
-    {
-      label: "Fleet Avg Delay",
-      value: "11.2 min",
-      change: "+2.1 min vs yesterday",
-      changeType: "negative" as const,
-      icon: Clock,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      href: "/delay-trends-by-hour",
-      status: "warning",
-    },
-    {
-      label: "Best Performing Aircraft",
-      value: "A321neo",
-      change: "3.2 min avg delay",
-      changeType: "positive" as const,
-      icon: TrendingUp,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      href: "/aircraft-type-delay-performance",
-      status: "good",
-    },
-    {
-      label: "Worst Performing Aircraft",
-      value: "A330-200",
-      change: "19.8 min avg delay",
-      changeType: "negative" as const,
-      icon: TrendingDown,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      href: "/aircraft-type-delay-performance",
-      status: "critical",
-    },
-    {
-      label: "Total Flights Today",
-      value: "127",
-      change: "+8 vs yesterday",
-      changeType: "positive" as const,
-      icon: Plane,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      href: "/delay-trends-by-hour",
-      status: "good",
-    },
-    {
-      label: "Peak Delay Hour",
-      value: "08:00-09:00",
-      change: "22.4 min avg",
-      changeType: "neutral" as const,
-      icon: Activity,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      href: "/delay-trends-by-hour",
-      status: "warning",
-    },
-    {
-      label: "Active Piers",
-      value: "7",
-      change: "B, C, D, E, F, G, H&M",
-      changeType: "neutral" as const,
-      icon: Building2,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
-      href: "/busiest-gates-and-terminals",
-      status: "good",
-    },
-    {
-      label: "High Variance Hours",
-      value: "3 hours",
-      change: "Flagged for review",
-      changeType: "negative" as const,
-      icon: AlertTriangle,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-      href: "/delay-trends-by-hour",
-      status: "warning",
-    },
-    {
-      label: "Critical Alerts",
-      value: "2 active",
-      change: "Gate F07 + Pier E delays",
-      changeType: "negative" as const,
-      icon: AlertCircle,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      href: "/busiest-gates-and-terminals",
-      status: "critical",
-    },
-  ]
+  const [isLoading, setIsLoading] = useState(true)
+  const [kpiData, setKpiData] = useState<KPIData[]>([])
+  const [delayHours, setDelayHours] = useState<DelayHour[]>([])
+  const [aircraftPerformance, setAircraftPerformance] = useState<AircraftPerformance[]>([])
+  const [gateData, setGateData] = useState<GateData[]>([])
+
+  // Fetch data from specialized API endpoints
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        // Fetch data from specialized endpoints in parallel
+        const [dashboardKPIs, aircraftData, gatesData, delayTrends] = await Promise.all([
+          fetchDashboardKPIs(),
+          fetchAircraftPerformance(),
+          fetchGatesTerminalsSummary(),
+          fetchDelayTrendsHourly()
+        ])
+
+        // Process dashboard KPIs
+        if (dashboardKPIs) {
+          const initialKPIData: KPIData[] = [
+            {
+              label: "Fleet Avg Delay",
+              value: dashboardKPIs.averageDelay || "n/v",
+              change: dashboardKPIs.delayedFlights > 0 ? `${dashboardKPIs.delayedFlights} delayed` : "On time",
+              changeType: parseFloat(dashboardKPIs.averageDelay) > 15 ? "negative" : parseFloat(dashboardKPIs.averageDelay) > 5 ? "neutral" : "positive",
+              icon: Clock,
+              color: "text-orange-600",
+              bgColor: "bg-orange-50",
+              href: "/delay-trends-by-hour",
+              status: parseFloat(dashboardKPIs.averageDelay) > 15 ? "critical" : parseFloat(dashboardKPIs.averageDelay) > 5 ? "warning" : "good",
+            },
+            {
+              label: "Total Flights Today",
+              value: dashboardKPIs.totalFlights?.toString() || "0",
+              change: `${dashboardKPIs.totalFlights || 0} KLM departures`,
+              changeType: "neutral",
+              icon: Plane,
+              color: "text-blue-600",
+              bgColor: "bg-blue-50",
+              href: "/delay-trends-by-hour",
+              status: "good",
+            },
+            {
+              label: "Peak Delay Hour",
+              value: dashboardKPIs.peakDelayHour || "n/v",
+              change: dashboardKPIs.peakDelayValue || "No delays",
+              changeType: dashboardKPIs.peakDelayValue ? "negative" : "positive",
+              icon: Activity,
+              color: "text-purple-600",
+              bgColor: "bg-purple-50",
+              href: "/delay-trends-by-hour",
+              status: dashboardKPIs.peakDelayValue ? "warning" : "good",
+            },
+            {
+              label: "High Variance Hours",
+              value: dashboardKPIs.highVarianceHours?.toString() || "0",
+              change: dashboardKPIs.highVarianceHours > 0 ? "High variance" : "Stable",
+              changeType: dashboardKPIs.highVarianceHours > 0 ? "negative" : "positive",
+              icon: AlertTriangle,
+              color: "text-yellow-600",
+              bgColor: "bg-yellow-50",
+              href: "/delay-trends-by-hour",
+              status: dashboardKPIs.highVarianceHours > 0 ? "warning" : "good",
+            },
+            {
+              label: "Critical Alerts",
+              value: dashboardKPIs.flightsOver30Min?.toString() || "0",
+              change: dashboardKPIs.flightsOver30Min > 0 ? "High delays" : "Normal ops",
+              changeType: dashboardKPIs.flightsOver30Min > 0 ? "negative" : "positive",
+              icon: AlertCircle,
+              color: "text-red-600",
+              bgColor: "bg-red-50",
+              href: "/busiest-gates-and-terminals",
+              status: dashboardKPIs.flightsOver30Min > 0 ? "critical" : "good",
+            },
+          ]
+
+          // Add aircraft performance KPIs if available
+          if (aircraftData && aircraftData.chartData && aircraftData.chartData.length > 0) {
+            // Sort aircraft by delay (best performer = lowest delay)
+            const sortedAircraft = [...aircraftData.chartData].sort((a, b) => 
+              (a.avgDelay || 0) - (b.avgDelay || 0)
+            )
+            
+            const bestAircraft = sortedAircraft[0] // Lowest delay = best performer
+            const worstAircraft = sortedAircraft[sortedAircraft.length - 1] // Highest delay = worst performer
+
+            initialKPIData.splice(1, 0, {
+              label: "Best Performing Aircraft",
+              value: bestAircraft ? getAircraftDisplayName(bestAircraft.type) : "n/v",
+              change: bestAircraft ? `${bestAircraft.avgDelay?.toFixed(1)}m avg` : "n/v",
+              changeType: bestAircraft && bestAircraft.avgDelay <= 5 ? "positive" : "neutral",
+              icon: TrendingUp,
+              color: "text-green-600",
+              bgColor: "bg-green-50",
+              href: "/aircraft-type-delay-performance",
+              status: bestAircraft && bestAircraft.avgDelay <= 5 ? "good" : "warning",
+            })
+
+            initialKPIData.splice(2, 0, {
+              label: "Worst Performing Aircraft",
+              value: worstAircraft ? getAircraftDisplayName(worstAircraft.type) : "n/v",
+              change: worstAircraft ? `${worstAircraft.avgDelay?.toFixed(1)}m avg` : "n/v",
+              changeType: worstAircraft && worstAircraft.avgDelay > 15 ? "negative" : "neutral",
+              icon: TrendingDown,
+              color: "text-red-600",
+              bgColor: "bg-red-50",
+              href: "/aircraft-type-delay-performance",
+              status: worstAircraft && worstAircraft.avgDelay > 15 ? "critical" : "warning",
+            })
+          }
+
+          // Add gates/terminals KPI if available
+          if (gatesData && gatesData.summary) {
+            initialKPIData.splice(3, 0, {
+              label: "Active Piers",
+              value: gatesData.summary.totalTerminals?.toString() || "0",
+              change: `${gatesData.summary.totalGates || 0} gates active`,
+              changeType: "neutral",
+              icon: Building2,
+              color: "text-indigo-600",
+              bgColor: "bg-indigo-50",
+              href: "/busiest-gates-and-terminals",
+              status: "good",
+            })
+          }
+
+          setKpiData(initialKPIData)
+        }
+
+        // Process aircraft performance data
+        if (aircraftData && aircraftData.chartData && aircraftData.chartData.length > 0) {
+          const initialAircraftPerformance: AircraftPerformance[] = aircraftData.chartData
+            .slice(0, 3)
+            .map((aircraft: any) => ({
+              type: getAircraftDisplayName(aircraft.type),
+              delay: aircraft.avgDelay,
+              flights: aircraft.flights,
+              status: aircraft.avgDelay < 5 ? "good" : aircraft.avgDelay < 15 ? "fair" : "poor",
+              category: aircraft.avgDelay < 5 ? "Best" : aircraft.avgDelay < 15 ? "Average" : "Worst"
+            }))
+          setAircraftPerformance(initialAircraftPerformance)
+        }
+
+        // Process gates/terminals data
+        if (gatesData && gatesData.gateData && gatesData.gateData.length > 0) {
+          const initialGateData: GateData[] = gatesData.gateData
+            .slice(0, 5)
+            .map((gate: any) => ({
+              gate: gate.gate,
+              pier: gate.pier,
+              flights: gate.flights,
+              utilization: gate.utilization || 0,
+              status: (gate.utilization || 0) > 80 ? "critical" : (gate.utilization || 0) > 60 ? "high" : "medium"
+            }))
+          setGateData(initialGateData)
+        }
+
+        // Process delay trends data
+        if (delayTrends && delayTrends.hourlyData) {
+          const initialDelayHours: DelayHour[] = delayTrends.hourlyData
+            .filter((hour: any) => hour.avgDelay !== null && hour.flights !== null)
+            .sort((a: any, b: any) => (b.avgDelay || 0) - (a.avgDelay || 0))
+            .slice(0, 5)
+            .map((hour: any) => ({
+              hour: `${hour.hour}-${(parseInt(hour.hour.split(':')[0]) + 1).toString().padStart(2, '0')}:00`,
+              delay: hour.avgDelay,
+              flights: hour.flights,
+              status: hour.avgDelay > 15 ? "critical" : hour.avgDelay > 5 ? "warning" : "good"
+            }))
+          setDelayHours(initialDelayHours)
+        }
+
+        // Handle case where no data is available
+        if (!dashboardKPIs && !aircraftData && !gatesData && !delayTrends) {
+        const initialKPIData: KPIData[] = [
+          {
+            label: "Fleet Avg Delay",
+            value: "n/v",
+              change: "No flights today",
+            changeType: "neutral",
+            icon: Clock,
+            color: "text-orange-600",
+            bgColor: "bg-orange-50",
+            href: "/delay-trends-by-hour",
+            status: "warning",
+          },
+          {
+            label: "Best Performing Aircraft",
+            value: "n/v",
+              change: "No data available",
+            changeType: "neutral",
+            icon: TrendingUp,
+            color: "text-green-600",
+            bgColor: "bg-green-50",
+            href: "/aircraft-type-delay-performance",
+            status: "good",
+          },
+          {
+            label: "Worst Performing Aircraft",
+            value: "n/v",
+              change: "No data available",
+            changeType: "neutral",
+            icon: TrendingDown,
+            color: "text-red-600",
+            bgColor: "bg-red-50",
+            href: "/aircraft-type-delay-performance",
+            status: "critical",
+          },
+          {
+            label: "Total Flights Today",
+              value: "0",
+              change: "No KLM flights",
+              changeType: "neutral",
+              icon: Plane,
+              color: "text-blue-600",
+              bgColor: "bg-blue-50",
+              href: "/delay-trends-by-hour",
+              status: "good",
+            },
+            {
+              label: "Peak Delay Hour",
+            value: "n/v",
+              change: "No flights scheduled",
+              changeType: "neutral",
+              icon: Activity,
+              color: "text-purple-600",
+              bgColor: "bg-purple-50",
+              href: "/delay-trends-by-hour",
+              status: "warning",
+            },
+            {
+              label: "Active Piers",
+              value: "0",
+              change: "No active piers",
+              changeType: "neutral",
+              icon: Building2,
+              color: "text-indigo-600",
+              bgColor: "bg-indigo-50",
+              href: "/busiest-gates-and-terminals",
+              status: "good",
+            },
+            {
+              label: "High Variance Hours",
+              value: "0",
+              change: "No variance data",
+              changeType: "neutral",
+              icon: AlertTriangle,
+              color: "text-yellow-600",
+              bgColor: "bg-yellow-50",
+              href: "/delay-trends-by-hour",
+              status: "warning",
+            },
+            {
+              label: "Critical Alerts",
+              value: "0",
+              change: "No alerts",
+              changeType: "positive",
+              icon: AlertCircle,
+              color: "text-red-600",
+              bgColor: "bg-red-50",
+              href: "/busiest-gates-and-terminals",
+              status: "good",
+            },
+          ]
+          
+          const initialDelayHours: DelayHour[] = [
+            { hour: "No flights", delay: null, flights: 0, status: "good" }
+          ]
+          
+          const initialAircraftPerformance: AircraftPerformance[] = [
+            { type: "No data", delay: null, flights: 0, status: "good", category: "No flights" }
+          ]
+          
+          const initialGateData: GateData[] = [
+            { gate: "No gates", pier: "No piers", flights: 0, utilization: 0, status: "medium" }
+          ]
+          
+          setKpiData(initialKPIData)
+          setDelayHours(initialDelayHours)
+          setAircraftPerformance(initialAircraftPerformance)
+          setGateData(initialGateData)
+        }
+        
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const getChangeIcon = (changeType: "positive" | "negative" | "neutral") => {
     switch (changeType) {
@@ -130,6 +527,27 @@ export function DashboardKPIs() {
     }
   }
 
+  const formatValue = (value: string | number | null) => {
+    if (value === null || value === undefined) return "n/v"
+    return value.toString()
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {[...Array(8)].map((_, index) => (
+            <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded mb-3"></div>
+              <div className="h-8 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Real-Time KPI Cards */}
@@ -138,7 +556,7 @@ export function DashboardKPIs() {
           <Link
             key={index}
             href={kpi.href}
-            className="group bg-white rounded-lg border border-gray-200 p-4 sm:p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1"
+            className="group bg-white rounded-lg border border-gray-200 p-4 sm:p-6 transition-all duration-200 hover:shadow-lg hover:border-gray-300 hover:-translate-y-1"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -182,19 +600,13 @@ export function DashboardKPIs() {
             <h3 className="text-lg font-semibold text-gray-900">Top Delay Hours</h3>
             <Link
               href="/delay-trends-by-hour"
-              className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View All →
             </Link>
           </div>
           <div className="space-y-3">
-            {[
-              { hour: "08:00-09:00", delay: 22.4, flights: 14, status: "critical" },
-              { hour: "15:00-16:00", delay: 19.2, flights: 13, status: "warning" },
-              { hour: "09:00-10:00", delay: 18.7, flights: 12, status: "warning" },
-              { hour: "16:00-17:00", delay: 16.4, flights: 12, status: "warning" },
-              { hour: "14:00-15:00", delay: 15.8, flights: 11, status: "warning" },
-            ].map((item, index) => (
+            {delayHours.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
@@ -203,13 +615,9 @@ export function DashboardKPIs() {
                   <span className="text-sm font-medium text-gray-900">{item.hour}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{item.flights} flights</span>
-                  <span
-                    className={`text-sm font-bold ${
-                      item.delay > 20 ? "text-red-600" : item.delay > 15 ? "text-orange-600" : "text-yellow-600"
-                    }`}
-                  >
-                    {item.delay.toFixed(1)}m
+                  <span className="text-sm text-gray-600">{formatValue(item.flights)} flights</span>
+                  <span className="text-sm font-bold text-gray-500">
+                    {item.delay ? `${item.delay.toFixed(1)}m` : "n/v"}
                   </span>
                 </div>
               </div>
@@ -223,17 +631,13 @@ export function DashboardKPIs() {
             <h3 className="text-lg font-semibold text-gray-900">Aircraft Performance</h3>
             <Link
               href="/aircraft-type-delay-performance"
-              className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View All →
             </Link>
           </div>
           <div className="space-y-3">
-            {[
-              { type: "A321neo", delay: 3.2, flights: 8, status: "good", category: "Best" },
-              { type: "B737-800", delay: 8.4, flights: 31, status: "fair", category: "Average" },
-              { type: "A330-200", delay: 19.8, flights: 6, status: "poor", category: "Worst" },
-            ].map((aircraft, index) => (
+            {aircraftPerformance.map((aircraft, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
@@ -251,13 +655,9 @@ export function DashboardKPIs() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{aircraft.flights} flights</span>
-                  <span
-                    className={`text-sm font-bold ${
-                      aircraft.delay > 15 ? "text-red-600" : aircraft.delay > 8 ? "text-orange-600" : "text-green-600"
-                    }`}
-                  >
-                    {aircraft.delay.toFixed(1)}m
+                  <span className="text-sm text-gray-600">{formatValue(aircraft.flights)} flights</span>
+                  <span className="text-sm font-bold text-gray-500">
+                    {aircraft.delay ? `${aircraft.delay.toFixed(1)}m` : "n/v"}
                   </span>
                 </div>
               </div>
@@ -271,19 +671,13 @@ export function DashboardKPIs() {
             <h3 className="text-lg font-semibold text-gray-900">Busiest Gates Today</h3>
             <Link
               href="/busiest-gates-and-terminals"
-              className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View All →
             </Link>
           </div>
           <div className="space-y-3">
-            {[
-              { gate: "F07", pier: "Pier F", flights: 4, utilization: 92, status: "critical" },
-              { gate: "D12", pier: "Pier D", flights: 6, utilization: 83, status: "high" },
-              { gate: "E18", pier: "Pier E", flights: 3, utilization: 78, status: "high" },
-              { gate: "G03", pier: "Pier G", flights: 3, utilization: 75, status: "medium" },
-              { gate: "C05", pier: "Pier C", flights: 5, utilization: 67, status: "medium" },
-            ].map((gate, index) => (
+            {gateData.map((gate, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
@@ -301,17 +695,9 @@ export function DashboardKPIs() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{gate.flights} flights</span>
-                  <span
-                    className={`text-sm font-bold ${
-                      gate.utilization > 90
-                        ? "text-red-600"
-                        : gate.utilization > 75
-                          ? "text-orange-600"
-                          : "text-yellow-600"
-                    }`}
-                  >
-                    {gate.utilization}%
+                  <span className="text-sm text-gray-600">{formatValue(gate.flights)} flights</span>
+                  <span className="text-sm font-bold text-gray-500">
+                    {gate.utilization ? `${gate.utilization}%` : "n/v"}
                   </span>
                 </div>
               </div>
@@ -321,10 +707,10 @@ export function DashboardKPIs() {
       </div>
 
       {/* Bottom Row - Navigation/Quick Access Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         <Link
           href="/aircraft-type-delay-performance"
-          className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:from-blue-100 hover:to-blue-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-blue-100 hover:to-blue-200 hover:-translate-y-1"
         >
           <div className="flex items-center gap-4 mb-3">
             <div className="bg-blue-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
@@ -345,7 +731,7 @@ export function DashboardKPIs() {
 
         <Link
           href="/busiest-gates-and-terminals"
-          className="group bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:from-green-100 hover:to-green-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-green-100 hover:to-green-200 hover:-translate-y-1"
         >
           <div className="flex items-center gap-4 mb-3">
             <div className="bg-green-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
@@ -366,7 +752,7 @@ export function DashboardKPIs() {
 
         <Link
           href="/delay-trends-by-hour"
-          className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:from-purple-100 hover:to-purple-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-purple-100 hover:to-purple-200 hover:-translate-y-1"
         >
           <div className="flex items-center gap-4 mb-3">
             <div className="bg-purple-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
@@ -382,6 +768,27 @@ export function DashboardKPIs() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-purple-600 font-medium">24-hour breakdown • Variance tracking</span>
             <TrendingUp className="h-4 w-4 text-purple-600 group-hover:translate-x-1 transition-transform duration-200" />
+          </div>
+        </Link>
+
+        <Link
+          href="/route-analytics"
+          className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-orange-100 hover:to-orange-200 hover:-translate-y-1"
+        >
+          <div className="flex items-center gap-4 mb-3">
+            <div className="bg-orange-500 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
+                Explore Route Analytics
+              </h3>
+              <p className="text-sm text-gray-600">Detailed route performance & trends</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-orange-600 font-medium">All destinations • Delay & volume trends</span>
+            <TrendingUp className="h-4 w-4 text-orange-500 group-hover:translate-x-1 transition-transform duration-200" />
           </div>
         </Link>
       </div>

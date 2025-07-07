@@ -1,141 +1,146 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronUp, ChevronDown, DoorOpen, Plane, Clock } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ArrowUpDown, Plane, Clock, AlertTriangle } from "lucide-react"
 
-const gateData = [
-  {
-    gate: "F07",
-    pier: "Pier F",
-    flights: 4,
-    arrivals: 2,
-    departures: 2,
-    avgTurnaround: 120,
-    status: "Busy",
-    nextFlight: "14:30",
-    type: "Non-Schengen",
-    purpose: "Long-haul KLM",
-  },
-  {
-    gate: "E18",
-    pier: "Pier E",
-    flights: 3,
-    arrivals: 1,
-    departures: 2,
-    avgTurnaround: 135,
-    status: "Active",
-    nextFlight: "15:15",
-    type: "Non-Schengen",
-    purpose: "Intercontinental",
-  },
-  {
-    gate: "G03",
-    pier: "Pier G",
-    flights: 3,
-    arrivals: 2,
-    departures: 1,
-    avgTurnaround: 125,
-    status: "Active",
-    nextFlight: "16:00",
-    type: "Non-Schengen",
-    purpose: "SkyTeam/KLM long-haul",
-  },
-  {
-    gate: "D12",
-    pier: "Pier D (Schengen)",
-    flights: 6,
-    arrivals: 3,
-    departures: 3,
-    avgTurnaround: 45,
-    status: "Busy",
-    nextFlight: "14:45",
-    type: "Schengen",
-    purpose: "European gates",
-  },
-  {
-    gate: "C05",
-    pier: "Pier C",
-    flights: 5,
-    arrivals: 3,
-    departures: 2,
-    avgTurnaround: 38,
-    status: "Active",
-    nextFlight: "17:20",
-    type: "Schengen",
-    purpose: "European (Schengen)",
-  },
-  {
-    gate: "B23",
-    pier: "Pier B",
-    flights: 4,
-    arrivals: 2,
-    departures: 2,
-    avgTurnaround: 35,
-    status: "Normal",
-    nextFlight: "15:30",
-    type: "Schengen",
-    purpose: "Short-haul European",
-  },
-  {
-    gate: "D67",
-    pier: "Pier D (Non-Schengen)",
-    flights: 3,
-    arrivals: 1,
-    departures: 2,
-    avgTurnaround: 85,
-    status: "Normal",
-    nextFlight: "16:45",
-    type: "Non-Schengen",
-    purpose: "Mixed-use",
-  },
-  {
-    gate: "H04",
-    pier: "Pier H&M",
-    flights: 5,
-    arrivals: 2,
-    departures: 3,
-    avgTurnaround: 32,
-    status: "Active",
-    nextFlight: "18:00",
-    type: "Schengen",
-    purpose: "Low-cost carriers",
-  },
-  {
-    gate: "F12",
-    pier: "Pier F",
-    flights: 3,
-    arrivals: 1,
-    departures: 2,
-    avgTurnaround: 110,
-    status: "Normal",
-    nextFlight: "19:15",
-    type: "Non-Schengen",
-    purpose: "Long-haul KLM",
-  },
-]
+interface GateData {
+  gate: string
+  flights: number | null
+  aircraftTypes: string[]
+  status: "Active" | "Inactive" | "Maintenance"
+  lastActivity: string
+  utilization: number | null
+  pier: string
+}
 
-type SortField = "gate" | "pier" | "flights" | "avgTurnaround" | "status"
-type SortDirection = "asc" | "desc"
+interface FlightData {
+  flightName: string
+  flightNumber: number
+  gate: string
+  pier: string
+  publicFlightState: {
+    flightStates: string[]
+  }
+  aircraftType: {
+    iataMain: string
+    iataSub: string
+  }
+  scheduleDateTime: string
+}
 
 export function GatesTable() {
-  const [sortField, setSortField] = useState<SortField>("flights")
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
-  const [filterTerminal, setFilterTerminal] = useState<string>("All")
+  const [isLoading, setIsLoading] = useState(true)
+  const [gateData, setGateData] = useState<GateData[]>([])
+  const [sortField, setSortField] = useState<keyof GateData>("flights")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
-  const piers = [
-    "All",
-    "Pier B",
-    "Pier C",
-    "Pier D (Schengen)",
-    "Pier D (Non-Schengen)",
-    "Pier E",
-    "Pier F",
-    "Pier G",
-    "Pier H&M",
-  ]
-  const types = ["All", "Schengen", "Non-Schengen"]
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        const response = await fetch(`/api/flights?filters=%7B%22flightDirection%22%3A%22D%22%2C%22scheduleDate%22%3A%22${today}%22%2C%22isOperationalFlight%22%3Atrue%2C%22prefixicao%22%3A%22KL%22%7D`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch flights data')
+        }
+        
+        const data = await response.json()
+        const flights: FlightData[] = data.flights || []
+        
+        // Calculate gate statistics from real flight data
+        const gateStats = flights.reduce((acc, flight) => {
+          if (flight.gate) {
+            if (!acc[flight.gate]) {
+              acc[flight.gate] = {
+                gate: flight.gate,
+                flights: 0,
+                aircraftTypes: [],
+                status: "Active" as const,
+                lastActivity: "",
+                utilization: 0,
+                pier: flight.pier || "Unknown"
+              }
+            }
+            
+            acc[flight.gate].flights += 1
+            
+            // Add aircraft type if not already present
+            const aircraftType = flight.aircraftType?.iataSub || flight.aircraftType?.iataMain || "Unknown"
+            if (!acc[flight.gate].aircraftTypes.includes(aircraftType)) {
+              acc[flight.gate].aircraftTypes.push(aircraftType)
+            }
+            
+            // Update last activity (most recent schedule time)
+            const scheduleTime = new Date(flight.scheduleDateTime)
+            if (!acc[flight.gate].lastActivity || scheduleTime > new Date(acc[flight.gate].lastActivity)) {
+              acc[flight.gate].lastActivity = scheduleTime.toISOString()
+            }
+          }
+          return acc
+        }, {} as Record<string, GateData>)
+        
+        // Calculate utilization and determine status for each gate
+        const transformedGateData: GateData[] = Object.values(gateStats).map(gate => {
+          // Simplified utilization calculation (flights per gate as percentage of total)
+          const totalFlights = flights.length
+          const utilization = totalFlights > 0 ? Math.round((gate.flights / totalFlights) * 100) : 0
+          
+          // Determine status based on flights and utilization
+          let status: "Active" | "Inactive" | "Maintenance" = "Active"
+          if (gate.flights === 0) status = "Inactive"
+          else if (utilization > 15) status = "Maintenance" // High utilization might indicate maintenance needed
+          
+          return {
+            ...gate,
+            utilization,
+            status
+          }
+        }).sort((a, b) => (b.flights || 0) - (a.flights || 0))
+        .slice(0, 10) // Only show top 10 gates
 
-  const handleSort = (field: SortField) => {
+        setGateData(transformedGateData)
+      } catch (error) {
+        console.error("Error fetching gate data:", error)
+        // Fallback to placeholder data
+        const fallbackGateData: GateData[] = [
+          {
+            gate: "D1",
+            flights: null,
+            aircraftTypes: [],
+            status: "Active",
+            lastActivity: "",
+            utilization: null,
+            pier: "D"
+          },
+          {
+            gate: "B2",
+            flights: null,
+            aircraftTypes: [],
+            status: "Inactive",
+            lastActivity: "",
+            utilization: null,
+            pier: "B"
+          },
+          {
+            gate: "E3",
+            flights: null,
+            aircraftTypes: [],
+            status: "Maintenance",
+            lastActivity: "",
+            utilization: null,
+            pier: "E"
+          }
+        ]
+        setGateData(fallbackGateData)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const handleSort = (field: keyof GateData) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -144,220 +149,218 @@ export function GatesTable() {
     }
   }
 
-  const filteredData = gateData.filter((gate) => filterTerminal === "All" || gate.pier === filterTerminal)
-
-  const sortedData = [...filteredData].sort((a, b) => {
-    let aVal: any = a[sortField]
-    let bVal: any = b[sortField]
-
-    if (sortField === "flights" || sortField === "avgTurnaround") {
-      aVal = Number(aVal)
-      bVal = Number(bVal)
+  const sortedData = [...gateData].sort((a, b) => {
+    const aValue = a[sortField]
+    const bValue = b[sortField]
+    
+    if (aValue === null && bValue === null) return 0
+    if (aValue === null) return 1
+    if (bValue === null) return -1
+    
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortDirection === "asc" ? aValue - bValue : bValue - aValue
     }
-
-    if (sortDirection === "asc") {
-      return aVal > bVal ? 1 : -1
-    } else {
-      return aVal < bVal ? 1 : -1
+    
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortDirection === "asc" 
+        ? aValue.localeCompare(bValue) 
+        : bValue.localeCompare(aValue)
     }
+    
+    return 0
   })
-
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return null
-    return sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Busy":
-        return "text-red-600 bg-red-50"
       case "Active":
-        return "text-yellow-600 bg-yellow-50"
-      case "Normal":
         return "text-green-600 bg-green-50"
+      case "Inactive":
+        return "text-gray-600 bg-gray-50"
+      case "Maintenance":
+        return "text-red-600 bg-red-50"
       default:
         return "text-gray-600 bg-gray-50"
     }
   }
 
-  const getFlightColor = (flights: number) => {
-    if (flights >= 7) return "text-red-600"
-    if (flights >= 5) return "text-yellow-600"
-    return "text-green-600"
+  const formatTime = (isoString: string) => {
+    if (!isoString) return "n/v"
+    try {
+      const date = new Date(isoString)
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      })
+    } catch {
+      return "n/v"
+    }
   }
 
-  const getTerminalColor = (terminal: string) => {
-    switch (terminal) {
-      case "Pier B":
-        return "text-blue-600 bg-blue-50"
-      case "Pier C":
-        return "text-purple-600 bg-purple-50"
-      case "Pier D (Schengen)":
-        return "text-green-600 bg-green-50"
-      case "Pier D (Non-Schengen)":
-        return "text-orange-600 bg-orange-50"
-      case "Pier E":
-        return "text-pink-600 bg-pink-50"
-      case "Pier F":
-        return "text-teal-600 bg-teal-50"
-      case "Pier G":
-        return "text-lime-600 bg-lime-50"
-      case "Pier H&M":
-        return "text-indigo-600 bg-indigo-50"
-      default:
-        return "text-gray-600 bg-gray-50"
-    }
+  const formatValue = (value: number | null) => {
+    return value !== null ? value.toString() : "n/v"
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 animate-pulse">
+        <div className="h-6 bg-gray-200 rounded mb-4"></div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr>
+                {[...Array(6)].map((_, index) => (
+                  <th key={index} className="h-4 bg-gray-200 rounded mb-2"></th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, rowIndex) => (
+                <tr key={rowIndex}>
+                  {[...Array(6)].map((_, colIndex) => (
+                    <td key={colIndex} className="h-4 bg-gray-200 rounded mb-2"></td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-      <div className="mb-4">
+      <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <DoorOpen className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Gate Activity by Pier</h2>
+          <Plane className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-semibold text-gray-900">Gate Activity</h2>
         </div>
-        <p className="text-sm text-gray-600">Real-time gate utilization and scheduling</p>
+        <p className="text-sm text-gray-600">Real-time gate utilization and status</p>
       </div>
 
-      {/* Filters and Sort Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Filter:</span>
-          <select
-            value={filterTerminal}
-            onChange={(e) => setFilterTerminal(e.target.value)}
-            className="px-3 py-1.5 rounded border border-gray-300 text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {piers.map((terminal) => (
-              <option key={terminal} value={terminal}>
-                {terminal}
-              </option>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="text-left py-3 px-2 font-medium text-gray-900">
+                <button
+                  onClick={() => handleSort("gate")}
+                  className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  Gate
+                  <ArrowUpDown className="h-4 w-4" />
+                </button>
+              </th>
+              <th className="text-left py-3 px-2 font-medium text-gray-900">
+                <button
+                  onClick={() => handleSort("flights")}
+                  className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  Flights
+                  <ArrowUpDown className="h-4 w-4" />
+                </button>
+              </th>
+              <th className="text-left py-3 px-2 font-medium text-gray-900">
+                Aircraft Types
+              </th>
+              <th className="text-left py-3 px-2 font-medium text-gray-900">
+                <button
+                  onClick={() => handleSort("utilization")}
+                  className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  Utilization
+                  <ArrowUpDown className="h-4 w-4" />
+                </button>
+              </th>
+              <th className="text-left py-3 px-2 font-medium text-gray-900">
+                <button
+                  onClick={() => handleSort("status")}
+                  className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  Status
+                  <ArrowUpDown className="h-4 w-4" />
+                </button>
+              </th>
+              <th className="text-left py-3 px-2 font-medium text-gray-900">
+                <button
+                  onClick={() => handleSort("lastActivity")}
+                  className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  Last Activity
+                  <ArrowUpDown className="h-4 w-4" />
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedData.map((gate, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-default">
+                <td className="py-3 px-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-900">{gate.gate}</span>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      {gate.pier}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-3 px-2">
+                  <span className="font-medium text-gray-900">{formatValue(gate.flights)}</span>
+                </td>
+                <td className="py-3 px-2">
+                  <div className="flex flex-wrap gap-1">
+                    {gate.aircraftTypes.length > 0 ? (
+                      gate.aircraftTypes.slice(0, 3).map((type, typeIndex) => (
+                        <span
+                          key={typeIndex}
+                          className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                        >
+                          {type}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 text-sm">n/v</span>
+                    )}
+                    {gate.aircraftTypes.length > 3 && (
+                      <span className="text-xs text-gray-500">+{gate.aircraftTypes.length - 3}</span>
+                    )}
+                  </div>
+                </td>
+                <td className="py-3 px-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${gate.utilization || 0}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600">{formatValue(gate.utilization)}%</span>
+                  </div>
+                </td>
+                <td className="py-3 px-2">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(gate.status)}`}
+                  >
+                    {gate.status === "Maintenance" && <AlertTriangle className="h-3 w-3" />}
+                    {gate.status === "Active" && <Clock className="h-3 w-3" />}
+                    {gate.status}
+                  </span>
+                </td>
+                <td className="py-3 px-2">
+                  <span className="text-sm text-gray-600">{formatTime(gate.lastActivity)}</span>
+                </td>
+              </tr>
             ))}
-          </select>
+          </tbody>
+        </table>
+      </div>
+
+      {sortedData.length === 0 && (
+        <div className="text-center py-8">
+          <Plane className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No gate data available</p>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          <span className="text-sm font-medium text-gray-700 mr-2">Sort by:</span>
-          <button
-            onClick={() => handleSort("gate")}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium cursor-pointer transition-colors ${
-              sortField === "gate" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:text-gray-900 hover:bg-white"
-            }`}
-          >
-            Gate <SortIcon field="gate" />
-          </button>
-          <button
-            onClick={() => handleSort("flights")}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium cursor-pointer transition-colors ${
-              sortField === "flights" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:text-gray-900 hover:bg-white"
-            }`}
-          >
-            Flights <SortIcon field="flights" />
-          </button>
-          <button
-            onClick={() => handleSort("avgTurnaround")}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium cursor-pointer transition-colors ${
-              sortField === "avgTurnaround"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-600 hover:text-gray-900 hover:bg-white"
-            }`}
-          >
-            Turnaround <SortIcon field="avgTurnaround" />
-          </button>
-          <button
-            onClick={() => handleSort("status")}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium cursor-pointer transition-colors ${
-              sortField === "status" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:text-gray-900 hover:bg-white"
-            }`}
-          >
-            Status <SortIcon field="status" />
-          </button>
-        </div>
-      </div>
-
-      {/* Responsive Card Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-        {sortedData.map((gate, index) => (
-          <div
-            key={index}
-            className="border rounded-lg p-4 cursor-default transition-all duration-200 hover:shadow-md hover:border-gray-300 bg-white hover:bg-gray-50"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <DoorOpen className="h-4 w-4 text-gray-600" />
-                <span className="font-bold text-gray-900 text-lg">{gate.gate}</span>
-              </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(gate.status)}`}>
-                {gate.status}
-              </span>
-            </div>
-
-            <div className="mb-3">
-              <span
-                className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getTerminalColor(gate.pier)}`}
-              >
-                {gate.pier}
-              </span>
-            </div>
-
-            <div className="mb-3">
-              <span className="text-xs text-gray-500 block mb-1">Type</span>
-              <span className="text-sm font-medium text-gray-900">{gate.type}</span>
-            </div>
-
-            <div className="mb-3">
-              <span className="text-xs text-gray-500 block mb-1">Purpose</span>
-              <span className="text-sm font-medium text-gray-900">{gate.purpose}</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Total Flights</span>
-                <span className={`text-lg font-bold ${getFlightColor(gate.flights)}`}>{gate.flights}</span>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Avg Turnaround</span>
-                <span className="text-lg font-bold text-gray-900">{gate.avgTurnaround}m</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Arrivals</span>
-                <div className="flex items-center gap-1">
-                  <Plane className="h-3 w-3 text-blue-600 transform rotate-180" />
-                  <span className="text-sm font-medium text-gray-900">{gate.arrivals}</span>
-                </div>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500 block mb-1">Departures</span>
-                <div className="flex items-center gap-1">
-                  <Plane className="h-3 w-3 text-green-600" />
-                  <span className="text-sm font-medium text-gray-900">{gate.departures}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-gray-100">
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>Next: {gate.nextFlight}</span>
-                </div>
-                <span>{((gate.flights / 51) * 100).toFixed(1)}% of daily gates</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-4 text-xs text-gray-500 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-        <span>
-          Showing {sortedData.length} of {gateData.length} active gates
-        </span>
-        <span className="hidden sm:inline">•</span>
-        <span>Data source: Schiphol Public Flight API v4.2</span>
-      </div>
+      )}
     </div>
   )
 }

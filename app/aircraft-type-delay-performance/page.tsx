@@ -1,5 +1,5 @@
 import { Sidebar } from "@/components/sidebar"
-import { AircraftPerformanceSummary } from "@/components/aircraft-performance-summary"
+import { FleetPerformanceSummary } from "@/components/fleet-performance-summary"
 import { AircraftPerformanceChart } from "@/components/aircraft-performance-chart"
 import { AircraftPerformanceTable } from "@/components/aircraft-performance-table"
 import { TrendingUp } from "lucide-react"
@@ -20,7 +20,7 @@ export default function AircraftTypeDelayPerformance() {
             </p>
           </div>
 
-          <AircraftPerformanceSummary />
+          <FleetPerformanceSummary />
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
             <div className="xl:col-span-2">
