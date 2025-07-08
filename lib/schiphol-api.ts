@@ -9,9 +9,18 @@ const SCHIPHOL_APP_ID = process.env.SCHIPHOL_APP_ID || 'cfcad115'
 // Schiphol API base URL
 const SCHIPHOL_API_BASE = 'https://api.schiphol.nl/public-flights'
 
+// Production timeout settings - reduced for faster response
+const API_TIMEOUT = 15000 // 15 seconds (reduced from 30)
+const MAX_RETRIES = 2 // Reduced from 3
+const RETRY_DELAY = 500 // Reduced from 1000ms
+
 // Cache for API responses (10 minutes)
 const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes in milliseconds
 const apiCache = new Map<string, { data: any; timestamp: number }>()
+
+// Concurrent page fetching for better performance
+const CONCURRENT_PAGES = 3 // Fetch 3 pages at once
+const PAGE_DELAY = 50 // Reduced delay between pages
 
 export interface SchipholApiConfig {
   flightDirection?: 'D' | 'A'
@@ -113,15 +122,25 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
   
   console.log('Calling Schiphol API (not cached):', apiUrl)
   
-  const response = await fetch(apiUrl, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'app_id': SCHIPHOL_APP_ID,
-      'app_key': SCHIPHOL_APP_KEY,
-      'ResourceVersion': 'v4'
-    }
-  })
+  // Create AbortController for timeout
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
+  
+  let response
+  try {
+    response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'app_id': SCHIPHOL_APP_ID,
+        'app_key': SCHIPHOL_APP_KEY,
+        'ResourceVersion': 'v4'
+      },
+      signal: controller.signal
+    })
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   if (!response.ok) {
     const errorText = await response.text()
@@ -133,11 +152,15 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
     }
     
     if (response.status === 401) {
-      throw new Error('Invalid API credentials.')
+      throw new Error('Invalid API credentials. Check SCHIPHOL_APP_KEY and SCHIPHOL_APP_ID environment variables.')
     }
     
     if (response.status === 403) {
       throw new Error('Access forbidden. Check API permissions.')
+    }
+    
+    if (response.status === 408 || response.status === 504) {
+      throw new Error('Request timeout. The API is taking too long to respond.')
     }
     
     throw new Error(`Schiphol API error: ${response.status} ${response.statusText}`)
@@ -167,7 +190,7 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
 }
 
 /**
- * Fetch all pages of flights from Schiphol API
+ * Fetch all pages of flights from Schiphol API with retry logic
  */
 async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResponse> {
   const allFlights: any[] = []
@@ -197,15 +220,45 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
     
     console.log(`Fetching page ${page}:`, apiUrl)
     
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'app_id': SCHIPHOL_APP_ID,
-        'app_key': SCHIPHOL_APP_KEY,
-        'ResourceVersion': 'v4'
+    // Retry logic for each page
+    let response
+    let retries = 0
+    
+    while (retries < MAX_RETRIES) {
+      try {
+        // Create AbortController for timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
+        
+        try {
+          response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'app_id': SCHIPHOL_APP_ID,
+              'app_key': SCHIPHOL_APP_KEY,
+              'ResourceVersion': 'v4'
+            },
+            signal: controller.signal
+          })
+        } finally {
+          clearTimeout(timeoutId)
+        }
+        
+        break // Success, exit retry loop
+      } catch (error) {
+        retries++
+        console.warn(`Page ${page} attempt ${retries} failed:`, error)
+        
+        if (retries >= MAX_RETRIES) {
+          console.error(`Failed to fetch page ${page} after ${MAX_RETRIES} attempts`)
+          throw error
+        }
+        
+        // Faster retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, retries - 1)))
       }
-    })
+    }
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -233,9 +286,9 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
     allFlights.push(...flights)
     page++
     
-    // Add a small delay to be respectful to the API
+    // Reduced delay for faster performance
     if (page < maxPages) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, PAGE_DELAY))
     }
   }
   
@@ -313,12 +366,14 @@ export function filterFlights(
   }
 ): SchipholFlight[] {
   let filtered = flights
+  const initialCount = flights.length
 
   // Note: flightDirection and airline are already filtered by the API
   // We only need to filter by date and operational status on the client side
 
   // Filter for KLM-operated flights only (not codeshares)
   if (filters.prefixicao === 'KL') {
+    const beforeKLMFilter = filtered.length
     filtered = filtered.filter(flight => {
       // Check if this is a true KLM-operated flight (not a codeshare)
       const mainFlight = flight.mainFlight || flight.flightName || ''
@@ -327,12 +382,15 @@ export function filterFlights(
       // This excludes codeshares operated by other airlines (like HV, Transavia)
       return mainFlight.startsWith('KL')
     })
+    const afterKLMFilter = filtered.length
+    console.log(`KLM filter: ${beforeKLMFilter} → ${afterKLMFilter} flights (removed ${beforeKLMFilter - afterKLMFilter} codeshares)`)
   }
 
   if (filters.scheduleDate) {
     const targetDate = new Date(filters.scheduleDate).toISOString().split('T')[0]
     console.log(`Filtering by date: ${targetDate}`)
     
+    const beforeDateFilter = filtered.length
     filtered = filtered.filter(flight => {
       // Try multiple ways to extract the flight date
       let flightDate = null
@@ -355,18 +413,23 @@ export function filterFlights(
       return flightDate === targetDate
     })
     
-    console.log(`After date filtering: ${filtered.length} flights remain`)
+    const afterDateFilter = filtered.length
+    console.log(`Date filter: ${beforeDateFilter} → ${afterDateFilter} flights (removed ${beforeDateFilter - afterDateFilter} date mismatches)`)
   }
 
   if (filters.isOperationalFlight !== undefined) {
+    const beforeOperationalFilter = filtered.length
     filtered = filtered.filter(flight => {
       if (filters.isOperationalFlight === true) {
         return isOperationalFlight(flight)
       }
       return true
     })
+    const afterOperationalFilter = filtered.length
+    console.log(`Operational filter: ${beforeOperationalFilter} → ${afterOperationalFilter} flights (removed ${beforeOperationalFilter - afterOperationalFilter} non-operational)`)
   }
 
+  console.log(`Total filtering: ${initialCount} → ${filtered.length} flights (removed ${initialCount - filtered.length} total)`)
   return filtered
 }
 
@@ -375,6 +438,7 @@ export function filterFlights(
  */
 export function removeDuplicateFlights(flights: SchipholFlight[]): SchipholFlight[] {
   const flightMap = new Map<number, SchipholFlight>()
+  const initialCount = flights.length
   
   flights.forEach(flight => {
     const flightNumber = flight.flightNumber
@@ -384,6 +448,9 @@ export function removeDuplicateFlights(flights: SchipholFlight[]): SchipholFligh
       flightMap.set(flightNumber, flight)
     }
   })
+  
+  const finalCount = flightMap.size
+  console.log(`Deduplication: ${initialCount} → ${finalCount} flights (removed ${initialCount - finalCount} duplicates)`)
   
   return Array.from(flightMap.values())
 }

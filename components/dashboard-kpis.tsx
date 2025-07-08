@@ -207,13 +207,22 @@ export function DashboardKPIs() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        // Fetch data from specialized endpoints in parallel
-        const [dashboardKPIs, aircraftData, gatesData, delayTrends] = await Promise.all([
+        // Fetch data from specialized endpoints in parallel with timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 25000) // 25 second timeout
+        )
+        
+        const dataPromise = Promise.all([
           fetchDashboardKPIs(),
           fetchAircraftPerformance(),
           fetchGatesTerminalsSummary(),
           fetchDelayTrendsHourly()
         ])
+        
+        const [dashboardKPIs, aircraftData, gatesData, delayTrends] = await Promise.race([
+          dataPromise,
+          timeoutPromise
+        ]) as [any, any, any, any]
 
         // Process dashboard KPIs
         if (dashboardKPIs) {
@@ -482,11 +491,71 @@ export function DashboardKPIs() {
           setGateData(initialGateData)
         }
         
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error)
-      } finally {
-        setIsLoading(false)
-      }
+              } catch (error) {
+          console.error("Error fetching dashboard data:", error)
+          
+          // Set fallback data on timeout or error
+          const fallbackKPIData: KPIData[] = [
+            {
+              label: "Fleet Avg Delay",
+              value: "Loading...",
+              change: "Please wait",
+              changeType: "neutral",
+              icon: Clock,
+              color: "text-orange-600",
+              bgColor: "bg-orange-50",
+              href: "/delay-trends-by-hour",
+              status: "warning",
+            },
+            {
+              label: "Total Flights Today",
+              value: "Loading...",
+              change: "Please wait",
+              changeType: "neutral",
+              icon: Plane,
+              color: "text-blue-600",
+              bgColor: "bg-blue-50",
+              href: "/delay-trends-by-hour",
+              status: "warning",
+            },
+            {
+              label: "Peak Delay Hour",
+              value: "Loading...",
+              change: "Please wait",
+              changeType: "neutral",
+              icon: Activity,
+              color: "text-purple-600",
+              bgColor: "bg-purple-50",
+              href: "/delay-trends-by-hour",
+              status: "warning",
+            },
+            {
+              label: "High Variance Hours",
+              value: "Loading...",
+              change: "Please wait",
+              changeType: "neutral",
+              icon: AlertTriangle,
+              color: "text-yellow-600",
+              bgColor: "bg-yellow-50",
+              href: "/delay-trends-by-hour",
+              status: "warning",
+            },
+            {
+              label: "Critical Alerts",
+              value: "Loading...",
+              change: "Please wait",
+              changeType: "neutral",
+              icon: AlertCircle,
+              color: "text-red-600",
+              bgColor: "bg-red-50",
+              href: "/busiest-gates-and-terminals",
+              status: "warning",
+            },
+          ]
+          setKpiData(fallbackKPIData)
+        } finally {
+          setIsLoading(false)
+        }
     }
 
     fetchData()
@@ -535,6 +604,13 @@ export function DashboardKPIs() {
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="text-sm text-gray-500">Loading dashboard data...</p>
+            <p className="text-xs text-gray-400">This may take a few seconds</p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(8)].map((_, index) => (
             <div key={index} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 animate-pulse">

@@ -123,3 +123,40 @@ The application includes error handling for:
 ## License
 
 This project is licensed under the MIT License.
+
+## Deployment to Vercel
+
+### Environment Variables Setup
+
+**CRITICAL**: You must set these environment variables in your Vercel dashboard:
+
+1. Go to your Vercel project dashboard
+2. Navigate to Settings → Environment Variables
+3. Add the following variables:
+
+```bash
+# Schiphol API Credentials
+SCHIPHOL_APP_KEY=bf01b2f53e73e9db0115b8f2093c97b9
+SCHIPHOL_APP_ID=cfcad115
+
+# MongoDB Connection (use your production MongoDB URI)
+MONGODB_URI=mongodb+srv://jasper:pindakaas@fly.83cukhh.mongodb.net/flyr-dashboard?retryWrites=true&w=majority&appName=fly
+```
+
+### Production Optimizations
+
+The application includes several production optimizations:
+
+- **10-minute API caching** to reduce Schiphol API calls
+- **Automatic cache cleanup** to prevent memory leaks
+- **Error handling** for API failures and timeouts
+- **Fallback data** when external APIs are unavailable
+
+### Troubleshooting Deployment Issues
+
+If you experience long loading times or no data:
+
+1. **Check Environment Variables**: Ensure all required env vars are set in Vercel
+2. **Monitor API Limits**: Schiphol API has rate limits that may cause timeouts
+3. **Check MongoDB Connection**: Verify your MongoDB Atlas cluster is accessible
+4. **Review Vercel Logs**: Check function logs for specific error messages

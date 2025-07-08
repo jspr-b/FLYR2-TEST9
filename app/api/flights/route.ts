@@ -54,6 +54,13 @@ export async function GET(request: Request) {
     filteredFlights = removeDuplicateFlights(filteredFlights)
     console.log(`After deduplication: ${filteredFlights.length} flights`)
 
+    // Summary of data flow
+    console.log(`📊 DATA FLOW SUMMARY:`)
+    console.log(`  • API fetched: ${allFlights.length} flights`)
+    console.log(`  • After filtering: ${filteredFlights.length} flights`)
+    console.log(`  • Total removed: ${allFlights.length - filteredFlights.length} flights`)
+    console.log(`  • Final result: ${filteredFlights.length} flights`)
+
     const responseData = {
       flights: filteredFlights,
       metadata: {
