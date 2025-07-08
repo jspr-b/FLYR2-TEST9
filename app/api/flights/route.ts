@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import Flight from '@/models/Flight'
 import { 
   fetchSchipholFlights, 
   transformSchipholFlight, 
@@ -12,8 +10,6 @@ import {
 
 export async function GET(request: Request) {
   try {
-    await dbConnect()
-
     // Get query parameters
     const { searchParams } = new URL(request.url)
     const filtersParam = searchParams.get('filters')
@@ -78,7 +74,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(responseData)
   } catch (error) {
-    console.error('Error fetching flights:', error)
+    console.error('❌ FLIGHTS API ERROR:', error)
     return NextResponse.json(
       { error: 'Failed to fetch flights', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
@@ -88,8 +84,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await dbConnect()
-    
     const body = await request.json()
     
     // Handle cache clear request
@@ -99,26 +93,15 @@ export async function POST(request: Request) {
       return NextResponse.json(result)
     }
     
-    // Validate the request body structure
-    if (!body.flights || !Array.isArray(body.flights)) {
-      return NextResponse.json(
-        { error: 'Invalid request body. Expected flights array or clearCache: true.' },
-        { status: 400 }
-      )
-    }
-
-    // Save flights to database
-    const savedFlights = await Flight.insertMany(body.flights)
-    
-    return NextResponse.json({
-      message: 'Flights saved successfully',
-      count: savedFlights.length,
-      flights: savedFlights
-    })
-  } catch (error) {
-    console.error('Error saving flights:', error)
+    // Return error for flight saving (no database in production)
     return NextResponse.json(
-      { error: 'Failed to save flights' },
+      { error: 'Flight saving not available in production mode' },
+      { status: 400 }
+    )
+  } catch (error) {
+    console.error('❌ FLIGHTS POST ERROR:', error)
+    return NextResponse.json(
+      { error: 'Failed to process request' },
       { status: 500 }
     )
   }

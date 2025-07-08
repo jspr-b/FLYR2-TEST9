@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import HourlyDelay from '@/models/HourlyDelay'
 import { getTodayLocalRange, calculateDelayMinutes, extractLocalHour } from '@/lib/timezone-utils'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
 
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect()
-
     // Get today's date in YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0]
 
@@ -32,6 +28,8 @@ export async function GET(request: NextRequest) {
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
+
+    console.log(`📊 DELAY TRENDS: Processing ${filteredFlights.length} flights`)
 
     // Calculate hourly delays from real flight data
     const hourlyDelays = calculateHourlyDelaysFromFlights(filteredFlights)
@@ -98,13 +96,14 @@ export async function GET(request: NextRequest) {
       highVarianceHours: highVarianceHours || '0'
     }
 
+    console.log(`✅ DELAY TRENDS: Successfully processed data`)
     return NextResponse.json({
       summary,
       hourlyData,
       tableData
     })
   } catch (error) {
-    console.error('Error fetching hourly delay trends:', error)
+    console.error('❌ DELAY TRENDS ERROR:', error)
     return NextResponse.json(
       { error: 'Failed to fetch delay trends data' },
       { status: 500 }

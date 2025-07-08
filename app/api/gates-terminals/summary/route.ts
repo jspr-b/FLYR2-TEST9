@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import GateTerminal from '@/models/GateTerminal'
 import { getTodayLocalRange } from '@/lib/timezone-utils'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
 
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect()
-
     // Get today's date in YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0]
 
@@ -33,16 +29,19 @@ export async function GET(request: NextRequest) {
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
 
+    console.log(`📊 GATES/TERMINALS: Processing ${filteredFlights.length} flights`)
+
     // Calculate gate and terminal statistics from real flight data
     const { gateData, pierData, summary } = calculateGateTerminalStats(filteredFlights)
 
+    console.log(`✅ GATES/TERMINALS: Successfully processed data`)
     return NextResponse.json({
       summary,
       pierData,
       gateData
     })
   } catch (error) {
-    console.error('Error fetching gates and terminals data:', error)
+    console.error('❌ GATES/TERMINALS ERROR:', error)
     return NextResponse.json(
       { error: 'Failed to fetch gates and terminals data' },
       { status: 500 }

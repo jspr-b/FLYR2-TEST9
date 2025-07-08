@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import Flight from '@/models/Flight'
-import HourlyDelay from '@/models/HourlyDelay'
 import { getTodayLocalRange, calculateDelayMinutes, extractLocalHour } from '@/lib/timezone-utils'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
 
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect()
-
     // Get today's date in YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0]
 
@@ -34,19 +29,12 @@ export async function GET(request: NextRequest) {
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
 
-    // Get hourly delay data for today from DB (for delay stats)
-    const { start: startOfDay, end: endOfDay } = getTodayLocalRange()
-    const hourlyDelays = await HourlyDelay.find({
-      date: {
-        $gte: startOfDay,
-        $lt: endOfDay
-      }
-    }).sort({ hour: 1 })
+    console.log(`📊 DASHBOARD KPIS: Processing ${filteredFlights.length} flights`)
 
-    // Calculate KPIs from filtered flights and hourlyDelays
-    return await calculateKPIsFromFlights(filteredFlights, hourlyDelays)
+    // Calculate KPIs from filtered flights
+    return await calculateKPIsFromFlights(filteredFlights)
   } catch (error) {
-    console.error('Error fetching dashboard KPIs:', error)
+    console.error('❌ DASHBOARD KPIS ERROR:', error)
     return NextResponse.json(
       { error: 'Failed to fetch dashboard data' },
       { status: 500 }
@@ -54,15 +42,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Calculate KPIs from flights and hourly delay data
-async function calculateKPIsFromFlights(flights: any[], hourlyDelays: any[]) {
+// Calculate KPIs from flights data
+async function calculateKPIsFromFlights(flights: any[]) {
   const totalFlights = flights.length
   const delays = flights.map(flight =>
     calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-  )
+  ).filter(delay => delay !== null) as number[]
+  
   const delayedFlights = delays.filter(delay => delay > 0).length
   const totalDelayMinutes = delays.reduce((sum, delay) => sum + delay, 0)
-  const averageDelay = totalFlights > 0 ? totalDelayMinutes / totalFlights : 0
+  const averageDelay = delays.length > 0 ? totalDelayMinutes / delays.length : 0
   const flightsOver30Min = delays.filter(delay => delay > 30).length
   const flightsOver60Min = delays.filter(delay => delay > 60).length
 
@@ -74,12 +63,14 @@ async function calculateKPIsFromFlights(flights: any[], hourlyDelays: any[]) {
     const scheduleHour = extractLocalHour(flight.scheduleDateTime)
     const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
     
-    if (!hourGroups[scheduleHour]) {
-      hourGroups[scheduleHour] = { flights: [], delays: [] }
+    if (delayMinutes !== null) {
+      if (!hourGroups[scheduleHour]) {
+        hourGroups[scheduleHour] = { flights: [], delays: [] }
+      }
+      
+      hourGroups[scheduleHour].flights.push(flight)
+      hourGroups[scheduleHour].delays.push(delayMinutes)
     }
-    
-    hourGroups[scheduleHour].flights.push(flight)
-    hourGroups[scheduleHour].delays.push(delayMinutes)
   })
 
   // Find peak delay hour
@@ -116,5 +107,6 @@ async function calculateKPIsFromFlights(flights: any[], hourlyDelays: any[]) {
     dataSource: 'schiphol-api'
   }
 
+  console.log(`✅ DASHBOARD KPIS: Successfully calculated KPIs`)
   return NextResponse.json(kpis)
 } 
