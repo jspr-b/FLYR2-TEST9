@@ -232,7 +232,6 @@ export function AircraftPerformanceChart() {
   // Aircraft type display name mapping (copied from dashboard-kpis.tsx)
   function getAircraftDisplayName(type: string): string {
     const aircraftMap: Record<string, string> = {
-      // Airbus Aircraft
       '332': 'Airbus A330-200',
       '333': 'Airbus A330-300',
       '32N': 'Airbus A320neo',
@@ -241,7 +240,6 @@ export function AircraftPerformanceChart() {
       'A333': 'Airbus A330-300',
       'A32N': 'Airbus A320neo',
       'A32Q': 'Airbus A321neo',
-      // Boeing Aircraft
       '772': 'Boeing 777-200ER',
       '773': 'Boeing 777-300ER',
       '77W': 'Boeing 777-300ER',
@@ -256,7 +254,6 @@ export function AircraftPerformanceChart() {
       'B773': 'Boeing 777-300ER',
       'B789': 'Boeing 787-9',
       'B738': 'Boeing 737-800',
-      // Embraer Aircraft (KLM Cityhopper)
       'E70': 'Embraer E170',
       'E75': 'Embraer E175',
       'E90': 'Embraer E190',
@@ -268,6 +265,46 @@ export function AircraftPerformanceChart() {
       '295': 'Embraer E195-E2',
     }
     return aircraftMap[type] || type
+  }
+
+  // Add this function for short names
+  function getAircraftShortName(type: string): string {
+    const aircraftMap: Record<string, string> = {
+      '332': 'A330-200',
+      '333': 'A330-300',
+      '32N': 'A320neo',
+      '32Q': 'A321neo',
+      'A332': 'A330-200',
+      'A333': 'A330-300',
+      'A32N': 'A320neo',
+      'A32Q': 'A321neo',
+      '772': '777-200ER',
+      '773': '777-300ER',
+      '77W': '777-300ER',
+      '789': '787-9',
+      '78W': '787-10',
+      '781': '787-10',
+      '73H': '737-700',
+      '738': '737-800',
+      '73W': '737-900',
+      '73J': '737-900',
+      'B772': '777-200ER',
+      'B773': '777-300ER',
+      'B789': '787-9',
+      'B738': '737-800',
+      'E70': 'E170',
+      'E75': 'E175',
+      'E90': 'E190',
+      'E7W': 'E195-E2',
+      'E195': 'E195',
+      'E170': 'E170',
+      'E175': 'E175',
+      'E190': 'E190',
+      '295': 'E195-E2',
+    }
+    if (aircraftMap[type]) return aircraftMap[type]
+    // Always strip manufacturer prefix if present, and trim whitespace
+    return type.replace(/^(Airbus|Boeing|Embraer)\s+/i, '').trim()
   }
 
   if (!isClient || isLoading) {
@@ -348,9 +385,12 @@ export function AircraftPerformanceChart() {
                       : `${formatValue(data.flights)} flights`
                     } | Routes: ${data.routes || 'No route data'}`}
                   />
-                  <div className="mt-3 text-center">
-                    <span className="text-xs sm:text-sm font-medium text-gray-900 block">
-                      {getAircraftDisplayName(data.type)}
+                  <div className="mt-3 text-center h-5">
+                    <span
+                      className="block truncate max-w-[60px] text-xs sm:text-sm font-medium text-gray-900"
+                      title={getAircraftDisplayName(data.type)}
+                    >
+                      {getAircraftShortName(data.type)}
                     </span>
                   </div>
                 </div>
