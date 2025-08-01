@@ -1,4 +1,5 @@
 import { DashboardKPIs } from "@/components/dashboard-kpis"
+import { GateTypeDistribution } from "@/components/gate-type-distribution"
 import { Sidebar } from "@/components/sidebar"
 import { LayoutDashboard } from "lucide-react"
 
@@ -18,7 +19,14 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <DashboardKPIs />
+          <div className="grid gap-6">
+            <DashboardKPIs />
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <GateTypeDistribution />
+              {/* Add more cards here as needed */}
+            </div>
+          </div>
         </div>
       </div>
     </div>

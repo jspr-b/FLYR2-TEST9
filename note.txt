@@ -1,5 +1,2 @@
-check if dashbaordkpi is workign page propperly 
-duplicate current code base and delete the other copy of flyr_1.2
-if decide if you want multiple pages first or calc to the database(verify first)
-page ideas in vercel keep the back correct 
+### note 
 

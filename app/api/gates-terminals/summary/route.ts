@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTodayLocalRange } from '@/lib/timezone-utils'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
 
+// Known bus gates
+const BUS_GATES = [
+  'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8',
+  'C21', 'C22', 'C23', 'C24',
+  'D6', 'E21', 'G1'
+]
+
 export async function GET(request: NextRequest) {
   try {
-    // Get today's date in YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0]
 
-    // Prepare Schiphol API configuration for KLM departures
     const apiConfig = {
       flightDirection: 'D' as const,
       airline: 'KL',
@@ -15,11 +20,9 @@ export async function GET(request: NextRequest) {
       fetchAllPages: true
     }
 
-    // Fetch flights from Schiphol API (same as /api/flights)
     const schipholData = await fetchSchipholFlights(apiConfig)
     const allFlights = (schipholData.flights || []).map(transformSchipholFlight)
 
-    // Apply the same filters and deduplication as /api/flights
     const filters = {
       flightDirection: 'D' as const,
       scheduleDate: today,
@@ -31,12 +34,96 @@ export async function GET(request: NextRequest) {
 
     console.log(`📊 GATES/TERMINALS: Processing ${filteredFlights.length} flights`)
 
-    // Calculate gate and terminal statistics from real flight data
-    const { gateData, pierData, summary } = calculateGateTerminalStats(filteredFlights)
+    // Group flights by gate
+    const gateMap = new Map<string, any[]>()
+    const pierMap = new Map<string, any[]>()
+    
+    filteredFlights.forEach(flight => {
+      const gate = flight.gate || 'Not Assigned Yet'
+      const pier = flight.pier || 'Unknown'
+      
+      if (!gateMap.has(gate)) {
+        gateMap.set(gate, [])
+      }
+      gateMap.get(gate)!.push(flight)
+      
+      if (!pierMap.has(pier)) {
+        pierMap.set(pier, [])
+      }
+      pierMap.get(pier)!.push(flight)
+    })
 
-    console.log(`✅ GATES/TERMINALS: Successfully processed data`)
+    // Calculate gate data with proper last activity
+    const gateData = Array.from(gateMap.entries()).map(([gate, gateFlights]) => {
+      const totalFlights = gateFlights.length
+      const isBusGate = BUS_GATES.some(busGate => gate.startsWith(busGate))
+      
+      // Calculate last activity as the most recent flight departure time
+      const sortedFlights = gateFlights.sort((a, b) => 
+        new Date(b.scheduleDateTime).getTime() - new Date(a.scheduleDateTime).getTime()
+      )
+      const lastFlight = sortedFlights[0]
+      const lastActivity = lastFlight ? lastFlight.scheduleDateTime : null
+      
+      // Get aircraft types from all flights at this gate
+      const aircraftTypes = [...new Set(
+        gateFlights
+          .map(f => f.aircraftType?.iataSub || f.aircraftType?.iataMain)
+          .filter(Boolean)
+      )]
+      
+      // Calculate utilization (flights per hour over 16-hour operational day)
+      const utilization = Math.min(100, (totalFlights / 16) * 100)
+      
+      return {
+        gate,
+        pier: gateFlights[0]?.pier || 'Unknown',
+        flights: totalFlights,
+        aircraftTypes,
+        lastActivity,
+        utilization: Math.round(utilization),
+        isBusGate,
+        status: totalFlights > 10 ? 'Busy' : totalFlights > 5 ? 'Moderate' : 'Available',
+        nextFlight: lastFlight?.flightName || 'None'
+      }
+    }).sort((a, b) => b.flights - a.flights)
+
+    // Calculate pier data
+    const pierData = Array.from(pierMap.entries()).map(([pier, pierFlights]) => ({
+      pier,
+      flights: pierFlights.length,
+      utilization: Math.min(100, (pierFlights.length / 20) * 100)
+    })).sort((a, b) => b.flights - a.flights)
+
+    // Calculate summary statistics
+    const totalFlights = filteredFlights.length
+    const busGateFlights = gateData
+      .filter(g => g.isBusGate)
+      .reduce((sum, g) => sum + g.flights, 0)
+
+    console.log('\n🔍 Gate Distribution Analysis:')
+    console.log('=' .repeat(50))
+    
+    // Log bus gate details
+    console.log('\nBus Gate Distribution:')
+    gateData
+      .filter(g => g.isBusGate)
+      .forEach(g => {
+        console.log(`${g.gate}: ${g.flights} flights, last activity: ${g.lastActivity ? new Date(g.lastActivity).toLocaleTimeString() : 'none'}`)
+      })
+    
+    console.log('\nSummary:')
+    console.log(`Total Flights: ${totalFlights}`)
+    console.log(`Bus Gate Flights: ${busGateFlights}`)
+    console.log(`Bus Gate Percentage: ${((busGateFlights / totalFlights) * 100).toFixed(1)}%`)
+    console.log('=' .repeat(50))
+
     return NextResponse.json({
-      summary,
+      summary: {
+        totalFlights,
+        busGateFlights,
+        busGatePercentage: (busGateFlights / totalFlights) * 100
+      },
       pierData,
       gateData
     })
@@ -47,100 +134,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-// Calculate gate and terminal statistics from flight data
-function calculateGateTerminalStats(flights: any[]) {
-  // Group flights by gate
-  const gateMap = new Map<string, any[]>()
-  const pierMap = new Map<string, any[]>()
-  
-  flights.forEach(flight => {
-    const gate = flight.gate || 'Unknown'
-    const pier = flight.pier || 'Unknown'
-    
-    if (!gateMap.has(gate)) {
-      gateMap.set(gate, [])
-    }
-    gateMap.get(gate)!.push(flight)
-    
-    if (!pierMap.has(pier)) {
-      pierMap.set(pier, [])
-    }
-    pierMap.get(pier)!.push(flight)
-  })
-
-  // Calculate gate data
-  const gateData = Array.from(gateMap.entries()).map(([gate, gateFlights]) => {
-    const totalFlights = gateFlights.length
-    const departures = gateFlights.length // All flights are departures in this case
-    const arrivals = 0 // No arrivals for departure-only data
-    
-    // Calculate average turnaround (simplified - would need more complex logic for real data)
-    const avgTurnaround = 45 // Default 45 minutes
-    
-    // Determine status based on flight count
-    let status = 'Available'
-    if (totalFlights > 10) status = 'Busy'
-    else if (totalFlights > 5) status = 'Moderate'
-    
-    // Get next flight (first flight in the hour)
-    const nextFlight = gateFlights
-      .sort((a, b) => new Date(a.scheduleDateTime).getTime() - new Date(b.scheduleDateTime).getTime())[0]
-    
-    return {
-      gate,
-      pier: gateFlights[0]?.pier || 'Unknown',
-      flights: totalFlights,
-      arrivals,
-      departures,
-      avgTurnaround,
-      status,
-      nextFlight: nextFlight ? `${nextFlight.flightName} (${new Date(nextFlight.scheduleDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })})` : 'None',
-      type: 'Schengen' as const,
-      purpose: 'Mixed operations'
-    }
-  }).sort((a, b) => b.flights - a.flights) // Sort by flight count in descending order (busiest first)
-
-  // Calculate pier data
-  const pierData = Array.from(pierMap.entries()).map(([pier, pierFlights]) => {
-    const totalFlights = pierFlights.length
-    const departures = pierFlights.length
-    const arrivals = 0
-    
-    // Calculate utilization (simplified - would need gate capacity data for real calculation)
-    const utilization = Math.min(100, (totalFlights / 20) * 100) // Assume 20 flights = 100% utilization
-    
-    let status = 'Low'
-    if (utilization > 80) status = 'High'
-    else if (utilization > 60) status = 'Medium'
-    
-    return {
-      pier,
-      flights: totalFlights,
-      arrivals,
-      departures,
-      utilization,
-      status,
-      type: 'Schengen' as const,
-      purpose: 'Mixed operations'
-    }
-  }).sort((a, b) => b.flights - a.flights) // Sort by flight count in descending order (busiest first)
-
-  // Calculate summary statistics
-  const totalGates = gateMap.size
-  const totalTerminals = new Set(pierMap.keys()).size
-  const totalFlights = flights.length
-  const avgUtilization = pierData.length > 0 
-    ? pierData.reduce((sum, pier) => sum + pier.utilization, 0) / pierData.length 
-    : 0
-
-  const summary = {
-    totalGates: totalGates || '0',
-    totalTerminals: totalTerminals || '0',
-    totalFlights: totalFlights || '0',
-    avgUtilization: avgUtilization ? `${avgUtilization.toFixed(1)}%` : '0.0%'
-  }
-
-  return { gateData, pierData, summary }
 } 

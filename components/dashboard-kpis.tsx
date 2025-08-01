@@ -67,11 +67,44 @@ async function fetchAircraftPerformance() {
 
 async function fetchGatesTerminalsSummary() {
   try {
-    const response = await fetch('/api/gates-terminals/summary')
-    if (!response.ok) throw new Error('Failed to fetch gates/terminals summary')
-    return await response.json()
+    const response = await fetch('/api/gate-occupancy')
+    if (!response.ok) throw new Error('Failed to fetch gate occupancy data')
+    const data = await response.json()
+    
+    // Known bus gates from the provided information
+    const BUS_GATES = [
+      'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8',
+      'C21', 'C22', 'C23', 'C24',
+      'D6', 'E21', 'G1'
+    ]
+    
+    // Transform the new API response to match expected structure
+    return {
+      summary: {
+        totalGates: data.summary.totalGates || 0,
+        totalTerminals: data.summary.piers?.length || 0,
+        // Count gates that are actually operational (not in dead zone)
+        activeGates: data.gates?.filter((gate: any) => 
+          gate.utilization.temporalStatus !== 'DEAD_ZONE'
+        ).length || 0
+      },
+      gateData: data.gates?.map((gate: any) => ({
+        gate: gate.gateID,
+        pier: gate.pier,
+        flights: gate.utilization.logical,
+        // Use current utilization instead of daily for real-time status
+        utilization: gate.utilization.current,
+        status: gate.utilization.temporalStatus === 'DEAD_ZONE' ? 'available' : 
+                gate.utilization.temporalStatus === 'ACTIVE' ? 'critical' : 
+                gate.utilization.current > 50 ? 'high' : 'moderate',
+        // Show temporal status instead of old status
+        temporalStatus: gate.utilization.temporalStatus,
+        physicalActivity: gate.utilization.physical,
+        isBusGate: BUS_GATES.includes(gate.gateID)
+      })).sort((a: any, b: any) => b.flights - a.flights) || []
+    }
   } catch (error) {
-    console.error('Error fetching gates/terminals summary:', error)
+    console.error('Error fetching gate occupancy data:', error)
     return null
   }
 }
@@ -324,7 +357,7 @@ export function DashboardKPIs() {
             initialKPIData.splice(3, 0, {
               label: "Active Piers",
               value: gatesData.summary.totalTerminals?.toString() || "0",
-              change: `${gatesData.summary.totalGates || 0} gates active`,
+              change: `${gatesData.summary.activeGates || 0} gates active`,
               changeType: "neutral",
               icon: Building2,
               color: "text-indigo-600",

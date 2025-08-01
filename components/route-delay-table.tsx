@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react"
+import React from "react"
 
 interface RouteDelayData {
   destination: string
@@ -164,7 +165,7 @@ export function RouteDelayTable() {
           {data.routes.map((route) => {
             const delaySeverity = getDelaySeverity(route.avgDelay)
             return (
-              <>
+              <React.Fragment key={route.destination}>
                 {/* Desktop grid row */}
                 <div
                   key={route.destination + '-desktop'}
@@ -259,7 +260,7 @@ export function RouteDelayTable() {
                   </div>
                   <div className="text-xs font-mono truncate" title={route.flightNumbers.join(', ')} aria-label={`Flight numbers: ${route.flightNumbers.join(', ')}`}>Flights: {route.flightNumbers.slice(0, 3).map((num, idx, arr) => (<span key={num}>{num}{idx < arr.length - 1 ? ', ' : ''}</span>))}{route.flightNumbers.length > 3 ? ', ...' : ''}</div>
                 </div>
-              </>
+              </React.Fragment>
             )
           })}
         </div>

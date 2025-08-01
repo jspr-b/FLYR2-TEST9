@@ -347,7 +347,17 @@ export function transformSchipholFlight(flight: any): SchipholFlight {
  * Check if a flight is operational based on its state
  */
 export function isOperationalFlight(flight: SchipholFlight): boolean {
-  const operationalStates = ['SCHEDULED', 'BOARDING', 'ON_TIME', 'DELAYED', 'DEPARTED']
+  const operationalStates = ['SCHEDULED', 'BOARDING', 'ON_TIME', 'DELAYED', 'DEPARTED', 'SCH', 'DEP']
+  const cancelledStates = ['CNX', 'CANCELLED']
+  
+  // If flight is cancelled, it's not operational
+  if (flight.publicFlightState?.flightStates?.some(state => 
+    cancelledStates.includes(state)
+  )) {
+    return false
+  }
+  
+  // Check for operational states
   return flight.publicFlightState?.flightStates?.some(state => 
     operationalStates.includes(state)
   ) || true // Default to true if no state info
