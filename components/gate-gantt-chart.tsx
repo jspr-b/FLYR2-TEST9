@@ -53,10 +53,10 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   useEffect(() => {
     setMounted(true)
     
-    // Update current time every minute
+    // Update current time every 30 seconds for better responsiveness
     const interval = setInterval(() => {
       setCurrentTime(getCurrentAmsterdamTime())
-    }, 60000) // Update every minute
+    }, 30000) // Update every 30 seconds
     
     return () => clearInterval(interval)
   }, [])

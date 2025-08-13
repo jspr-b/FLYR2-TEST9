@@ -6,13 +6,14 @@
  */
 
 /**
- * Convert any date to Amsterdam timezone (UTC+2)
- * Amsterdam is UTC+2 during DST (summer), UTC+1 during standard time
- * For simplicity and current date (August 2025), using UTC+2
+ * Get current time as a proper Date object for Amsterdam timezone calculations
+ * This returns the current moment in time - the same universal timestamp
+ * The key insight: Date objects represent moments in time, not local times
  */
 export function toAmsterdamTime(date: Date = new Date()): Date {
-  const utcTime = date.getTime() + (date.getTimezoneOffset() * 60000)
-  return new Date(utcTime + (2 * 3600000)) // UTC+2 for summer time
+  // Simply return the same moment in time
+  // When we need Amsterdam-specific formatting, we use timeZone in toLocaleString
+  return new Date(date.getTime());
 }
 
 /**
@@ -90,7 +91,8 @@ export function getAmsterdamDateString(date: Date = new Date()): string {
  * Get today's date string in Amsterdam timezone (YYYY-MM-DD format)
  */
 export function getTodayAmsterdam(): string {
-  return toAmsterdamTime().toISOString().split('T')[0]
+  const now = new Date();
+  return now.toLocaleDateString('en-CA', { timeZone: 'Europe/Amsterdam' }); // en-CA gives YYYY-MM-DD format
 }
 
 /**
