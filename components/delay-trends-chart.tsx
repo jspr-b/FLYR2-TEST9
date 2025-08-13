@@ -19,6 +19,11 @@ export function DelayTrendsChart() {
   const [viewType, setViewType] = useState<"delay" | "flights">("delay")
   const [isLoading, setIsLoading] = useState(true)
   const [hourlyDelayData, setHourlyDelayData] = useState<HourlyDelayData[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,15 +132,19 @@ export function DelayTrendsChart() {
     return value !== null ? value.toString() : "n/v"
   }
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 animate-pulse">
         <div className="h-6 bg-gray-200 rounded mb-4"></div>
         <div className="h-4 bg-gray-200 rounded mb-6"></div>
         <div className="flex items-end justify-center gap-4 h-64">
-          {[...Array(17)].map((_, index) => (
-            <div key={index} className="w-8 bg-gray-200 rounded-t" style={{ height: `${Math.random() * 200 + 4}px` }}></div>
-          ))}
+          {[...Array(17)].map((_, index) => {
+            // Use deterministic heights to avoid hydration mismatch
+            const heights = [80, 120, 60, 140, 100, 160, 90, 200, 70, 130, 110, 180, 150, 40, 170, 50, 190]
+            return (
+              <div key={index} className="w-8 bg-gray-200 rounded-t" style={{ height: `${heights[index] || 80}px` }}></div>
+            )
+          })}
         </div>
       </div>
     )

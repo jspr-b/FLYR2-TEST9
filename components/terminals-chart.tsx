@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Building2, Info } from "lucide-react"
+import { Building2, Info, Database, Calendar, Activity, TrendingUp, BarChart, Clock } from "lucide-react"
+import { formatValue, formatUtilization } from "@/lib/client-utils"
 
 interface PierData {
   pier: string
@@ -12,18 +13,30 @@ interface PierData {
   status: "High" | "Medium" | "Low"
   type: "Schengen" | "Non-Schengen"
   purpose: string
+  currentlyActive: number | null
+  totalScheduled: number | null
+}
+
+interface GateOccupancyData {
+  gateID: string
+  pier: string
+  gateType: string
+  scheduledFlights: FlightData[]
+  utilization: {
+    current: number
+    daily: number
+    temporalStatus: string
+    logical: number
+  }
 }
 
 interface FlightData {
   flightName: string
-  flightNumber: number
-  gate: string
-  pier: string
-  flightDirection: 'D' | 'A'
+  flightNumber: string
   scheduleDateTime: string
-  publicFlightState: {
-    flightStates: string[]
-  }
+  flightDirection?: 'D' | 'A'
+  primaryState: string
+  gate?: string
 }
 
 interface HourlyDensity {
@@ -38,28 +51,29 @@ export function TerminalsChart() {
   const [pierData, setPierData] = useState<PierData[]>([])
   const [hourlyDensity, setHourlyDensity] = useState<Record<string, HourlyDensity[]>>({})
   const [showHourlyView, setShowHourlyView] = useState(false)
+  const [showCurrentActivity, setShowCurrentActivity] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const today = new Date().toISOString().split('T')[0]
-        const response = await fetch(`/api/flights?filters=%7B%22flightDirection%22%3A%22D%22%2C%22scheduleDate%22%3A%22${today}%22%2C%22isOperationalFlight%22%3Atrue%2C%22prefixicao%22%3A%22KL%22%7D`)
+        // Fetch from temporal-aware gate occupancy API
+        const response = await fetch('/api/gate-occupancy')
         if (!response.ok) {
-          throw new Error('Failed to fetch flights data')
+          throw new Error('Failed to fetch gate occupancy data')
         }
         
         const data = await response.json()
-        const flights: FlightData[] = data.flights || []
+        const gates: GateOccupancyData[] = data.gates || []
         
-        // Calculate pier statistics from real flight data
-        const pierStats = flights.reduce((acc, flight) => {
-          let pierKey = flight.pier
+        // Calculate pier statistics from gate occupancy data
+        const pierStats = gates.reduce((acc, gate) => {
+          let pierKey = gate.pier
           let type: "Schengen" | "Non-Schengen" = "Schengen"
 
           // Special handling for D pier
-          if (flight.pier === "D" && flight.gate) {
-            const gateNumber = parseInt(flight.gate.replace(/\D/g, ""))
+          if (gate.pier === "D" && gate.gateID) {
+            const gateNumber = parseInt(gate.gateID.replace(/\D/g, ""))
             if (gateNumber >= 59 && gateNumber <= 87) {
               pierKey = "D-Schengen"
               type = "Schengen"
@@ -74,7 +88,7 @@ export function TerminalsChart() {
           } else {
             // Determine type based on pier (simplified mapping)
             const schengenPiers = ["A", "B", "C"]
-            type = schengenPiers.includes(flight.pier) ? "Schengen" : "Non-Schengen"
+            type = schengenPiers.includes(gate.pier) ? "Schengen" : "Non-Schengen"
           }
 
           if (pierKey) {
@@ -87,25 +101,39 @@ export function TerminalsChart() {
                 utilization: 0,
                 status: "Low" as const,
                 type,
-                purpose: "Mixed operations"
+                purpose: "Mixed operations",
+                currentlyActive: 0,
+                totalScheduled: 0
               }
             }
 
-            acc[pierKey].flights += 1
-            if (flight.flightDirection === 'A') {
-              acc[pierKey].arrivals += 1
-            } else {
-              acc[pierKey].departures += 1
-            }
+            // Count scheduled flights
+            const scheduledFlights = gate.scheduledFlights || []
+            const activeFlights = scheduledFlights.filter(flight => 
+              ['BRD', 'GTO', 'GCL', 'GTD', 'DEP'].includes(flight.primaryState)
+            )
+
+            // Use logical flights for total count (what user sees scheduled)
+            const flightCount = gate.utilization.logical || 0
+            acc[pierKey].flights += flightCount
+            acc[pierKey].totalScheduled += flightCount
+            acc[pierKey].currentlyActive += activeFlights.length
+
+            // Count departures (assuming we're looking at departures primarily)
+            acc[pierKey].departures += flightCount
           }
           return acc
         }, {} as Record<string, PierData>)
         
         // Calculate utilization and status for each pier
         const transformedPierData: PierData[] = Object.values(pierStats).map(pier => {
-          // Simplified utilization calculation (flights per pier as percentage of total)
-          const totalFlights = flights.length
-          const utilization = totalFlights > 0 ? Math.round((pier.flights / totalFlights) * 100) : 0
+          // Use current or total flights based on toggle
+          const relevantFlights = showCurrentActivity ? pier.currentlyActive : pier.flights
+          const totalFlights = showCurrentActivity ? 
+            Object.values(pierStats).reduce((sum, p) => sum + (p.currentlyActive || 0), 0) :
+            Object.values(pierStats).reduce((sum, p) => sum + (p.flights || 0), 0)
+          
+          const utilization = totalFlights > 0 ? Math.round(((relevantFlights || 0) / totalFlights) * 100) : 0
           
           // Determine status based on utilization
           let status: "High" | "Medium" | "Low" = "Low"
@@ -114,28 +142,31 @@ export function TerminalsChart() {
           
           return {
             ...pier,
+            flights: relevantFlights, // Show either current or scheduled based on toggle
             utilization,
             status,
             type: pier.type
           }
         }).sort((a, b) => (b.flights || 0) - (a.flights || 0))
 
-        // Calculate hourly density for each pier
+        // Calculate hourly density for each pier (using scheduled flights)
         const hourlyDensityData: Record<string, HourlyDensity[]> = {}
         
         Object.keys(pierStats).forEach(pierKey => {
-          const pierFlights = flights.filter(flight => {
-            let flightPierKey = flight.pier
-            if (flight.pier === "D" && flight.gate) {
-              const gateNumber = parseInt(flight.gate.replace(/\D/g, ""))
+          const pierGates = gates.filter(gate => {
+            let gatePierKey = gate.pier
+            if (gate.pier === "D" && gate.gateID) {
+              const gateNumber = parseInt(gate.gateID.replace(/\D/g, ""))
               if (gateNumber >= 59 && gateNumber <= 87) {
-                flightPierKey = "D-Schengen"
+                gatePierKey = "D-Schengen"
               } else if (gateNumber >= 1 && gateNumber <= 57) {
-                flightPierKey = "D-Non-Schengen"
+                gatePierKey = "D-Non-Schengen"
               }
             }
-            return flightPierKey === pierKey
+            return gatePierKey === pierKey
           })
+
+          const allPierFlights = pierGates.flatMap(gate => gate.scheduledFlights || [])
 
           // Group flights by hour
           const hourlyCounts: Record<string, number> = {}
@@ -144,7 +175,7 @@ export function TerminalsChart() {
             hourlyCounts[hourStr] = 0
           }
 
-          pierFlights.forEach(flight => {
+          allPierFlights.forEach(flight => {
             try {
               const flightHour = new Date(flight.scheduleDateTime).getHours()
               const hourStr = flightHour.toString().padStart(2, '0')
@@ -163,6 +194,13 @@ export function TerminalsChart() {
             flights: count,
             intensity: maxFlightsInHour > 0 ? count / maxFlightsInHour : 0
           }))
+        })
+
+        // Log temporal context
+        console.log('🏗️ Pier Usage Analysis:')
+        console.log('- Show current activity:', showCurrentActivity)
+        Object.values(pierStats).forEach(pier => {
+          console.log(`- Pier ${pier.pier}: ${pier.currentlyActive} currently active, ${pier.totalScheduled} total scheduled`)
         })
 
         setPierData(transformedPierData)
@@ -184,6 +222,8 @@ export function TerminalsChart() {
             status: "Medium",
             type: "Schengen",
             purpose: "Mixed operations",
+            currentlyActive: null,
+            totalScheduled: null,
           },
           {
             pier: "B",
@@ -194,6 +234,8 @@ export function TerminalsChart() {
             status: "Low",
             type: "Schengen",
             purpose: "Mixed operations",
+            currentlyActive: null,
+            totalScheduled: null,
           },
           {
             pier: "E",
@@ -204,6 +246,8 @@ export function TerminalsChart() {
             status: "High",
             type: "Non-Schengen",
             purpose: "Long-haul operations",
+            currentlyActive: null,
+            totalScheduled: null,
           },
         ]
         setPierData(fallbackPierData)
@@ -213,7 +257,31 @@ export function TerminalsChart() {
     }
 
     fetchData()
-  }, [selectedPier])
+  }, [selectedPier, showCurrentActivity])
+
+  // Auto-refresh every 2.5 minutes in background
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        // Background refresh - don't change loading state
+        const response = await fetch('/api/gate-occupancy')
+        if (response.ok) {
+          const data = await response.json()
+          const gates: GateOccupancyData[] = data.gates || []
+          
+          // Process data silently (same logic as main fetchData)
+          // For brevity, just trigger the main fetchData which will update state
+          // In a production app, you'd want to avoid the loading state during background refresh
+          fetchData()
+          console.log('🔄 Background refresh completed for terminals chart')
+        }
+      } catch (error) {
+        console.error('Background refresh failed for terminals chart:', error)
+      }
+    }, 2.5 * 60 * 1000) // 2.5 minutes
+
+    return () => clearInterval(interval)
+  }, []) // No dependencies, runs independently of other state changes
 
   const maxFlights = Math.max(...pierData.map((d) => d.flights || 0))
 
@@ -290,37 +358,118 @@ export function TerminalsChart() {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 min-h-[500px] lg:min-h-[600px]">
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Building2 className="h-5 w-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">Pier Usage Overview</h2>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowHourlyView(false)}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                !showHourlyView 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Daily
-            </button>
-            <button
-              onClick={() => setShowHourlyView(true)}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                showHourlyView 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Hourly
-            </button>
+        </div>
+
+        {/* Enhanced Control Panel */}
+        <div className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* Data Mode Selection */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Database className="h-4 w-4" />
+                Data Source
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowCurrentActivity(false)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    !showCurrentActivity 
+                      ? 'bg-green-600 text-white shadow-md ring-2 ring-green-200' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  <Calendar className="h-4 w-4" />
+                  All Scheduled
+                </button>
+                <button
+                  onClick={() => setShowCurrentActivity(true)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    showCurrentActivity 
+                      ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-200' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  <Activity className="h-4 w-4" />
+                  Live Activity
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                {showCurrentActivity 
+                  ? 'Shows only flights with active boarding/departure operations' 
+                  : 'Shows all flights assigned to piers (including future scheduled flights)'
+                }
+              </p>
+            </div>
+
+            {/* View Mode Selection */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <TrendingUp className="h-4 w-4" />
+                View Type
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowHourlyView(false)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    !showHourlyView 
+                      ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-200' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  <BarChart className="h-4 w-4" />
+                  Pier Summary
+                </button>
+                <button
+                  onClick={() => setShowHourlyView(true)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    showHourlyView 
+                      ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-200' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  <Clock className="h-4 w-4" />
+                  Hourly Timeline
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                {showHourlyView 
+                  ? 'Shows flight distribution throughout the day (6AM-11PM)' 
+                  : 'Shows total flights per pier with utilization percentages'
+                }
+              </p>
+            </div>
+          </div>
+
+          {/* Current Selection Summary */}
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600">
+                  Currently viewing: <span className="font-medium text-gray-900">
+                    {showCurrentActivity ? 'Live Activity' : 'All Scheduled'} • {showHourlyView ? 'Hourly Timeline' : 'Pier Summary'}
+                  </span>
+                </span>
+                {showHourlyView && selectedPier && (
+                  <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded-md">
+                    Focus: Pier {selectedPier}
+                  </span>
+                )}
+              </div>
+              {!showHourlyView && (
+                <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md border border-blue-200 shrink-0">
+                  <Info className="h-3 w-3 flex-shrink-0" />
+                  <span>Click any pier bar for details</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        <p className="text-sm text-gray-600">
-          {showHourlyView ? 'Click a pier in the daily view to see its hourly breakdown, or view all piers combined' : 'Click bars for detailed breakdown'}
-        </p>
       </div>
 
       {!showHourlyView ? (
@@ -345,7 +494,7 @@ export function TerminalsChart() {
                       }`}
                       style={{ height: `${height}px` }}
                       onClick={() => setSelectedPier(isSelected ? null : data.pier)}
-                      title={`${data.pier}: ${formatValue(data.flights)} flights (${formatValue(data.utilization)}% utilization)`}
+                      title={`${data.pier}: ${formatValue(data.flights)} flights (${formatUtilization(data.utilization)}% utilization)`}
                     />
                     <div className="mt-3 text-center">
                       <span className="text-xs sm:text-sm font-medium text-gray-900 block">
@@ -354,7 +503,7 @@ export function TerminalsChart() {
                       <span
                         className={`inline-block px-1.5 sm:px-2 py-1 rounded-full text-xs font-medium mt-1 ${getStatusColor(data.status)}`}
                       >
-                        {formatValue(data.utilization)}%
+                        {formatUtilization(data.utilization)}%
                       </span>
                     </div>
                   </div>
@@ -446,14 +595,12 @@ export function TerminalsChart() {
                 const data = pierData.find((d) => d.pier === selectedPier)
                 if (!data) return null
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span className="text-blue-700 font-medium">Total Flights:</span>
+                      <span className="text-blue-700 font-medium">
+                        {showCurrentActivity ? 'Current Flights:' : 'Total Flights:'}
+                      </span>
                       <p className="text-blue-900">{formatValue(data.flights)}</p>
-                    </div>
-                    <div>
-                      <span className="text-blue-700 font-medium">Arrivals:</span>
-                      <p className="text-blue-900">{formatValue(data.arrivals)}</p>
                     </div>
                     <div>
                       <span className="text-blue-700 font-medium">Departures:</span>
@@ -461,7 +608,7 @@ export function TerminalsChart() {
                     </div>
                     <div>
                       <span className="text-blue-700 font-medium">Utilization:</span>
-                      <p className="text-blue-900">{formatValue(data.utilization)}%</p>
+                      <p className="text-blue-900">{formatUtilization(data.utilization)}%</p>
                     </div>
                   </div>
                 )

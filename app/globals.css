@@ -10,6 +10,16 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Hide scrollbar for synchronized scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer base {
@@ -90,5 +100,54 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Force proper viewport behavior */
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    font-size: 16px;
+  }
+  
+  /* Prevent zoom on form inputs */
+  input, select, textarea {
+    font-size: 16px;
+  }
+  
+  /* Force containers to respect viewport */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Responsive container utilities */
+  .responsive-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Timeline responsive utilities */
+  .timeline-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+  
+  .timeline-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .timeline-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .timeline-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .timeline-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 }

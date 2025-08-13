@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTodayLocalRange, calculateDelayMinutes, extractLocalHour } from '@/lib/timezone-utils'
-import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
+import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
+import { getAmsterdamDateString } from '@/lib/amsterdam-time'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get today's date in YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0]
+    // Get today's date in Amsterdam timezone (YYYY-MM-DD)
+    const today = getAmsterdamDateString()
 
     // Prepare Schiphol API configuration for KLM departures
     const apiConfig = {
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
+    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
 
     console.log(`📊 DELAY TRENDS: Processing ${filteredFlights.length} flights`)
 

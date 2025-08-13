@@ -4,12 +4,14 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react"
+import { useClientData } from "@/lib/client-utils"
 import React from "react"
 
 interface RouteDelayData {
   destination: string
   destinationName: string
   totalFlights: number
+  departedFlights: number
   onTimeFlights: number
   delayedFlights: number
   avgDelay: number
@@ -27,29 +29,20 @@ interface ApiResponse {
 }
 
 export function RouteDelayTable() {
-  const [data, setData] = useState<ApiResponse | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchRouteDelayData = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/route-analytics/delays')
-        if (!response.ok) {
-          throw new Error('Failed to fetch route delay data')
-        }
-        const result = await response.json()
-        setData(result)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
-      } finally {
-        setLoading(false)
-      }
+  const fetchRouteDelayData = async (): Promise<ApiResponse> => {
+    const response = await fetch('/api/route-analytics/delays')
+    if (!response.ok) {
+      throw new Error('Failed to fetch route delay data')
     }
+    return await response.json()
+  }
 
-    fetchRouteDelayData()
-  }, [])
+  const { data, loading, backgroundLoading, error } = useClientData(
+    fetchRouteDelayData,
+    { routes: [] } as ApiResponse,
+    [], // No dependencies
+    2.5 * 60 * 1000 // Auto-refresh every 2.5 minutes
+  )
 
   const getPerformanceColor = (percentage: number) => {
     if (percentage >= 80) return "text-green-600"
@@ -81,9 +74,9 @@ export function RouteDelayTable() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <div key={index} className="grid grid-cols-6 gap-2 items-center p-3 border rounded-lg animate-pulse">
-                <div className="flex items-center space-x-2 col-span-2">
+            {Array.from({ length: 15 }).map((_, index) => (
+              <div key={index} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-lg animate-pulse">
+                <div className="flex items-center space-x-2 col-span-3">
                   <div className="w-8 h-8 bg-gray-300 rounded"></div>
                   <div>
                     <p className="font-medium text-sm cursor-default">...</p>
@@ -93,7 +86,12 @@ export function RouteDelayTable() {
                 <div className="text-center">...</div>
                 <div className="text-center">...</div>
                 <div className="text-center">...</div>
-                <div className="flex flex-col items-end space-y-1">...</div>
+                <div className="text-center">...</div>
+                <div className="text-center">...</div>
+                <div className="text-center">...</div>
+                <div className="text-center">...</div>
+                <div className="text-center">...</div>
+                <div className="col-span-2 text-center">...</div>
               </div>
             ))}
           </div>
@@ -144,24 +142,28 @@ export function RouteDelayTable() {
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="w-5 h-5" />
           Route Delay Performance
+          {backgroundLoading && (
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse ml-2" title="Updating data..." />
+          )}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">Top 10 routes by flight volume</p>
+        <p className="text-sm text-muted-foreground">Top 15 routes by flight volume (auto-refreshes every 2.5min)</p>
       </CardHeader>
       <CardContent>
         {/* Desktop grid */}
-        <div className="hidden md:grid grid-cols-9 gap-2 px-2 mb-2 text-xs font-semibold text-muted-foreground">
-          <div className="col-span-2">Destination</div>
+        <div className="hidden md:grid grid-cols-12 gap-2 px-2 mb-2 text-xs font-semibold text-muted-foreground">
+          <div className="col-span-3">Destination</div>
           <div className="text-center">On Time</div>
           <div className="text-center">Delayed</div>
+          <div className="text-center">Departed</div>
           <div className="text-center">Avg Delay</div>
           <div className="text-center">Median</div>
-          <div className="text-center">% >15m</div>
+          <div className="text-center">% {'>'}15m</div>
           <div className="text-center">Earliest</div>
           <div className="text-center">Latest</div>
-          <div className="text-center">Flights</div>
+          <div className="col-span-2 text-center">Flights</div>
         </div>
         {/* Card list, scrollable */}
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="space-y-2 max-h-[500px] overflow-y-auto">
           {data.routes.map((route) => {
             const delaySeverity = getDelaySeverity(route.avgDelay)
             return (
@@ -169,18 +171,22 @@ export function RouteDelayTable() {
                 {/* Desktop grid row */}
                 <div
                   key={route.destination + '-desktop'}
-                  className="hidden md:grid grid-cols-9 gap-2 items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-default"
+                  className="hidden md:grid grid-cols-12 gap-2 items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-default"
                 >
                   {/* Destination info */}
-                  <div className="flex items-center space-x-3 col-span-2 min-w-0">
+                  <div className="flex items-center space-x-3 col-span-3 min-w-0">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-sm font-semibold text-blue-600 cursor-default truncate">
+                      <span className="text-sm font-semibold text-blue-600 cursor-default">
                         {route.destination}
                       </span>
                     </div>
-                    <div className="truncate min-w-0">
-                      <p className="font-medium text-sm cursor-default truncate max-w-[7ch]" title={route.destinationName}>{route.destinationName}</p>
-                      <p className="text-xs text-muted-foreground cursor-default truncate">{route.totalFlights} flights</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm cursor-default break-words" title={route.destinationName}>
+                        {route.destinationName}
+                      </p>
+                      <p className="text-xs text-muted-foreground cursor-default">
+                        {route.totalFlights} flights
+                      </p>
                     </div>
                   </div>
                   {/* On Time */}
@@ -191,6 +197,10 @@ export function RouteDelayTable() {
                   {/* Delayed */}
                   <div className="text-center min-w-0">
                     <span className="text-red-600 font-semibold">{route.delayedFlights}</span>
+                  </div>
+                  {/* Departed */}
+                  <div className="text-center min-w-0">
+                    <span className="text-blue-600 font-semibold">{route.departedFlights}</span>
                   </div>
                   {/* Avg Delay */}
                   <div className="text-center min-w-0">
@@ -213,21 +223,16 @@ export function RouteDelayTable() {
                   <div className="text-center min-w-0">
                     <span className="font-mono text-xs">{route.latestDeparture ? route.latestDeparture.slice(11, 16) : '-'}</span>
                   </div>
-                  {/* Flight Numbers */}
-                  <div className="text-center min-w-0">
+                  {/* Flight Numbers - Show ALL flights with more space */}
+                  <div className="col-span-2 min-w-0 px-2">
                     {route.flightNumbers.length > 0 ? (
-                      <span
+                      <div
                         title={route.flightNumbers.join(', ')}
-                        className="text-xs font-mono cursor-pointer truncate block max-w-[8ch] sm:max-w-[16ch] md:max-w-[24ch]"
+                        className="text-xs font-mono text-left break-words leading-relaxed"
                         aria-label={`Flight numbers: ${route.flightNumbers.join(', ')}`}
                       >
-                        {route.flightNumbers.slice(0, 3).map((num, idx, arr) => (
-                          <span key={num}>
-                            {num}{idx < arr.length - 1 ? ', ' : ''}
-                          </span>
-                        ))}
-                        {route.flightNumbers.length > 3 ? ', ...' : ''}
-                      </span>
+                        {route.flightNumbers.join(', ')}
+                      </div>
                     ) : (
                       <span className="text-xs text-muted-foreground">-</span>
                     )}
@@ -240,25 +245,32 @@ export function RouteDelayTable() {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-sm font-semibold text-blue-600 cursor-default truncate">
+                      <span className="text-sm font-semibold text-blue-600 cursor-default">
                         {route.destination}
                       </span>
                     </div>
-                    <div className="truncate min-w-0">
-                      <p className="font-medium text-sm cursor-default truncate max-w-[10ch]" title={route.destinationName}>{route.destinationName}</p>
-                      <p className="text-xs text-muted-foreground cursor-default truncate">{route.totalFlights} flights</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm cursor-default break-words" title={route.destinationName}>
+                        {route.destinationName}
+                      </p>
+                      <p className="text-xs text-muted-foreground cursor-default">
+                        {route.totalFlights} flights
+                      </p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div><span className="text-green-600 font-semibold">On Time: {route.onTimeFlights}</span> <span className="text-muted-foreground">/{route.totalFlights}</span></div>
                     <div><span className="text-red-600 font-semibold">Delayed: {route.delayedFlights}</span></div>
+                    <div><span className="text-blue-600 font-semibold">Departed: {route.departedFlights}</span></div>
                     <div><span className="font-semibold">Avg: {route.avgDelay}min</span> <span className="text-muted-foreground">max {route.maxDelay}min</span></div>
                     <div><span className="font-semibold">Median: {route.medianDelay}min</span></div>
-                    <div><span className="font-semibold">% >15m: {route.percentDelayedOver15}%</span></div>
+                    <div><span className="font-semibold">% {'>'}15m: {route.percentDelayedOver15}%</span></div>
                     <div><span className="font-mono">Earliest: {route.earliestDeparture ? route.earliestDeparture.slice(11, 16) : '-'}</span></div>
                     <div><span className="font-mono">Latest: {route.latestDeparture ? route.latestDeparture.slice(11, 16) : '-'}</span></div>
                   </div>
-                  <div className="text-xs font-mono truncate" title={route.flightNumbers.join(', ')} aria-label={`Flight numbers: ${route.flightNumbers.join(', ')}`}>Flights: {route.flightNumbers.slice(0, 3).map((num, idx, arr) => (<span key={num}>{num}{idx < arr.length - 1 ? ', ' : ''}</span>))}{route.flightNumbers.length > 3 ? ', ...' : ''}</div>
+                  <div className="text-xs font-mono text-left break-words" title={route.flightNumbers.join(', ')} aria-label={`Flight numbers: ${route.flightNumbers.join(', ')}`}>
+                    <strong>Flights:</strong> {route.flightNumbers.join(', ')}
+                  </div>
                 </div>
               </React.Fragment>
             )

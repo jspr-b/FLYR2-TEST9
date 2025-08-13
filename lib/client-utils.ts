@@ -1,46 +1,107 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
-// Universal hook for handling hydration and data fetching
+// Universal hook for handling hydration and data fetching with background refresh
 export function useClientData<T>(
   fetchFunction: () => Promise<T>,
   initialData: T,
-  deps: any[] = []
+  deps: any[] = [],
+  autoRefreshInterval?: number // in milliseconds
 ) {
   const [mounted, setMounted] = useState(false)
   const [data, setData] = useState<T>(initialData)
   const [loading, setLoading] = useState(true)
+  const [backgroundLoading, setBackgroundLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Request counter to prevent race conditions
+  const requestCounterRef = useRef(0)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (isBackgroundRefresh = false) => {
+    // Increment request counter for this fetch
+    const currentRequestId = ++requestCounterRef.current
+    
     try {
-      setLoading(true)
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setBackgroundLoading(true)
+      }
       setError(null)
+      
       const result = await fetchFunction()
-      setData(result)
+      
+      // Only update state if this is still the latest request
+      if (currentRequestId === requestCounterRef.current) {
+        setData(result)
+      } else {
+        console.log(`🚫 Discarding stale response (request ${currentRequestId}, latest: ${requestCounterRef.current})`)
+      }
     } catch (err) {
-      console.error('Data fetch error:', err)
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      // Only update error state if this is still the latest request
+      if (currentRequestId === requestCounterRef.current) {
+        console.error('Data fetch error:', err)
+        setError(err instanceof Error ? err.message : 'Unknown error')
+      }
     } finally {
-      setLoading(false)
+      // Only update loading states if this is still the latest request
+      if (currentRequestId === requestCounterRef.current) {
+        if (!isBackgroundRefresh) {
+          setLoading(false)
+        } else {
+          setBackgroundLoading(false)
+        }
+      }
     }
   }
 
+  // Initial data fetch
   useEffect(() => {
     if (!mounted) return
-    fetchData()
+    fetchData(false)
   }, [mounted, ...deps])
 
-  const refetch = () => {
-    if (mounted) {
-      fetchData()
+  // Auto-refresh setup
+  useEffect(() => {
+    if (!mounted || !autoRefreshInterval) return
+
+    const interval = setInterval(() => {
+      // Background refresh - no loading state shown to user
+      fetchData(true)
+    }, autoRefreshInterval)
+
+    return () => clearInterval(interval)
+  }, [mounted, autoRefreshInterval])
+
+  // Debounced refetch to prevent rapid successive calls
+  const lastRefetchRef = useRef(0)
+  const refetch = (showLoading = false) => {
+    if (!mounted) return
+    
+    const now = Date.now()
+    const timeSinceLastRefetch = now - lastRefetchRef.current
+    
+    // Prevent refetch if called within 1 second of the last one
+    if (timeSinceLastRefetch < 1000) {
+      console.log(`⏳ Debouncing refetch (${timeSinceLastRefetch}ms since last)`)
+      return
     }
+    
+    lastRefetchRef.current = now
+    fetchData(!showLoading)
   }
 
-  return { data, loading, error, mounted, refetch }
+  return { 
+    data, 
+    loading, 
+    backgroundLoading,
+    error, 
+    mounted, 
+    refetch 
+  }
 }
 
 // Safe data accessor with fallbacks
@@ -82,10 +143,12 @@ export function formatTime(time: string | null | undefined): string {
     // Check if the date is valid
     if (isNaN(date.getTime())) return 'n/v'
     
+    // Always format in Amsterdam timezone
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
+      timeZone: 'Europe/Amsterdam'
     })
   } catch {
     return 'n/v'
@@ -95,6 +158,11 @@ export function formatTime(time: string | null | undefined): string {
 // Format value with fallback
 export function formatValue(value: number | null | undefined): string {
   return value != null ? value.toString() : 'n/v'
+}
+
+// Format utilization percentage with rounding (no decimals)
+export function formatUtilization(value: number | null | undefined): string {
+  return value != null ? Math.round(value).toString() : 'n/v'
 }
 
 // Format aircraft types for display

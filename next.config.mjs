@@ -10,9 +10,7 @@ const nextConfig = {
     unoptimized: true,
   },
   // Production optimizations
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose'],
-  },
+  serverExternalPackages: ['mongoose'],
   // Increase timeout for API routes
   serverRuntimeConfig: {
     // Will only be available on the server side
@@ -23,7 +21,6 @@ const nextConfig = {
     staticFolder: '/static',
   },
   // Optimize for Vercel
-  swcMinify: true,
   compress: true,
   poweredByHeader: false,
   // Handle environment variables

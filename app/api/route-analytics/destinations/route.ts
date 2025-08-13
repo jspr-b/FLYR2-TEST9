@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
+import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
+import { getAmsterdamDateString } from '@/lib/amsterdam-time'
 
 // European airport mapping with country information
 const europeanAirports: Record<string, { name: string, country: string }> = {
@@ -201,8 +202,8 @@ const europeanAirports: Record<string, { name: string, country: string }> = {
 
 export async function GET() {
   try {
-    // Get today's date in YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0]
+    // Get today's date in Amsterdam timezone (YYYY-MM-DD)
+    const today = getAmsterdamDateString()
 
     // Prepare Schiphol API configuration for KLM departures
     const apiConfig = {
@@ -225,6 +226,7 @@ export async function GET() {
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
+    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
 
     // Calculate destination statistics from flight data (Europe only)
     const destinationStats = calculateDestinationStats(filteredFlights)

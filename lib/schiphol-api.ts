@@ -14,9 +14,12 @@ const API_TIMEOUT = 15000 // 15 seconds (reduced from 30)
 const MAX_RETRIES = 2 // Reduced from 3
 const RETRY_DELAY = 500 // Reduced from 1000ms
 
-// Cache for API responses (10 minutes)
-const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes in milliseconds
+// Cache for API responses (2.5 minutes)
+const CACHE_DURATION = 2.5 * 60 * 1000 // 2.5 minutes in milliseconds
 const apiCache = new Map<string, { data: any; timestamp: number }>()
+
+// Track pending requests to prevent race conditions
+const pendingRequests = new Map<string, Promise<SchipholApiResponse>>()
 
 // Concurrent page fetching for better performance
 const CONCURRENT_PAGES = 3 // Fetch 3 pages at once
@@ -85,7 +88,7 @@ function isCacheValid(timestamp: number): boolean {
 }
 
 /**
- * Fetch flights from Schiphol API with 10-minute caching
+ * Fetch flights from Schiphol API with 2.5-minute caching and race condition prevention
  */
 export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<SchipholApiResponse> {
   const cacheKey = generateCacheKey(config)
@@ -97,96 +100,128 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
     return cached.data
   }
 
-  // If fetchAllPages is true, fetch all pages
-  if (config.fetchAllPages) {
-    return await fetchAllPages(config)
+  // Check if there's already a pending request for this cache key
+  const pendingRequest = pendingRequests.get(cacheKey)
+  if (pendingRequest) {
+    console.log('🔄 Waiting for pending request for:', cacheKey)
+    return await pendingRequest
   }
 
-  // Single page fetch
-  const params = new URLSearchParams()
-  
-  // Only use supported parameters
-  if (config.flightDirection) {
-    params.append('flightDirection', config.flightDirection)
-  }
-  
-  if (config.airline) {
-    params.append('airline', config.airline)
-  }
+  // Create the request promise
+  const requestPromise = (async () => {
+    try {
+      // If fetchAllPages is true, fetch all pages
+      if (config.fetchAllPages) {
+        const result = await fetchAllPages(config)
+        
+        // Cache the result
+        apiCache.set(cacheKey, {
+          data: result,
+          timestamp: Date.now()
+        })
+        
+        return result
+      }
 
-  if (config.scheduleDate) {
-    params.append('scheduleDate', config.scheduleDate)
-  }
+      // Single page fetch (existing logic continues...)
+      const params = new URLSearchParams()
+      
+      // Only use supported parameters
+      if (config.flightDirection) {
+        params.append('flightDirection', config.flightDirection)
+      }
+      
+      if (config.airline) {
+        params.append('airline', config.airline)
+      }
 
-  const apiUrl = `${SCHIPHOL_API_BASE}/flights?${params.toString()}`
-  
-  console.log('Calling Schiphol API (not cached):', apiUrl)
-  
-  // Create AbortController for timeout
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
-  
-  let response
-  try {
-    response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'app_id': SCHIPHOL_APP_ID,
-        'app_key': SCHIPHOL_APP_KEY,
-        'ResourceVersion': 'v4'
-      },
-      signal: controller.signal
-    })
-  } finally {
-    clearTimeout(timeoutId)
-  }
+      if (config.scheduleDate) {
+        params.append('scheduleDate', config.scheduleDate)
+      }
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('Schiphol API error:', response.status, response.statusText, errorText)
-    
-    // Handle specific error cases
-    if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Please try again later.')
+      const apiUrl = `${SCHIPHOL_API_BASE}/flights?${params.toString()}`
+      
+      console.log('Calling Schiphol API (not cached):', apiUrl)
+      
+      // Create AbortController for timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
+      
+      let response
+      try {
+        response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'app_id': SCHIPHOL_APP_ID,
+            'app_key': SCHIPHOL_APP_KEY,
+            'ResourceVersion': 'v4'
+          },
+          signal: controller.signal
+        })
+      } finally {
+        clearTimeout(timeoutId)
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Schiphol API error:', response.status, response.statusText, errorText)
+        
+        // Handle specific error cases
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again later.')
+        }
+        
+        if (response.status === 401) {
+          throw new Error('Invalid API credentials. Check SCHIPHOL_APP_KEY and SCHIPHOL_APP_ID environment variables.')
+        }
+        
+        if (response.status === 403) {
+          throw new Error('Access forbidden. Check API permissions.')
+        }
+        
+        if (response.status === 408 || response.status === 504) {
+          throw new Error('Request timeout. The API is taking too long to respond.')
+        }
+        
+        throw new Error(`Schiphol API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      console.log('Schiphol API response received:', {
+        flightCount: data.flights?.length || 0,
+        meta: data.meta
+      })
+
+      // Cache the response
+      apiCache.set(cacheKey, {
+        data,
+        timestamp: Date.now()
+      })
+
+      // Clean up old cache entries (older than 15 minutes)
+      const cleanupTime = Date.now() - (15 * 60 * 1000)
+      for (const [key, value] of apiCache.entries()) {
+        if (value.timestamp < cleanupTime) {
+          apiCache.delete(key)
+        }
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error fetching Schiphol flights:', error)
+      throw error
+    } finally {
+      // Always clean up the pending request when done (success or failure)
+      pendingRequests.delete(cacheKey)
     }
-    
-    if (response.status === 401) {
-      throw new Error('Invalid API credentials. Check SCHIPHOL_APP_KEY and SCHIPHOL_APP_ID environment variables.')
-    }
-    
-    if (response.status === 403) {
-      throw new Error('Access forbidden. Check API permissions.')
-    }
-    
-    if (response.status === 408 || response.status === 504) {
-      throw new Error('Request timeout. The API is taking too long to respond.')
-    }
-    
-    throw new Error(`Schiphol API error: ${response.status} ${response.statusText}`)
-  }
+  })()
 
-  const data = await response.json()
-  console.log('Schiphol API response received:', {
-    flightCount: data.flights?.length || 0,
-    meta: data.meta
-  })
+  // Add the request promise to the pending requests map
+  pendingRequests.set(cacheKey, requestPromise)
 
-  // Cache the response
-  apiCache.set(cacheKey, {
-    data,
-    timestamp: Date.now()
-  })
-
-  // Clean up old cache entries (older than 15 minutes)
-  const cleanupTime = Date.now() - (15 * 60 * 1000)
-  for (const [key, value] of apiCache.entries()) {
-    if (value.timestamp < cleanupTime) {
-      apiCache.delete(key)
-    }
-  }
-
-  return data
+  // Return the promise, which will resolve when the request completes
+  return requestPromise
 }
 
 /**
@@ -221,7 +256,7 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
     console.log(`Fetching page ${page}:`, apiUrl)
     
     // Retry logic for each page
-    let response
+    let response: Response | undefined
     let retries = 0
     
     while (retries < MAX_RETRIES) {
@@ -258,6 +293,11 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
         // Faster retry with exponential backoff
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, retries - 1)))
       }
+    }
+
+    if (!response) {
+      console.error(`No response received for page ${page}`)
+      break
     }
 
     if (!response.ok) {
@@ -441,6 +481,31 @@ export function filterFlights(
 
   console.log(`Total filtering: ${initialCount} → ${filtered.length} flights (removed ${initialCount - filtered.length} total)`)
   return filtered
+}
+
+/**
+ * Filter out flights with stale lastUpdatedAt timestamps
+ * Removes flights updated more than specified hours ago to prevent ghost flights
+ */
+export function removeStaleFlights(flights: SchipholFlight[], maxStaleHours: number = 24): SchipholFlight[] {
+  const cutoffTime = new Date(Date.now() - maxStaleHours * 60 * 60 * 1000)
+  const initialCount = flights.length
+  
+  const fresh = flights.filter(flight => {
+    if (!flight.lastUpdatedAt) return true // Keep flights without timestamp
+    
+    const lastUpdated = new Date(flight.lastUpdatedAt)
+    const isStale = lastUpdated < cutoffTime
+    
+    if (isStale) {
+      console.log(`🗑️ Filtering stale flight: ${flight.flightName} (updated ${lastUpdated.toISOString()})`)
+    }
+    
+    return !isStale
+  })
+  
+  console.log(`Stale data filter: ${initialCount} → ${fresh.length} flights (removed ${initialCount - fresh.length} stale)`)
+  return fresh
 }
 
 /**

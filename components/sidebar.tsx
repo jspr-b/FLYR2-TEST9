@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Plane, Clock, TrendingUp, LayoutDashboard, Menu, X, Route } from "lucide-react"
+import { Plane, Clock, TrendingUp, LayoutDashboard, Menu, X, Route, Building2, Activity, BarChart3 } from "lucide-react"
 import { useState } from "react"
 
 const navigation = [
@@ -10,6 +10,7 @@ const navigation = [
   { name: "Route Analytics", href: "/route-analytics", icon: Route },
   { name: "Delay Trends by Hour", href: "/delay-trends-by-hour", icon: Clock },
   { name: "Busiest Gates & Terminals", href: "/busiest-gates-and-terminals", icon: Plane },
+  { name: "Gate Activity Analysis", href: "/gate-activity", icon: Activity },
   { name: "Aircraft Type Performance", href: "/aircraft-type-delay-performance", icon: TrendingUp },
 ]
 

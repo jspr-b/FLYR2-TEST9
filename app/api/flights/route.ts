@@ -4,9 +4,11 @@ import {
   transformSchipholFlight, 
   filterFlights, 
   removeDuplicateFlights,
+  removeStaleFlights,
   getCacheStats,
   type SchipholApiConfig 
 } from '@/lib/schiphol-api'
+import { getAmsterdamDateString } from '@/lib/amsterdam-time'
 
 export async function GET(request: Request) {
   try {
@@ -48,6 +50,7 @@ export async function GET(request: Request) {
     console.log(`After filtering: ${filteredFlights.length} flights`)
     
     filteredFlights = removeDuplicateFlights(filteredFlights)
+    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
     console.log(`After deduplication: ${filteredFlights.length} flights`)
 
     // Summary of data flow
@@ -62,7 +65,7 @@ export async function GET(request: Request) {
       metadata: {
         totalCount: filteredFlights.length,
         lastUpdated: new Date().toISOString(),
-        date: (filters as any).scheduleDate || new Date().toISOString().split('T')[0],
+        date: (filters as any).scheduleDate || getAmsterdamDateString(),
         cache: getCacheStats(),
         debug: {
           originalFlightCount: allFlights.length,

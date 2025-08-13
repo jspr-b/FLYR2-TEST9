@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
+import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
 import { calculateDelayMinutes } from '@/lib/timezone-utils'
+import { getAmsterdamDateString } from '@/lib/amsterdam-time'
 
 // European airport mapping with country information
 const europeanAirports: Record<string, { name: string, country: string }> = {
@@ -197,13 +198,13 @@ const europeanAirports: Record<string, { name: string, country: string }> = {
   'VAT': { name: 'Vatican City', country: 'Vatican City' },
   
   // Liechtenstein
-  'ZRH': { name: 'Zurich', country: 'Liechtenstein' }, // Uses Zurich airport
+  // Note: Liechtenstein uses Zurich airport (ZRH) which is already defined for Switzerland
 }
 
 export async function GET() {
   try {
-    // Get today's date in YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0]
+    // Get today's date in Amsterdam timezone (YYYY-MM-DD)
+    const today = getAmsterdamDateString()
 
     // Prepare Schiphol API configuration for KLM departures
     const apiConfig = {
@@ -226,6 +227,7 @@ export async function GET() {
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
+    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
 
     // Calculate route delay statistics from flight data (Europe only)
     const routeDelays = calculateRouteDelays(filteredFlights)
@@ -283,14 +285,19 @@ function calculateRouteDelays(flights: any[]) {
         flight.scheduleDateTime,
         flight.publicEstimatedOffBlockTime
       )
+      const flightState = flight.publicFlightState?.flightStates?.[0] || 'UNKNOWN'
       return {
         flight,
         delayMinutes,
         isOnTime: delayMinutes <= 0,
         scheduleDateTime: flight.scheduleDateTime,
-        flightName: flight.flightName
+        flightName: flight.flightName,
+        flightState
       }
     })
+
+    // Count departed flights (DEP state)
+    const departedFlights = delays.filter(d => d.flightState === 'DEP').length
 
     // Median delay
     const sortedDelays = delays.map(d => d.delayMinutes).sort((a, b) => a - b)
@@ -314,7 +321,7 @@ function calculateRouteDelays(flights: any[]) {
     const earliestDeparture = sortedByTime[0] || null
     const latestDeparture = sortedByTime[sortedByTime.length - 1] || null
 
-    // Flight numbers (show up to 3, but return all)
+    // Flight numbers (return all)
     const flightNumbers = Array.from(new Set(delays.map(d => d.flightName))).filter(Boolean)
 
     const onTimeFlights = delays.filter(d => d.isOnTime).length
@@ -333,6 +340,7 @@ function calculateRouteDelays(flights: any[]) {
       destination: code,
       destinationName: data.name,
       totalFlights,
+      departedFlights, // NEW: Count of flights that have departed
       onTimeFlights,
       delayedFlights,
       avgDelay: Math.round(avgDelay * 10) / 10, // Round to 1 decimal
@@ -350,6 +358,6 @@ function calculateRouteDelays(flights: any[]) {
   routes.sort((a, b) => b.totalFlights - a.totalFlights)
 
   return {
-    routes: routes.slice(0, 10) // Return top 10 routes
+    routes: routes.slice(0, 15) // Return top 15 routes by flight volume
   }
 } 

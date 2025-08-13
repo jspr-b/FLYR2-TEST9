@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(claude-code --list-models)",
+      "Bash(npm update:*)"
+    ],
+    "deny": []
+  }
+}

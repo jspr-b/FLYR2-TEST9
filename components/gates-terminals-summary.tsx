@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Building2, DoorOpen, Plane, TrendingUp } from "lucide-react"
+import { formatUtilization } from "@/lib/client-utils"
 
 interface SummaryStat {
   label: string
@@ -12,17 +13,25 @@ interface SummaryStat {
   bgColor: string
 }
 
-interface FlightData {
-  flightName: string
-  flightNumber: number
-  gate: string
+interface GateOccupancyData {
+  gateID: string
   pier: string
-  publicFlightState: {
-    flightStates: string[]
+  gateType: string
+  scheduledFlights: any[]
+  utilization: {
+    current: number
+    daily: number
+    temporalStatus: string
+    logical: number
   }
-  aircraftType: {
-    iataMain: string
-    iataSub: string
+}
+
+interface GateOccupancyResponse {
+  gates: GateOccupancyData[]
+  summary: {
+    totalGates: number
+    statusBreakdown: Record<string, number>
+    averageUtilization: number
   }
 }
 
@@ -34,74 +43,71 @@ export function GatesTerminalsSummary() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const today = new Date().toISOString().split('T')[0]
-        const response = await fetch(`/api/flights?filters=%7B%22flightDirection%22%3A%22D%22%2C%22scheduleDate%22%3A%22${today}%22%2C%22isOperationalFlight%22%3Atrue%2C%22prefixicao%22%3A%22KL%22%7D`)
+        // Fetch from the temporal-aware gate occupancy API
+        const response = await fetch('/api/gate-occupancy')
         if (!response.ok) {
-          throw new Error('Failed to fetch flights data')
+          throw new Error('Failed to fetch gate occupancy data')
         }
         
-        const data = await response.json()
-        const flights: FlightData[] = data.flights || []
+        const data: GateOccupancyResponse = await response.json()
+        const gates = data.gates || []
         
-        // Calculate statistics from real flight data
-        const gates = new Set(flights.filter(f => f.gate).map(f => f.gate))
-        const piers = new Set(flights.filter(f => f.pier).map(f => f.pier))
+        // Only count gates that are physically occupied (not approaching or departed)
+        const activeGates = data.summary.statusBreakdown?.OCCUPIED || 0
         
-        // Count flights per pier
-        const pierFlights = flights.reduce((acc, flight) => {
-          if (flight.pier) {
-            acc[flight.pier] = (acc[flight.pier] || 0) + 1
+        // Get unique piers
+        const piers = new Set(gates.map(gate => gate.pier).filter(Boolean))
+        
+        // Calculate flights by Schengen/Non-Schengen
+        let schengenFlights = 0
+        let nonSchengenFlights = 0
+        let totalFlights = 0
+        
+        gates.forEach(gate => {
+          const flightCount = gate.utilization.logical || 0
+          totalFlights += flightCount
+          
+          // Determine Schengen vs Non-Schengen based on gate classification
+          const isSchengenGate = (gateID: string, pier: string) => {
+            if (!gateID || !pier) return false
+            
+            // Pier D has both Schengen and Non-Schengen gates
+            if (pier === 'D') {
+              const gateNumber = parseInt(gateID.replace(/\D/g, ''))
+              // D59-D87 are Schengen (upper level)
+              return gateNumber >= 59 && gateNumber <= 87
+            }
+            
+            // Other piers: A, B, C are Schengen; E, F, G, H, M are Non-Schengen
+            const schengenPiers = ['A', 'B', 'C']
+            return schengenPiers.includes(pier)
           }
-          return acc
-        }, {} as Record<string, number>)
-        
-        // Find busiest pier
-        const busiestPier = Object.entries(pierFlights).reduce((max, [pier, count]) => 
-          count > max.count ? { pier, count } : max, 
-          { pier: 'None', count: 0 }
-        )
-        
-        // Determine Schengen vs Non-Schengen based on actual Schiphol gate mapping
-        const isSchengenGate = (gate: string, pier: string) => {
-          if (!gate || !pier) return false
           
-          // Pier D has both Schengen and Non-Schengen gates
-          if (pier === 'D') {
-            const gateNumber = parseInt(gate.replace(/\D/g, '')) // Extract number from gate
-            // D59-D87 are Schengen (upper level)
-            return gateNumber >= 59 && gateNumber <= 87
+          if (isSchengenGate(gate.gateID, gate.pier)) {
+            schengenFlights += flightCount
+          } else {
+            nonSchengenFlights += flightCount
           }
-          
-          // Other piers: A, B, C are Schengen; E, F, G, H, M are Non-Schengen
-          const schengenPiers = ['A', 'B', 'C']
-          const nonSchengenPiers = ['E', 'F', 'G', 'H', 'M']
-          
-          if (schengenPiers.includes(pier)) return true
-          if (nonSchengenPiers.includes(pier)) return false
-          
-          return false // Unknown pier
-        }
+        })
         
-        const schengenFlights = flights.filter(f => isSchengenGate(f.gate, f.pier)).length
-        const nonSchengenFlights = flights.filter(f => !isSchengenGate(f.gate, f.pier) && f.pier).length
-        const otherFlights = flights.filter(f => !f.pier).length
+        // Calculate average utilization from current utilization
+        const avgUtilization = Math.round(data.summary.averageUtilization || 0)
         
-        // Summary of flight distribution
-        console.log('Flight Distribution:')
-        console.log('- Total flights:', flights.length)
+        // Log temporal awareness
+        console.log('🕒 Temporal Gate Analysis:')
+        console.log('- Total gates:', gates.length)
+        console.log('- Occupied gates (physically active):', activeGates)
+        console.log('- Gates in DEAD_ZONE:', gates.filter(g => g.utilization.temporalStatus === 'DEAD_ZONE').length)
+        console.log('- Current avg utilization:', formatUtilization(avgUtilization) + '%')
+        console.log('- Total scheduled flights:', totalFlights)
         console.log('- Schengen flights:', schengenFlights)
         console.log('- Non-Schengen flights:', nonSchengenFlights)
-        console.log('- Flights without pier info:', otherFlights)
-        console.log('- Verification:', schengenFlights + nonSchengenFlights + otherFlights, '=', flights.length)
-        
-        // Calculate average utilization (simplified - assuming 100% if gate has flights)
-        const avgUtilization = gates.size > 0 ? Math.round((flights.length / gates.size) * 10) : 0
-        
+
         const summaryStats: SummaryStat[] = [
           {
             label: "Active Gates",
-            value: gates.size.toString(),
-            change: `${piers.size} piers`,
+            value: activeGates.toString(),
+            change: `${piers.size} piers operational`,
             icon: Building2,
             color: "text-blue-600",
             bgColor: "bg-blue-50",
@@ -109,7 +115,7 @@ export function GatesTerminalsSummary() {
           {
             label: "Schengen Flights",
             value: schengenFlights.toString(),
-            change: `${avgUtilization}% avg`,
+            change: `${formatUtilization(avgUtilization)}% current utilization`,
             icon: DoorOpen,
             color: "text-green-600",
             bgColor: "bg-green-50",
@@ -117,15 +123,15 @@ export function GatesTerminalsSummary() {
           {
             label: "Non-Schengen Flights",
             value: nonSchengenFlights.toString(),
-            change: `${otherFlights} no pier`,
+            change: `${gates.length - activeGates} gates idle`,
             icon: TrendingUp,
             color: "text-purple-600",
             bgColor: "bg-purple-50",
           },
           {
             label: "Total Flights",
-            value: flights.length.toString(),
-            change: `${schengenFlights + nonSchengenFlights + otherFlights} verified`,
+            value: totalFlights.toString(),
+            change: `${schengenFlights + nonSchengenFlights} verified`,
             icon: Plane,
             color: "text-orange-600",
             bgColor: "bg-orange-50",
@@ -134,13 +140,13 @@ export function GatesTerminalsSummary() {
 
         setSummaryStats(summaryStats)
       } catch (error) {
-        console.error("Error fetching summary data:", error)
+        console.error("Error fetching gate occupancy data:", error)
         // Fallback to placeholder data
         const fallbackStats: SummaryStat[] = [
           {
             label: "Active Gates",
-            value: "n/v",
-            change: "n/v",
+            value: "0",
+            change: "system error",
             icon: Building2,
             color: "text-blue-600",
             bgColor: "bg-blue-50",
@@ -148,7 +154,7 @@ export function GatesTerminalsSummary() {
           {
             label: "Schengen Flights",
             value: "n/v",
-            change: "n/v",
+            change: "system error",
             icon: DoorOpen,
             color: "text-green-600",
             bgColor: "bg-green-50",
@@ -156,7 +162,7 @@ export function GatesTerminalsSummary() {
           {
             label: "Non-Schengen Flights",
             value: "n/v",
-            change: "n/v",
+            change: "system error",
             icon: TrendingUp,
             color: "text-purple-600",
             bgColor: "bg-purple-50",
@@ -164,7 +170,7 @@ export function GatesTerminalsSummary() {
           {
             label: "Total Flights",
             value: "n/v",
-            change: "n/v",
+            change: "system error",
             icon: Plane,
             color: "text-orange-600",
             bgColor: "bg-orange-50",

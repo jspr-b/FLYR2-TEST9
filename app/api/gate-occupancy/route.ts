@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights } from '@/lib/schiphol-api'
+import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
+import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
 
 // Gate occupancy status definitions
 type GateOccupancyStatus = 
-  | 'AVAILABLE'     // No current flight assigned
-  | 'OCCUPIED'      // Flight currently at gate (BOARDING, ON_TIME, DELAYED)
-  | 'DEPARTED'      // Flight recently departed
-  | 'APPROACHING'   // Flight scheduled soon
-  | 'CONFLICT'      // Multiple flights assigned overlapping times
+  | 'DAY_USE_ACCESS' // Gate has flights scheduled today but not currently active
+  | 'OCCUPIED'       // Flight currently at gate (BOARDING, ON_TIME, DELAYED)
+  | 'DEPARTED'       // Flight recently departed
+  | 'APPROACHING'    // Flight scheduled soon
+  | 'CONFLICT'       // Multiple flights assigned overlapping times
   | 'MAINTENANCE'   // Gate closed for maintenance
   | 'UNKNOWN'       // Status cannot be determined
 
@@ -26,7 +27,7 @@ const FLIGHT_STATE_MAPPING = {
   // Approaching/scheduled
   'SCH': 'APPROACHING', // Flight Scheduled
   'DEL': 'APPROACHING', // Delayed
-  'GCH': 'APPROACHING', // Gate Change
+  'GCH': 'APPROACHING', // Gate Change (overridden by determineGateStatus for complex scenarios)
   
   // Special states
   'CNX': 'AVAILABLE',   // Cancelled
@@ -138,8 +139,15 @@ function classifyGateType(gate: string, pier: string): 'SCHENGEN' | 'NON_SCHENGE
 }
 
 // Determine current gate status based on flight states and timing
+// Enhanced logic: Checks ALL flight states, not just primary state
+// Priority order: Active gate states > Departed > Gate changes > Primary state mapping
+// 
+// Examples:
+// - Flight with SCH (primary), GCH, GTO → Returns OCCUPIED (gate is open)
+// - Flight with SCH (primary), GCH only → Returns APPROACHING (gate change)
+// - Flight with DEL (primary), BRD → Returns OCCUPIED (boarding active)
 function determineGateStatus(flights: any[], currentTime: Date): GateOccupancyStatus {
-  if (flights.length === 0) return 'AVAILABLE'
+  if (flights.length === 0) return 'DAY_USE_ACCESS'
   
   // Sort by schedule time to get current/next flight
   const sortedFlights = flights.sort((a, b) => 
@@ -151,11 +159,33 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
     const scheduleTime = new Date(flight.scheduleDateTime)
     const timeDiffMinutes = (scheduleTime.getTime() - currentTime.getTime()) / (1000 * 60)
     
-    // Get primary flight state
-    const primaryState = flight.publicFlightState?.flightStates?.[0]
+    // Get all flight states, not just primary
+    const flightStates = flight.publicFlightState?.flightStates || []
+    const primaryState = flightStates[0]
     if (!primaryState) continue
     
-    // Map flight state to gate status
+    // Enhanced logic: Check for active gate states regardless of primary state
+    // Priority: Active gate states > Gate changes > Primary state mapping
+    
+    // First, check for any active gate states (these override everything)
+    const occupiedStates = ['BRD', 'GTO', 'GCL', 'GTD', 'WIL']
+    for (const state of occupiedStates) {
+      if (flightStates.includes(state)) {
+        return 'OCCUPIED' // Active gate state found
+      }
+    }
+    
+    // Check for departed state
+    if (flightStates.includes('DEP') && timeDiffMinutes > -60) {
+      return 'DEPARTED' // Recently departed
+    }
+    
+    // Check for gate change (when no active states found)
+    if (flightStates.includes('GCH') && timeDiffMinutes <= 120) {
+      return 'APPROACHING' // Gate change without active states
+    }
+    
+    // Fall back to standard mapping for primary state
     const mappedStatus = FLIGHT_STATE_MAPPING[primaryState as keyof typeof FLIGHT_STATE_MAPPING]
     
     if (mappedStatus === 'OCCUPIED') return 'OCCUPIED'
@@ -163,7 +193,7 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
     if (mappedStatus === 'APPROACHING' && timeDiffMinutes <= 120) return 'APPROACHING' // Within 2 hours
   }
   
-  return 'AVAILABLE'
+  return 'DAY_USE_ACCESS'
 }
 
 // Hub gates like D6, E21, G1 have subgates and can handle multiple flights simultaneously
@@ -260,9 +290,13 @@ function calculateCurrentUtilization(flights: any[], currentTime: Date): number 
     return timeDiffHours <= OPERATIONAL_WINDOW_HOURS
   })
   
-  const physicallyActiveFlights = activeFlights.filter(flight => 
-    ['BRD', 'GTO', 'GCL', 'GTD', 'DEP'].includes(flight.publicFlightState?.flightStates?.[0])
-  )
+  const physicallyActiveFlights = activeFlights.filter(flight => {
+    const flightStates = flight.publicFlightState?.flightStates || []
+    
+    // Check for any physically active states regardless of primary state
+    const physicalStates = ['BRD', 'GTO', 'GCL', 'GTD', 'DEP']
+    return physicalStates.some((state: string) => flightStates.includes(state))
+  })
   
   return physicallyActiveFlights.length > 0 ? 
     Math.min(100, (physicallyActiveFlights.length / 3) * 100) : 0
@@ -280,17 +314,26 @@ function calculateDailyCapacity(flights: any[]): number {
 
 function determinePhysicalActivity(flights: any[]): 'NONE' | 'BOARDING' | 'DEPARTING' | 'TURNAROUND' | 'OCCUPIED' {
   const activeFlights = flights.filter(flight => {
-    const state = flight.publicFlightState?.flightStates?.[0]
-    return ['BRD', 'GTO', 'GCL', 'GTD', 'DEP'].includes(state)
+    const flightStates = flight.publicFlightState?.flightStates || []
+    
+    // Check for any active states regardless of primary state
+    const activeStates = ['BRD', 'GTO', 'GCL', 'GTD', 'DEP']
+    return activeStates.some(state => flightStates.includes(state))
   })
   
   if (activeFlights.length === 0) return 'NONE'
   
-  const states = activeFlights.map(flight => flight.publicFlightState?.flightStates?.[0])
+  // Collect all active states from active flights
+  const allStates = activeFlights.flatMap(flight => {
+    const flightStates = flight.publicFlightState?.flightStates || []
+    
+    // Return all active states found in this flight
+    return flightStates.filter((state: string) => ['BRD', 'GTO', 'GCL', 'GTD', 'DEP'].includes(state))
+  })
   
-  if (states.includes('BRD') || states.includes('GTO')) return 'BOARDING'
-  if (states.includes('DEP')) return 'DEPARTING'
-  if (states.includes('GCL') || states.includes('GTD')) return 'OCCUPIED'
+  if (allStates.includes('BRD') || allStates.includes('GTO')) return 'BOARDING'
+  if (allStates.includes('DEP')) return 'DEPARTING'
+  if (allStates.includes('GCL') || allStates.includes('GTD')) return 'OCCUPIED'
   
   return 'TURNAROUND'
 }
@@ -298,8 +341,11 @@ function determinePhysicalActivity(flights: any[]): 'NONE' | 'BOARDING' | 'DEPAR
 function determineTemporalStatus(currentTime: Date, flights: any[]): 'DEAD_ZONE' | 'PRE_OPERATIONAL' | 'ACTIVE' | 'POST_OPERATIONAL' {
   // Check for active flights first
   const activeFlights = flights.filter(flight => {
-    const state = flight.publicFlightState?.flightStates?.[0]
-    return ['BRD', 'GTO', 'GCL', 'GTD', 'DEP'].includes(state)
+    const flightStates = flight.publicFlightState?.flightStates || []
+    
+    // Check for any active states regardless of primary state
+    const activeStates = ['BRD', 'GTO', 'GCL', 'GTD', 'DEP']
+    return activeStates.some((state: string) => flightStates.includes(state))
   })
   
   if (activeFlights.length > 0) return 'ACTIVE'
@@ -369,8 +415,9 @@ function createTemporalContext(currentTime: Date, flights: any[]): TemporalConte
 
 export async function GET(request: NextRequest) {
   try {
-    const currentTime = new Date()
-    const today = currentTime.toISOString().split('T')[0]
+    // Use Amsterdam time for all calculations to match Schiphol API data
+    const currentTime = getCurrentAmsterdamTime()
+    const today = getTodayAmsterdam()
     
     console.log(`🔍 GATE OCCUPANCY ANALYSIS for ${today}`)
     console.log('=' .repeat(60))
@@ -395,6 +442,7 @@ export async function GET(request: NextRequest) {
     
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
+    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
 
     console.log(`📊 Processing ${filteredFlights.length} flights for gate occupancy analysis`)
 
@@ -412,13 +460,47 @@ export async function GET(request: NextRequest) {
     // Process each gate
     const gateOccupancyData: EnhancedGateOccupancyData[] = []
     
-    for (const [gateID, gateFlights] of gateFlightsMap.entries()) {
+    for (const [gateID, gateFlights] of Array.from(gateFlightsMap.entries())) {
       if (gateID === 'UNASSIGNED') continue // Skip unassigned flights for gate analysis
       
-      const scheduledFlights = gateFlights.map(flight => ({
-        flightName: flight.flightName,
-        flightNumber: flight.flightNumber,
-        scheduleDateTime: flight.scheduleDateTime,
+      const scheduledFlights = gateFlights.map(flight => {
+        // Determine the best estimated departure time first
+        let estimatedDateTime = flight.publicEstimatedOffBlockTime
+        
+        // Check if flight has delay state
+        const flightStates = flight.publicFlightState?.flightStates || []
+        const hasDelayState = flightStates.includes('DEL')
+        
+        // If flight is marked as delayed but no estimated time from API, we need to calculate it
+        if (hasDelayState && !estimatedDateTime) {
+          // Check if there's any delay information in the flight data
+          const delayInfo = flight.delay || flight.delayMinutes || flight.publicFlightState?.delay
+          let estimatedDelayMinutes = 0
+          
+          if (delayInfo && typeof delayInfo === 'number') {
+            estimatedDelayMinutes = delayInfo
+          } else if (delayInfo && typeof delayInfo === 'string') {
+            // Try to parse delay from string format like "26min" or "1h 30m"
+            const delayMatch = delayInfo.match(/(\d+)/)
+            estimatedDelayMinutes = delayMatch ? parseInt(delayMatch[1]) : 30 // Default 30min
+          } else {
+            // Default delay for flights marked as delayed but no specific info
+            estimatedDelayMinutes = 30
+          }
+          
+          const scheduled = new Date(flight.scheduleDateTime)
+          estimatedDateTime = new Date(scheduled.getTime() + estimatedDelayMinutes * 60 * 1000).toISOString()
+        }
+        
+        // Calculate actual delay minutes for display purposes
+        const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime)
+        
+        return {
+          flightName: flight.flightName,
+          flightNumber: flight.flightNumber,
+          scheduleDateTime: flight.scheduleDateTime,
+          estimatedDateTime: estimatedDateTime || null,
+          actualDateTime: flight.actualOffBlockTime || null,
         aircraftType: flight.aircraftType?.iataMain || flight.aircraftType?.iataSub || 'UNKNOWN',
         destination: flight.route?.destinations?.[0] || 'UNKNOWN',
         gate: flight.gate || gateID,
@@ -428,19 +510,25 @@ export async function GET(request: NextRequest) {
           FLIGHT_STATE_DESCRIPTIONS[state] || state) || [],
         primaryState: flight.publicFlightState?.flightStates?.[0] || 'UNKNOWN',
         primaryStateReadable: FLIGHT_STATE_DESCRIPTIONS[flight.publicFlightState?.flightStates?.[0] as keyof typeof FLIGHT_STATE_DESCRIPTIONS] || 'Unknown',
-        delayMinutes: calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime || flight.scheduleDateTime),
-        delayFormatted: (() => {
-          const delay = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime || flight.scheduleDateTime);
-          return delay > 0 ? `${Math.floor(delay / 60)}h ${delay % 60}m` : '0m';
-        })(),
-        isDelayed: flight.publicFlightState?.flightStates?.[0] === 'DEL' || calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime || flight.scheduleDateTime) > 15,
-        lastUpdated: flight.lastUpdatedAt
-      }))
+          delayMinutes: calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime),
+          delayFormatted: (() => {
+            const delay = calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime);
+            return delay > 0 ? `${Math.floor(delay / 60)}h ${delay % 60}m` : '0m';
+          })(),
+          delayReason: flight.publicFlightState?.delayReason || 'Reason not specified',
+          isDelayed: flight.publicFlightState?.flightStates?.[0] === 'DEL' || calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime) > 15,
+          lastUpdated: flight.lastUpdatedAt
+        }
+      })
       
       const status = determineGateStatus(gateFlights, currentTime)
-      const occupyingFlight = gateFlights.find(flight => 
-        ['BRD', 'GTO', 'GCL', 'GTD', 'WIL'].includes(flight.publicFlightState?.flightStates?.[0])
-      )
+      const occupyingFlight = gateFlights.find(flight => {
+        const flightStates = flight.publicFlightState?.flightStates || []
+        
+        // Check for any active gate states regardless of primary state
+        const occupiedStates = ['BRD', 'GTO', 'GCL', 'GTD', 'WIL']
+        return occupiedStates.some(state => flightStates.includes(state))
+      })
       const pier = gateFlights[0]?.pier || 'UNKNOWN'
       const gateType = classifyGateType(gateID, pier)
       const utilization = createEnhancedUtilization(gateFlights, currentTime)
@@ -475,19 +563,98 @@ export async function GET(request: NextRequest) {
       return acc
     }, {} as Record<string, number>)
 
+    // Calculate active piers (piers that have at least one OCCUPIED gate)
+    const activePiers = new Set<string>()
+    const allPiers = new Set<string>()
+    
+    gateOccupancyData.forEach(gate => {
+      allPiers.add(gate.pier)
+      if (gate.status === 'OCCUPIED') {
+        activePiers.add(gate.pier)
+      }
+    })
+
+    // Calculate KLM operational footprint vs total Schiphol
+    const TOTAL_SCHIPHOL_GATES = 223 // Based on Schiphol documentation
+    const TOTAL_SCHIPHOL_PIERS = 8 // B, C, D, E, F, G, H, M
+    const klmOperationalFootprint = Math.round((gateOccupancyData.length / TOTAL_SCHIPHOL_GATES) * 100)
+    
+    // Calculate pier utilization with Pier D split by Schengen/Non-Schengen
+    const pierUtilization = Array.from(allPiers).flatMap(pier => {
+      const pierGates = gateOccupancyData.filter(gate => gate.pier === pier)
+      
+      if (pier === 'D') {
+        // Split Pier D into Schengen and Non-Schengen zones
+        const nonSchengenGates = pierGates.filter(gate => {
+          const gateNum = parseInt(gate.gateID.replace('D', ''))
+          return gateNum <= 57
+        })
+        const schengenGates = pierGates.filter(gate => {
+          const gateNum = parseInt(gate.gateID.replace('D', ''))
+          return gateNum > 57
+        })
+        
+        return [
+          {
+            pier: 'D-Non-Schengen',
+            gates: nonSchengenGates.length,
+            flights: nonSchengenGates.reduce((sum, gate) => sum + gate.utilization.logical, 0),
+            avgUtilization: nonSchengenGates.length > 0 ? 
+              Math.round(nonSchengenGates.reduce((sum, gate) => sum + gate.utilization.current, 0) / nonSchengenGates.length) : 0
+          },
+          {
+            pier: 'D-Schengen',
+            gates: schengenGates.length,
+            flights: schengenGates.reduce((sum, gate) => sum + gate.utilization.logical, 0),
+            avgUtilization: schengenGates.length > 0 ? 
+              Math.round(schengenGates.reduce((sum, gate) => sum + gate.utilization.current, 0) / schengenGates.length) : 0
+          }
+        ]
+      } else {
+        // Other piers remain unchanged
+        const pierFlights = pierGates.reduce((sum, gate) => sum + gate.utilization.logical, 0)
+        return [{
+          pier,
+          gates: pierGates.length,
+          flights: pierFlights,
+          avgUtilization: pierGates.length > 0 ? 
+            Math.round(pierGates.reduce((sum, gate) => sum + gate.utilization.current, 0) / pierGates.length) : 0
+        }]
+      }
+    }).sort((a, b) => b.flights - a.flights)
+
     const summary = {
+      // Existing metrics
       totalGates: gateOccupancyData.length,
+      totalPiers: allPiers.size,
+      activePiers: activePiers.size,
+      activePiersList: Array.from(activePiers).sort(),
       statusBreakdown: statusCounts,
       averageUtilization: Math.round(
         gateOccupancyData.reduce((sum, gate) => sum + gate.utilization.current, 0) / gateOccupancyData.length
       ),
       delayedFlights: delayedFlightsAnalysis.summary,
+      
+      // Enhanced context metrics
+      schipholContext: {
+        totalSchipholGates: TOTAL_SCHIPHOL_GATES,
+        totalSchipholPiers: TOTAL_SCHIPHOL_PIERS,
+        klmOperationalFootprint: klmOperationalFootprint,
+        klmGatesUsedToday: gateOccupancyData.length,
+        unusedSchipholGates: TOTAL_SCHIPHOL_GATES - gateOccupancyData.length,
+        pierUtilization: pierUtilization,
+        busiestPier: pierUtilization[0]?.pier || 'N/A',
+        totalFlightsHandled: gateOccupancyData.reduce((sum, gate) => sum + gate.utilization.logical, 0)
+      },
+      
       lastAnalyzed: currentTime.toISOString(),
       dataSource: 'SCHIPHOL_API_SYSTEM_DERIVED'
     }
 
     console.log('\n📊 GATE OCCUPANCY SUMMARY:')
     console.log(`  • Total Gates Analyzed: ${summary.totalGates}`)
+    console.log(`  • Total Piers: ${summary.totalPiers}`)
+    console.log(`  • Active Piers: ${summary.activePiers} (${summary.activePiersList.join(', ')})`)
     console.log(`  • Status Breakdown:`, statusCounts)
     console.log(`  • Average Utilization: ${summary.averageUtilization}%`)
     console.log(`  • Delayed Flights: ${delayedFlightsAnalysis.summary.totalDelayedFlights}`)

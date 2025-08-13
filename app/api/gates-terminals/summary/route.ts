@@ -11,118 +11,73 @@ const BUS_GATES = [
 
 export async function GET(request: NextRequest) {
   try {
-    const today = new Date().toISOString().split('T')[0]
-
-    const apiConfig = {
-      flightDirection: 'D' as const,
-      airline: 'KL',
-      scheduleDate: today,
-      fetchAllPages: true
-    }
-
-    const schipholData = await fetchSchipholFlights(apiConfig)
-    const allFlights = (schipholData.flights || []).map(transformSchipholFlight)
-
-    const filters = {
-      flightDirection: 'D' as const,
-      scheduleDate: today,
-      isOperationalFlight: true,
-      prefixicao: 'KL'
-    }
-    let filteredFlights = filterFlights(allFlights, filters)
-    filteredFlights = removeDuplicateFlights(filteredFlights)
-
-    console.log(`📊 GATES/TERMINALS: Processing ${filteredFlights.length} flights`)
-
-    // Group flights by gate
-    const gateMap = new Map<string, any[]>()
-    const pierMap = new Map<string, any[]>()
+    // Fetch data from the gate occupancy API instead of duplicating logic
+    const response = await fetch('http://localhost:3000/api/gate-occupancy')
+    if (!response.ok) throw new Error('Failed to fetch gate occupancy data')
     
-    filteredFlights.forEach(flight => {
-      const gate = flight.gate || 'Not Assigned Yet'
-      const pier = flight.pier || 'Unknown'
-      
-      if (!gateMap.has(gate)) {
-        gateMap.set(gate, [])
+    const data = await response.json()
+    
+    // Calculate bus gate statistics from the new API structure
+    const gateData = data.gates?.map((gate: any) => ({
+      gate: gate.gateID,
+      pier: gate.pier,
+      flights: gate.utilization.logical,
+      aircraftTypes: gate.scheduledFlights?.map((f: any) => f.aircraftType).filter(Boolean) || [],
+      lastActivity: gate.scheduledFlights?.length > 0 ? 
+        gate.scheduledFlights[gate.scheduledFlights.length - 1].scheduleDateTime : null,
+      utilization: gate.utilization.current,
+      isBusGate: BUS_GATES.includes(gate.gateID),
+      status: gate.utilization.temporalStatus === 'DEAD_ZONE' ? 'Available' : 
+              gate.utilization.temporalStatus === 'ACTIVE' ? 'Busy' : 'Moderate',
+      nextFlight: gate.scheduledFlights?.length > 0 ? gate.scheduledFlights[0].flightName : 'None'
+    })).sort((a: any, b: any) => b.flights - a.flights) || []
+
+    // Calculate pier statistics
+    const pierMap = new Map<string, any>()
+    gateData.forEach((gate: any) => {
+      if (!pierMap.has(gate.pier)) {
+        pierMap.set(gate.pier, { pier: gate.pier, flights: 0, utilization: 0 })
       }
-      gateMap.get(gate)!.push(flight)
-      
-      if (!pierMap.has(pier)) {
-        pierMap.set(pier, [])
-      }
-      pierMap.get(pier)!.push(flight)
+      const pierData = pierMap.get(gate.pier)!
+      pierData.flights += gate.flights
+      pierData.utilization = Math.min(100, (pierData.flights / 20) * 100)
     })
 
-    // Calculate gate data with proper last activity
-    const gateData = Array.from(gateMap.entries()).map(([gate, gateFlights]) => {
-      const totalFlights = gateFlights.length
-      const isBusGate = BUS_GATES.some(busGate => gate.startsWith(busGate))
-      
-      // Calculate last activity as the most recent flight departure time
-      const sortedFlights = gateFlights.sort((a, b) => 
-        new Date(b.scheduleDateTime).getTime() - new Date(a.scheduleDateTime).getTime()
-      )
-      const lastFlight = sortedFlights[0]
-      const lastActivity = lastFlight ? lastFlight.scheduleDateTime : null
-      
-      // Get aircraft types from all flights at this gate
-      const aircraftTypes = [...new Set(
-        gateFlights
-          .map(f => f.aircraftType?.iataSub || f.aircraftType?.iataMain)
-          .filter(Boolean)
-      )]
-      
-      // Calculate utilization (flights per hour over 16-hour operational day)
-      const utilization = Math.min(100, (totalFlights / 16) * 100)
-      
-      return {
-        gate,
-        pier: gateFlights[0]?.pier || 'Unknown',
-        flights: totalFlights,
-        aircraftTypes,
-        lastActivity,
-        utilization: Math.round(utilization),
-        isBusGate,
-        status: totalFlights > 10 ? 'Busy' : totalFlights > 5 ? 'Moderate' : 'Available',
-        nextFlight: lastFlight?.flightName || 'None'
-      }
-    }).sort((a, b) => b.flights - a.flights)
-
-    // Calculate pier data
-    const pierData = Array.from(pierMap.entries()).map(([pier, pierFlights]) => ({
-      pier,
-      flights: pierFlights.length,
-      utilization: Math.min(100, (pierFlights.length / 20) * 100)
-    })).sort((a, b) => b.flights - a.flights)
+    const pierData = Array.from(pierMap.values()).sort((a, b) => b.flights - a.flights)
 
     // Calculate summary statistics
-    const totalFlights = filteredFlights.length
+    const totalFlights = data.gates?.reduce((sum: number, gate: any) => 
+      sum + (gate.utilization.logical || 0), 0) || 0
+    
     const busGateFlights = gateData
-      .filter(g => g.isBusGate)
-      .reduce((sum, g) => sum + g.flights, 0)
+      .filter((g: any) => g.isBusGate)
+      .reduce((sum: number, g: any) => sum + g.flights, 0)
 
     console.log('\n🔍 Gate Distribution Analysis:')
     console.log('=' .repeat(50))
-    
-    // Log bus gate details
     console.log('\nBus Gate Distribution:')
     gateData
-      .filter(g => g.isBusGate)
-      .forEach(g => {
+      .filter((g: any) => g.isBusGate)
+      .forEach((g: any) => {
         console.log(`${g.gate}: ${g.flights} flights, last activity: ${g.lastActivity ? new Date(g.lastActivity).toLocaleTimeString() : 'none'}`)
       })
     
     console.log('\nSummary:')
     console.log(`Total Flights: ${totalFlights}`)
     console.log(`Bus Gate Flights: ${busGateFlights}`)
-    console.log(`Bus Gate Percentage: ${((busGateFlights / totalFlights) * 100).toFixed(1)}%`)
+    console.log(`Bus Gate Percentage: ${totalFlights > 0 ? ((busGateFlights / totalFlights) * 100).toFixed(1) : 0}%`)
     console.log('=' .repeat(50))
 
     return NextResponse.json({
       summary: {
+        totalGates: data.summary.totalGates || 0,
+        totalPiers: data.summary.totalPiers || 0,
+        activePiers: data.summary.activePiers || 0,
+        activePiersList: data.summary.activePiersList || [],
+        activeGates: data.summary.statusBreakdown?.OCCUPIED || 0,
         totalFlights,
         busGateFlights,
-        busGatePercentage: (busGateFlights / totalFlights) * 100
+        busGatePercentage: totalFlights > 0 ? (busGateFlights / totalFlights) * 100 : 0
       },
       pierData,
       gateData

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ArrowUpDown, Plane, Clock, AlertTriangle, Bus, Eye, X, RefreshCw } from "lucide-react"
-import { useClientData, normalizeGateData, formatTime, formatValue, formatAircraftTypes } from "@/lib/client-utils"
+import { useClientData, normalizeGateData, formatTime, formatValue, formatAircraftTypes, formatUtilization } from "@/lib/client-utils"
 
 // Known bus gates from the provided information
 const BUS_GATES = [
@@ -28,7 +28,6 @@ const EMPTY_GATE_DATA: GateData[] = []
 
 export function GatesTable() {
   const [showAllGates, setShowAllGates] = useState(false)
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [sortConfig, setSortConfig] = useState<{
     key: keyof GateData
     direction: 'ascending' | 'descending'
@@ -49,7 +48,13 @@ export function GatesTable() {
       status: gate.utilization.temporalStatus === 'DEAD_ZONE' ? 'Inactive' : 
               gate.utilization.temporalStatus === 'ACTIVE' ? 'Active' : 'Inactive',
       lastActivity: gate.scheduledFlights?.length > 0 ? 
-        gate.scheduledFlights[gate.scheduledFlights.length - 1].scheduleDateTime : null,
+        (() => {
+          const lastFlight = gate.scheduledFlights[gate.scheduledFlights.length - 1]
+          // Use estimated time if flight is delayed, otherwise use scheduled time
+          return lastFlight.isDelayed && lastFlight.estimatedDateTime 
+            ? lastFlight.estimatedDateTime 
+            : lastFlight.scheduleDateTime
+        })() : null,
       utilization: gate.utilization.current, // Use current utilization, not daily
       pier: gate.pier,
       isBusGate: BUS_GATES.includes(gate.gateID),
@@ -60,23 +65,24 @@ export function GatesTable() {
     return transformedData
   }
 
-  const { data: gateData, loading, mounted, refetch } = useClientData(
+  const { data: gateData, loading, backgroundLoading, mounted, refetch } = useClientData(
     fetchGates,
-    EMPTY_GATE_DATA
+    EMPTY_GATE_DATA,
+    [], // No dependencies
+    2.5 * 60 * 1000 // Auto-refresh every 2.5 minutes
   )
 
-  // Auto-refresh every 10 minutes to catch new gate assignments
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch()
-      setLastRefresh(new Date())
-    }, 10 * 60 * 1000) // 10 minutes
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
 
-    return () => clearInterval(interval)
-  }, [refetch])
+  // Update lastRefresh when data changes
+  useEffect(() => {
+    if (mounted && !loading) {
+      setLastRefresh(new Date())
+    }
+  }, [gateData, mounted, loading])
 
   const handleManualRefresh = () => {
-    refetch()
+    refetch(true) // Show loading state for manual refresh
     setLastRefresh(new Date())
   }
 
@@ -122,7 +128,8 @@ export function GatesTable() {
   }
 
   const renderGateRow = (gate: GateData, index: number) => {
-    const displayAircraftTypes = formatAircraftTypes(gate.aircraftTypes)
+    // Get unique aircraft types only (no duplicates)
+    const uniqueAircraftTypes = [...new Set(gate.aircraftTypes)].filter(Boolean)
     
     return (
       <tr key={`${gate.gate}-${index}`} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-default">
@@ -139,20 +146,24 @@ export function GatesTable() {
         </td>
         <td className="py-3 px-2">
           <div className="flex flex-wrap gap-1">
-            {displayAircraftTypes.length > 0 ? (
-              displayAircraftTypes.slice(0, 3).map((type, typeIndex) => (
-                <span
-                  key={typeIndex}
-                  className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
-                >
-                  {type}
-                </span>
-              ))
+            {uniqueAircraftTypes.length > 0 ? (
+              <>
+                {uniqueAircraftTypes.slice(0, 2).map((type, typeIndex) => (
+                  <span
+                    key={typeIndex}
+                    className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                  >
+                    {type}
+                  </span>
+                ))}
+                {uniqueAircraftTypes.length > 2 && (
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                    +{uniqueAircraftTypes.length - 2}
+                  </span>
+                )}
+              </>
             ) : (
-              <span className="text-gray-400 text-sm">n/v</span>
-            )}
-            {displayAircraftTypes.length > 3 && (
-              <span className="text-xs text-gray-500">+{displayAircraftTypes.length - 3}</span>
+              <span className="text-xs text-gray-500">No data</span>
             )}
           </div>
         </td>
@@ -177,7 +188,7 @@ export function GatesTable() {
                 style={{ width: `${Math.min(100, gate.utilization)}%` }}
               />
             </div>
-            <span className="text-sm text-gray-600">{formatValue(gate.utilization)}%</span>
+            <span className="text-sm text-gray-600">{formatUtilization(gate.utilization)}%</span>
           </div>
         </td>
         <td className="py-3 px-2">
@@ -222,6 +233,9 @@ export function GatesTable() {
               <div className="flex items-center gap-3">
                 <Plane className="h-5 w-5 text-blue-600" />
                 <h2 className="text-lg font-semibold text-gray-900">Gate Activity</h2>
+                {backgroundLoading && (
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" title="Auto-refreshing data..." />
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -248,10 +262,11 @@ export function GatesTable() {
                 Real-time gate utilization and status {!showAllGates && sortedData.length > 10 && `(showing top 10 of ${sortedData.length})`}
               </p>
               <p className="text-xs text-gray-500">
-                Last updated: {lastRefresh.toLocaleTimeString('en-US', { 
-                  hour: '2-digit', 
+                Last updated: {lastRefresh.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
                   minute: '2-digit',
-                  hour12: false 
+                  hour12: false,
+                  timeZone: 'Europe/Amsterdam'
                 })}
               </p>
             </div>
