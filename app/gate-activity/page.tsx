@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useClientData } from "@/lib/client-utils"
 import { Sidebar } from "@/components/sidebar"
 import { GateGanttChart } from "@/components/gate-gantt-chart"
-import { Activity } from "lucide-react"
+import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock } from "lucide-react"
 
 interface GateActivityData {
   summary: {
@@ -353,23 +353,110 @@ export default function GateActivityPage() {
                   <p className="text-xs text-gray-600">Current flight phases</p>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    {Object.entries(processedData?.flightStates || {}).slice(0, 5).map(([state, count]) => (
-                      <div key={state} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded border ${
-                            state === 'BRD' ? 'bg-green-500 border-green-700' :
-                            state === 'GTO' ? 'bg-blue-500 border-blue-700' :
-                            state === 'DEP' ? 'bg-gray-500 border-gray-700' :
-                            state === 'SCH' ? 'bg-purple-500 border-purple-700' :
-                            state === 'DEL' ? 'bg-red-400 border-red-600' :
-                            'bg-gray-400 border-gray-600'
-                          }`} />
-                          <span className="text-sm font-medium">{state}</span>
-                        </div>
-                        <span className="text-lg font-semibold">{count}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    {Object.entries(processedData?.flightStates || {})
+                      .sort(([, a], [, b]) => b - a)
+                      .slice(0, 5)
+                      .map(([state, count]) => {
+                        const total = Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)
+                        const percentage = Math.round((count / total) * 100)
+                        
+                        const stateConfig = {
+                          SCH: { 
+                            label: 'Scheduled', 
+                            color: 'bg-purple-500', 
+                            bgColor: 'bg-purple-100',
+                            iconColor: 'text-purple-600',
+                            Icon: Calendar,
+                            description: 'Awaiting departure'
+                          },
+                          DEP: { 
+                            label: 'Departed', 
+                            color: 'bg-gray-500', 
+                            bgColor: 'bg-gray-100',
+                            iconColor: 'text-gray-600',
+                            Icon: Plane,
+                            description: 'Left the gate'
+                          },
+                          BRD: { 
+                            label: 'Boarding', 
+                            color: 'bg-green-500', 
+                            bgColor: 'bg-green-100',
+                            iconColor: 'text-green-600',
+                            Icon: Users,
+                            description: 'Passengers boarding'
+                          },
+                          GCL: { 
+                            label: 'Gate Closed', 
+                            color: 'bg-orange-500', 
+                            bgColor: 'bg-orange-100',
+                            iconColor: 'text-orange-600',
+                            Icon: DoorClosed,
+                            description: 'Gate closed'
+                          },
+                          GTO: { 
+                            label: 'Gate Open', 
+                            color: 'bg-blue-500', 
+                            bgColor: 'bg-blue-100',
+                            iconColor: 'text-blue-600',
+                            Icon: DoorOpen,
+                            description: 'Gate is open'
+                          },
+                          DEL: { 
+                            label: 'Delayed', 
+                            color: 'bg-red-500', 
+                            bgColor: 'bg-red-100',
+                            iconColor: 'text-red-600',
+                            Icon: Clock,
+                            description: 'Flight delayed'
+                          }
+                        }
+                        
+                        const config = stateConfig[state] || {
+                          label: state,
+                          color: 'bg-gray-400',
+                          bgColor: 'bg-gray-100',
+                          iconColor: 'text-gray-600',
+                          Icon: Activity,
+                          description: state
+                        }
+                        
+                        return (
+                          <div key={state} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg ${config.bgColor} flex items-center justify-center`}>
+                                  <config.Icon className={`w-5 h-5 ${config.iconColor}`} />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm">{config.label}</div>
+                                  <div className="text-xs text-gray-500">{config.description}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold">{count}</div>
+                                <div className="text-xs text-gray-500">{percentage}%</div>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div 
+                                className={`${config.color} h-1.5 rounded-full transition-all duration-500`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                  
+                  {/* Total flights indicator */}
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>Total active flights</span>
+                      <span className="font-semibold text-gray-900">
+                        {Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
