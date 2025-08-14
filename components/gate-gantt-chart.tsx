@@ -50,6 +50,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   // Synchronized scrolling refs
   const headerScrollRef = useRef<HTMLDivElement>(null)
   const contentScrollRef = useRef<HTMLDivElement>(null)
+  
+  // Modal-specific ref for full-screen unified scrolling
+  const modalContentScrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -62,7 +65,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     return () => clearInterval(interval)
   }, [])
 
-  // Synchronized scrolling effect
+  // Synchronized scrolling effect for main view
   useEffect(() => {
     const headerEl = headerScrollRef.current
     const contentEl = contentScrollRef.current
@@ -86,6 +89,8 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       contentEl.removeEventListener('scroll', contentToHeader)
     }
   }, [mounted])
+
+  // Modal uses unified scrolling - no separate synchronization needed
 
   // Determine if flight is Intra-European (Schengen/EU) vs Intercontinental
   const isIntraEuropean = (destination: string): boolean => {
@@ -430,22 +435,191 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     setHoveredPosition(null)
   }
 
-  const handleFlightClick = (flight: any) => {
-    setSelectedFlight(flight)
+  const handleFlightClick = (flight: any, gate?: any) => {
+    // Enhance flight data with gate information including pier
+    const enhancedFlight = {
+      ...flight,
+      pier: gate?.pier || flight.pier || 'N/A'
+    }
+    setSelectedFlight(enhancedFlight)
     setIsDialogOpen(true)
   }
 
   // Render Gantt chart content - reusable for both normal and full screen views
   const renderGanttContent = (isFullScreen = false) => {
-    const containerClass = isFullScreen 
-      ? "w-full h-full flex flex-col" 
-      : "w-full"
-    const headerClass = isFullScreen 
-      ? "sticky top-0 bg-white z-10 border-b border-gray-200" 
-      : "sticky top-0 bg-white z-10 border-b border-gray-200"
-    const contentClass = isFullScreen 
-      ? "flex-1 overflow-auto border-t-0" 
-      : "max-h-96 overflow-auto border-t-0"
+    if (isFullScreen) {
+      // Modal version - unified scrolling
+      return (
+        <div className="w-full h-full overflow-auto" ref={modalContentScrollRef}>
+          <div className="min-w-fit">
+            {/* Time Header - Part of scrollable content */}
+            <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
+              <div className="flex min-w-fit">
+                {timeSlots.map((slot, index) => (
+                  <div 
+                    key={index} 
+                    className="flex flex-col items-center justify-center border-l border-gray-200 py-3 bg-gray-50 flex-shrink-0"
+                    style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                  >
+                    <span className="font-medium text-xs whitespace-nowrap">
+                      {slot.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: 'Europe/Amsterdam'
+                      })}
+                    </span>
+                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                      AMS {slot.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Gates Content */}
+            <div className="min-w-fit">{processedGateData.map((gate) => (
+              <div key={gate.gateID} className="border-b border-gray-100 last:border-b-0">
+                {/* Gate Label Row - Sticky Left */}
+                <div className="flex items-center py-2 px-3 bg-gray-50 border-b border-gray-200 sticky left-0 z-10 shadow-sm">
+                  <div className="w-16 text-sm font-medium text-gray-900 flex-shrink-0">
+                    {gate.gateID}
+                  </div>
+                  <div className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                    Pier {gate.pier} • {gate.flights.length} flight{gate.flights.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                
+                {/* Timeline Bar - Responsive Height Based on Stacks */}
+                <div 
+                  className="relative bg-white flex border-b border-gray-100"
+                  style={{ 
+                    height: `${Math.max(48, ((gate as any).flightStacks?.length || 0) * 36 + 12)}px`
+                  }}
+                >
+                  {/* Grid lines - Responsive Width */}
+                  {timeSlots.map((_, index) => (
+                    <div 
+                      key={index} 
+                      className="border-l border-gray-200 flex-shrink-0 relative" 
+                      style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                    />
+                  ))}
+                  
+                  {/* Flight Stacks - Positioned Absolutely */}
+                  <div className="absolute inset-0">
+                    {((gate as any).flightStacks || []).map((stack: any[], stackIndex: number) => (
+                      <React.Fragment key={stackIndex}>
+                      {stack.map((flight, flightIndex) => {
+                        const timeline = getFlightTimeline(flight)
+                        const barDuration = timeline.endTime.getTime() - timeline.startTime.getTime()
+                        
+                        // Calculate positions for both scheduled and actual departure times
+                        const scheduledDepartureOffset = timeline.scheduledTime.getTime() - timeline.startTime.getTime()
+                        const scheduledDeparturePercent = (scheduledDepartureOffset / barDuration) * 100
+                        
+                        const actualDepartureOffset = timeline.actualDepartureTime.getTime() - timeline.startTime.getTime()
+                        const actualDeparturePercent = (actualDepartureOffset / barDuration) * 100
+                        
+                        // Calculate vertical position based on stack index
+                        const barHeight = 30 // Reduced from 32 to leave 6px gap between stacks
+                        const barTop = 6 + (stackIndex * 36)
+                        
+                        return (
+                          <div
+                            key={`${stackIndex}-${flightIndex}`}
+                            className={`absolute rounded border cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:z-10 ${getStatusColor(flight)}`}
+                            style={{
+                              ...getFlightBarStyle(flight),
+                              top: `${barTop}px`,
+                              height: `${barHeight}px`
+                            }}
+                            onMouseEnter={(e) => handleFlightHover(flight, e)}
+                            onMouseLeave={handleFlightLeave}
+                            onMouseMove={(e) => setHoveredPosition({ x: e.clientX, y: e.clientY })}
+                            onClick={() => handleFlightClick(flight, gate)}
+                          >
+                            <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
+                              {flight.flightName}
+                            </div>
+                            
+                            {/* Departure Time Indicators */}
+                            {timeline.isTimelineShifted ? (
+                              <>
+                                {/* Original scheduled time (dashed) */}
+                                <div 
+                                  className="absolute top-1 bottom-1 w-0.5 bg-gray-300/60 border-l-2 border-dashed border-gray-400"
+                                  style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
+                                  title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
+                                />
+                                {/* New estimated time (solid) */}
+                                <div 
+                                  className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-sm"
+                                  style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
+                                  title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
+                                />
+                              </>
+                            ) : (
+                              /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
+                              <div 
+                                className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
+                                style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
+                                title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
+                              />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </React.Fragment>
+                  ))}
+                  
+                    {/* Current Time Indicator - Simple Line */}
+                    {(() => {
+                      const { position, isVisible } = getCurrentTimePosition()
+                      
+                      if (!isVisible) return null
+                      
+                      return (
+                        <div
+                          className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20"
+                          style={{ left: `${position}%`, transform: 'translateX(-0.5px)' }}
+                        />
+                      )
+                    })()}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* No Data State */}
+            {processedGateData.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Plane className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                {showAllGates ? (
+                  <div>
+                    <p>No gates available</p>
+                    <p className="text-xs">No gate data found</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p>No gates with upcoming flights in the selected time range</p>
+                    <p className="text-xs">Try selecting a longer time range or toggle "Show all gates"</p>
+                  </div>
+                )}
+              </div>
+            )}</div>
+          </div>
+        </div>
+      )
+    }
+
+    // Main component version - synchronized scrolling
+    const containerClass = "w-full"
+    const headerClass = "sticky top-0 bg-white z-10 border-b border-gray-200"
+    const contentClass = "max-h-96 overflow-auto border-t-0"
 
     return (
       <div className={containerClass}>
@@ -547,7 +721,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                             onMouseEnter={(e) => handleFlightHover(flight, e)}
                             onMouseLeave={handleFlightLeave}
                             onMouseMove={(e) => setHoveredPosition({ x: e.clientX, y: e.clientY })}
-                            onClick={() => handleFlightClick(flight)}
+                            onClick={() => handleFlightClick(flight, gate)}
                           >
                             <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
                               {flight.flightName}
@@ -1007,7 +1181,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Pier:</span>
-                        <span className="font-medium">{selectedFlight.pier || 'N/A'}</span>
+                        <span className="font-medium">{selectedFlight.pier}</span>
                       </div>
                     </div>
                   </div>
@@ -1126,6 +1300,38 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                             />
                           </>
                         )}
+                        {/* Current Time Indicator */}
+                        {(() => {
+                          const currentTimeOffset = currentTime.getTime() - timeline.startTime.getTime()
+                          const totalDuration = timeline.endTime.getTime() - timeline.startTime.getTime()
+                          const currentTimePercent = (currentTimeOffset / totalDuration) * 100
+                          
+                          // Debug logging
+                          console.log('Dialog Timeline Debug:', {
+                            currentTime: currentTime.toISOString(),
+                            startTime: timeline.startTime.toISOString(),
+                            endTime: timeline.endTime.toISOString(),
+                            currentTimePercent,
+                            flight: selectedFlight?.flightName
+                          })
+                          
+                          // Show indicator if current time is within a reasonable range (extend beyond exact bounds)
+                          if (currentTimePercent >= -10 && currentTimePercent <= 110) {
+                            return (
+                              <div 
+                                className="absolute top-0 bottom-0 w-1 bg-red-500 z-30 shadow-lg"
+                                style={{ left: `${Math.max(0, Math.min(100, currentTimePercent))}%` }}
+                                title={`Current Time: ${currentTime.toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  hour12: false,
+                                  timeZone: 'Europe/Amsterdam'
+                                })} AMS (${currentTimePercent.toFixed(1)}%)`}
+                              />
+                            )
+                          }
+                          return null
+                        })()}
                       </div>
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Gate Opens</span>
