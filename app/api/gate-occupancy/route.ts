@@ -419,7 +419,10 @@ export async function GET(request: NextRequest) {
     const currentTime = getCurrentAmsterdamTime()
     const today = getTodayAmsterdam()
     
-    console.log(`🔍 GATE OCCUPANCY ANALYSIS for ${today}`)
+    // Check if this is a background refresh
+    const isBackgroundRefresh = request.headers.get('X-Background-Refresh') === 'true'
+    
+    console.log(`🔍 GATE OCCUPANCY ANALYSIS for ${today} (Background: ${isBackgroundRefresh})`)
     console.log('=' .repeat(60))
 
     // Fetch today's flights
@@ -427,7 +430,8 @@ export async function GET(request: NextRequest) {
       flightDirection: 'D' as const,
       airline: 'KL',
       scheduleDate: today,
-      fetchAllPages: true
+      fetchAllPages: true,
+      isBackgroundRefresh
     }
 
     const schipholData = await fetchSchipholFlights(apiConfig)

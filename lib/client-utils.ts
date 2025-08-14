@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 
 // Universal hook for handling hydration and data fetching with background refresh
 export function useClientData<T>(
-  fetchFunction: () => Promise<T>,
+  fetchFunction: (isBackgroundRefresh?: boolean) => Promise<T>,
   initialData: T,
   deps: any[] = [],
   autoRefreshInterval?: number // in milliseconds
@@ -12,9 +12,13 @@ export function useClientData<T>(
   const [loading, setLoading] = useState(true)
   const [backgroundLoading, setBackgroundLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [backgroundError, setBackgroundError] = useState<string | null>(null)
   
   // Request counter to prevent race conditions
   const requestCounterRef = useRef(0)
+  
+  // Track if we've successfully loaded data at least once
+  const hasLoadedOnceRef = useRef(false)
 
   useEffect(() => {
     setMounted(true)
@@ -27,24 +31,46 @@ export function useClientData<T>(
     try {
       if (!isBackgroundRefresh) {
         setLoading(true)
+        setError(null)
       } else {
         setBackgroundLoading(true)
+        setBackgroundError(null)
       }
-      setError(null)
       
-      const result = await fetchFunction()
+      const result = await fetchFunction(isBackgroundRefresh)
       
       // Only update state if this is still the latest request
       if (currentRequestId === requestCounterRef.current) {
         setData(result)
+        hasLoadedOnceRef.current = true
+        // Clear any previous errors on successful fetch
+        if (isBackgroundRefresh) {
+          setBackgroundError(null)
+        } else {
+          setError(null)
+        }
       } else {
         console.log(`🚫 Discarding stale response (request ${currentRequestId}, latest: ${requestCounterRef.current})`)
       }
     } catch (err) {
       // Only update error state if this is still the latest request
       if (currentRequestId === requestCounterRef.current) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
         console.error('Data fetch error:', err)
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        
+        if (isBackgroundRefresh) {
+          // For background refresh, only set backgroundError and keep showing cached data
+          setBackgroundError(errorMessage)
+          console.log('⚠️ Background refresh failed, continuing with cached data')
+        } else {
+          // For initial load, only show error if we haven't loaded successfully before
+          if (!hasLoadedOnceRef.current) {
+            setError(errorMessage)
+          } else {
+            // If we have data, show it even if refresh failed
+            setBackgroundError(errorMessage)
+          }
+        }
       }
     } finally {
       // Only update loading states if this is still the latest request
@@ -99,6 +125,7 @@ export function useClientData<T>(
     loading, 
     backgroundLoading,
     error, 
+    backgroundError,
     mounted, 
     refetch 
   }

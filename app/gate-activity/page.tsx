@@ -74,13 +74,17 @@ interface GateActivityData {
 }
 
 export default function GateActivityPage() {
-  const fetchGateActivity = async (): Promise<GateActivityData> => {
-    const response = await fetch('/api/gate-occupancy')
+  const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
+    const response = await fetch('/api/gate-occupancy', {
+      headers: {
+        'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
+      }
+    })
     if (!response.ok) throw new Error('Failed to fetch gate activity data')
     return await response.json()
   }
 
-  const { data, loading, backgroundLoading, error } = useClientData(
+  const { data, loading, backgroundLoading, error, backgroundError } = useClientData(
     fetchGateActivity,
     { summary: { totalGates: 0, totalPiers: 0, activePiers: 0, activePiersList: [], statusBreakdown: {}, averageUtilization: 0, delayedFlights: { totalDelayedFlights: 0, averageDelayMinutes: 0, totalDelayMinutes: 0, maxDelay: { minutes: 0, formatted: '', flight: null } } }, gates: [] } as GateActivityData,
     [],
@@ -191,7 +195,29 @@ export default function GateActivityPage() {
                 Real-Time Gate Status • Flight Operations • Activity Monitoring
               </p>
             </div>
-            <div className="text-center p-8 text-red-600">Error: {error}</div>
+            <div className="max-w-md mx-auto mt-8">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Unable to load gate activity data</h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>We're having trouble connecting to the flight information system. This could be due to:</p>
+                      <ul className="list-disc pl-5 mt-2 space-y-1">
+                        <li>Temporary network connectivity issues</li>
+                        <li>High system load</li>
+                        <li>Scheduled maintenance</li>
+                      </ul>
+                      <p className="mt-3">Please refresh the page to try again.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -214,6 +240,14 @@ export default function GateActivityPage() {
             <p className="text-gray-600 text-sm sm:text-base">
               Real-Time Gate Status • Flight Operations • Activity Monitoring
             </p>
+            {backgroundError && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-amber-600">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Unable to refresh data. Showing last available information.</span>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-6">

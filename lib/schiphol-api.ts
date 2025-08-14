@@ -9,8 +9,9 @@ const SCHIPHOL_APP_ID = process.env.SCHIPHOL_APP_ID || 'cfcad115'
 // Schiphol API base URL
 const SCHIPHOL_API_BASE = 'https://api.schiphol.nl/public-flights'
 
-// Production timeout settings - reduced for faster response
-const API_TIMEOUT = 15000 // 15 seconds (reduced from 30)
+// Production timeout settings - configurable based on request type
+const DEFAULT_API_TIMEOUT = 30000 // 30 seconds for better reliability
+const BACKGROUND_API_TIMEOUT = 45000 // 45 seconds for background refreshes
 const MAX_RETRIES = 2 // Reduced from 3
 const RETRY_DELAY = 500 // Reduced from 1000ms
 
@@ -30,6 +31,7 @@ export interface SchipholApiConfig {
   airline?: string
   scheduleDate?: string
   fetchAllPages?: boolean
+  isBackgroundRefresh?: boolean // Added to determine timeout duration
 }
 
 export interface SchipholFlight {
@@ -143,9 +145,10 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
       
       console.log('Calling Schiphol API (not cached):', apiUrl)
       
-      // Create AbortController for timeout
+      // Create AbortController for timeout - use longer timeout for background refresh
+      const timeout = config.isBackgroundRefresh ? BACKGROUND_API_TIMEOUT : DEFAULT_API_TIMEOUT
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
+      const timeoutId = setTimeout(() => controller.abort(), timeout)
       
       let response
       try {
@@ -261,9 +264,10 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
     
     while (retries < MAX_RETRIES) {
       try {
-        // Create AbortController for timeout
+        // Create AbortController for timeout - use longer timeout for background refresh
+        const timeout = config.isBackgroundRefresh ? BACKGROUND_API_TIMEOUT : DEFAULT_API_TIMEOUT
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
+        const timeoutId = setTimeout(() => controller.abort(), timeout)
         
         try {
           response = await fetch(apiUrl, {
