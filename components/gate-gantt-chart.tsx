@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, Fragment } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Clock, Plane, Calendar } from "lucide-react"
+import { Clock, Plane, Calendar, Maximize2, X, Eye } from "lucide-react"
 import { TimeHeader } from './timeline/TimeHeader'
 import { GateRow } from './timeline/GateRow'
 import { Legend } from './timeline/Legend'
@@ -45,6 +45,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   const [mounted, setMounted] = useState(false)
   const [selectedFlight, setSelectedFlight] = useState<any>(null) // For dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isFullScreenOpen, setIsFullScreenOpen] = useState(false)
   
   // Synchronized scrolling refs
   const headerScrollRef = useRef<HTMLDivElement>(null)
@@ -401,18 +402,22 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     }
   }
 
-  // Calculate current time position
+  // Calculate current time position with enhanced precision
   const getCurrentTimePosition = () => {
-    const now = currentTime // Use the state that updates every minute
+    const now = currentTime // Use the state that updates every 30 seconds
     const startTime = timeSlots[0]
     const endTime = timeSlots[timeSlots.length - 1]
     
-    if (!startTime || !endTime) return 0
+    if (!startTime || !endTime) return { position: 0, isVisible: false }
     
     const totalDuration = endTime.getTime() - startTime.getTime()
     const currentOffset = now.getTime() - startTime.getTime()
     
-    return Math.max(0, Math.min(100, (currentOffset / totalDuration) * 100))
+    // Check if current time is within the visible timeline
+    const isVisible = currentOffset >= 0 && currentOffset <= totalDuration
+    const position = Math.max(0, Math.min(100, (currentOffset / totalDuration) * 100))
+    
+    return { position, isVisible }
   }
 
   const handleFlightHover = (flight: any, event: React.MouseEvent) => {
@@ -428,6 +433,195 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   const handleFlightClick = (flight: any) => {
     setSelectedFlight(flight)
     setIsDialogOpen(true)
+  }
+
+  // Render Gantt chart content - reusable for both normal and full screen views
+  const renderGanttContent = (isFullScreen = false) => {
+    const containerClass = isFullScreen 
+      ? "w-full h-full flex flex-col" 
+      : "w-full"
+    const headerClass = isFullScreen 
+      ? "sticky top-0 bg-white z-10 border-b border-gray-200" 
+      : "sticky top-0 bg-white z-10 border-b border-gray-200"
+    const contentClass = isFullScreen 
+      ? "flex-1 overflow-auto border-t-0" 
+      : "max-h-96 overflow-auto border-t-0"
+
+    return (
+      <div className={containerClass}>
+        {/* Time Header - Synchronized with content */}
+        <div className={headerClass}>
+          <div 
+            ref={headerScrollRef}
+            className="overflow-x-auto scrollbar-hide"
+          >
+            <div className="flex min-w-fit">
+              {timeSlots.map((slot, index) => (
+                <div 
+                  key={index} 
+                  className="flex flex-col items-center justify-center border-l border-gray-200 py-3 bg-gray-50 flex-shrink-0"
+                  style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                >
+                  <span className="font-medium text-xs whitespace-nowrap">
+                    {slot.toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      hour12: false,
+                      timeZone: 'Europe/Amsterdam'
+                    })}
+                  </span>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">
+                    AMS {slot.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Gates Content - Synchronized with header */}
+        <div 
+          ref={contentScrollRef}
+          className={contentClass}
+        >
+          <div className="min-w-fit">
+            {processedGateData.map((gate) => (
+              <div key={gate.gateID} className="border-b border-gray-100 last:border-b-0">
+                {/* Gate Label Row - Sticky Left */}
+                <div className="flex items-center py-2 px-3 bg-gray-50 border-b border-gray-200 sticky left-0 z-10 shadow-sm">
+                  <div className="w-16 text-sm font-medium text-gray-900 flex-shrink-0">
+                    {gate.gateID}
+                  </div>
+                  <div className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                    Pier {gate.pier} • {gate.flights.length} flight{gate.flights.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                
+                {/* Timeline Bar - Responsive Height Based on Stacks */}
+                <div 
+                  className="relative bg-white flex border-b border-gray-100"
+                  style={{ 
+                    height: `${Math.max(48, ((gate as any).flightStacks?.length || 0) * 36 + 12)}px`
+                  }}
+                >
+                  {/* Grid lines - Responsive Width */}
+                  {timeSlots.map((_, index) => (
+                    <div 
+                      key={index} 
+                      className="border-l border-gray-200 flex-shrink-0 relative" 
+                      style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                    />
+                  ))}
+                  
+                  {/* Flight Stacks - Positioned Absolutely */}
+                  <div className="absolute inset-0">
+                    {((gate as any).flightStacks || []).map((stack: any[], stackIndex: number) => (
+                      <React.Fragment key={stackIndex}>
+                      {stack.map((flight, flightIndex) => {
+                        const timeline = getFlightTimeline(flight)
+                        const barDuration = timeline.endTime.getTime() - timeline.startTime.getTime()
+                        
+                        // Calculate positions for both scheduled and actual departure times
+                        const scheduledDepartureOffset = timeline.scheduledTime.getTime() - timeline.startTime.getTime()
+                        const scheduledDeparturePercent = (scheduledDepartureOffset / barDuration) * 100
+                        
+                        const actualDepartureOffset = timeline.actualDepartureTime.getTime() - timeline.startTime.getTime()
+                        const actualDeparturePercent = (actualDepartureOffset / barDuration) * 100
+                        
+                        // Calculate vertical position based on stack index
+                        const barHeight = 30 // Reduced from 32 to leave 6px gap between stacks
+                        const barTop = 6 + (stackIndex * 36)
+                        
+                        return (
+                          <div
+                            key={`${stackIndex}-${flightIndex}`}
+                            className={`absolute rounded border cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:z-10 ${getStatusColor(flight)}`}
+                            style={{
+                              ...getFlightBarStyle(flight),
+                              top: `${barTop}px`,
+                              height: `${barHeight}px`
+                            }}
+                            onMouseEnter={(e) => handleFlightHover(flight, e)}
+                            onMouseLeave={handleFlightLeave}
+                            onMouseMove={(e) => setHoveredPosition({ x: e.clientX, y: e.clientY })}
+                            onClick={() => handleFlightClick(flight)}
+                          >
+                            <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
+                              {flight.flightName}
+                            </div>
+                            
+                            {/* Departure Time Indicators */}
+                            {timeline.isTimelineShifted ? (
+                              <>
+                                {/* Original scheduled time (dashed) */}
+                                <div 
+                                  className="absolute top-1 bottom-1 w-0.5 bg-gray-300/60 border-l-2 border-dashed border-gray-400"
+                                  style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
+                                  title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
+                                />
+                                {/* New estimated time (solid) */}
+                                <div 
+                                  className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-sm"
+                                  style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
+                                  title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
+                                />
+                              </>
+                            ) : (
+                              /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
+                              <div 
+                                className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
+                                style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
+                                title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
+                              />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </React.Fragment>
+                  ))}
+                  
+                    {/* Current Time Indicator - Simple Line */}
+                    {(() => {
+                      const { position, isVisible } = getCurrentTimePosition()
+                      
+                      if (!isVisible) return null
+                      
+                      return (
+                        <div
+                          className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20"
+                          style={{ left: `${position}%`, transform: 'translateX(-0.5px)' }}
+                        />
+                      )
+                    })()}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* No Data State */}
+            {processedGateData.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Plane className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                {showAllGates ? (
+                  <div>
+                    <p>No gates available</p>
+                    <p className="text-xs">No gate data found</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p>No gates with upcoming flights in the selected time range</p>
+                    <p className="text-xs">Try selecting a longer time range or toggle "Show all gates"</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -458,6 +652,15 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
               </button>
             </div>
             
+            {/* Full Screen Toggle */}
+            <button
+              onClick={() => setIsFullScreenOpen(true)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+            >
+              <Eye className="h-4 w-4" />
+              View All
+            </button>
+            
             {/* Dynamic Time Range Display */}
             <div className="flex items-center gap-2 text-xs text-gray-600">
               <span>Timeline:</span>
@@ -487,173 +690,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       
       <CardContent className="p-0">
         {/* Synchronized Gantt Chart Container */}
-        <div className="w-full">
-          {/* Time Header - Synchronized with content */}
-          <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
-            <div 
-              ref={headerScrollRef}
-              className="overflow-x-auto scrollbar-hide"
-            >
-              <div className="flex min-w-fit">
-                {timeSlots.map((slot, index) => (
-                  <div 
-                    key={index} 
-                    className="flex flex-col items-center justify-center border-l border-gray-200 py-3 bg-gray-50 flex-shrink-0"
-                    style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
-                  >
-                    <span className="font-medium text-xs whitespace-nowrap">
-                      {slot.toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
-                        minute: '2-digit',
-                        hour12: false,
-                        timeZone: 'Europe/Amsterdam'
-                      })}
-                    </span>
-                    <span className="text-xs text-gray-400 whitespace-nowrap">
-                      AMS {slot.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Gates Content - Synchronized with header */}
-          <div 
-            ref={contentScrollRef}
-            className="max-h-96 overflow-auto border-t-0"
-          >
-            <div className="min-w-fit">
-              {processedGateData.map((gate) => (
-                <div key={gate.gateID} className="border-b border-gray-100 last:border-b-0">
-                  {/* Gate Label Row - Sticky Left */}
-                  <div className="flex items-center py-2 px-3 bg-gray-50 border-b border-gray-200 sticky left-0 z-10 shadow-sm">
-                    <div className="w-16 text-sm font-medium text-gray-900 flex-shrink-0">
-                      {gate.gateID}
-                    </div>
-                    <div className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                      Pier {gate.pier} • {gate.flights.length} flight{gate.flights.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                  
-                  {/* Timeline Bar - Responsive Height Based on Stacks */}
-                  <div 
-                    className="relative bg-white flex border-b border-gray-100"
-                    style={{ 
-                      height: `${Math.max(48, ((gate as any).flightStacks?.length || 0) * 36 + 12)}px`
-                    }}
-                  >
-                    {/* Grid lines - Responsive Width */}
-                    {timeSlots.map((_, index) => (
-                      <div 
-                        key={index} 
-                        className="border-l border-gray-200 flex-shrink-0 relative" 
-                        style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
-                      />
-                    ))}
-                    
-                    {/* Flight Stacks - Positioned Absolutely */}
-                    <div className="absolute inset-0">
-                      {((gate as any).flightStacks || []).map((stack: any[], stackIndex: number) => (
-                        <React.Fragment key={stackIndex}>
-                        {stack.map((flight, flightIndex) => {
-                          const timeline = getFlightTimeline(flight)
-                          const barDuration = timeline.endTime.getTime() - timeline.startTime.getTime()
-                          
-                          // Calculate positions for both scheduled and actual departure times
-                          const scheduledDepartureOffset = timeline.scheduledTime.getTime() - timeline.startTime.getTime()
-                          const scheduledDeparturePercent = (scheduledDepartureOffset / barDuration) * 100
-                          
-                          const actualDepartureOffset = timeline.actualDepartureTime.getTime() - timeline.startTime.getTime()
-                          const actualDeparturePercent = (actualDepartureOffset / barDuration) * 100
-                          
-                          // Calculate vertical position based on stack index
-                          const barHeight = 30 // Reduced from 32 to leave 6px gap between stacks
-                          const barTop = 6 + (stackIndex * 36)
-                          
-                          return (
-                            <div
-                              key={`${stackIndex}-${flightIndex}`}
-                              className={`absolute rounded border cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:z-10 ${getStatusColor(flight)}`}
-                              style={{
-                                ...getFlightBarStyle(flight),
-                                top: `${barTop}px`,
-                                height: `${barHeight}px`
-                              }}
-                              onMouseEnter={(e) => handleFlightHover(flight, e)}
-                              onMouseLeave={handleFlightLeave}
-                              onMouseMove={(e) => setHoveredPosition({ x: e.clientX, y: e.clientY })}
-                              onClick={() => handleFlightClick(flight)}
-                            >
-                              <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
-                                {flight.flightName}
-                              </div>
-                              
-                              {/* Departure Time Indicators */}
-                              {timeline.isTimelineShifted ? (
-                                <>
-                                  {/* Original scheduled time (dashed) */}
-                                  <div 
-                                    className="absolute top-1 bottom-1 w-0.5 bg-gray-300/60 border-l-2 border-dashed border-gray-400"
-                                    style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
-                                    title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
-                                  />
-                                  {/* New estimated time (solid) */}
-                                  <div 
-                                    className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-sm"
-                                    style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
-                                    title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
-                                  />
-                                </>
-                              ) : (
-                                /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
-                                <div 
-                                  className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
-                                  style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
-                                  title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
-                                />
-                              )}
-                            </div>
-                          )
-                        })}
-                      </React.Fragment>
-                    ))}
-                    
-                      {/* Current Time Indicator */}
-                      <div
-                        className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20"
-                        style={{ left: `${getCurrentTimePosition()}%` }}
-                      >
-                        <div className="absolute -top-2 -left-1 w-2 h-2 bg-red-500 rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* No Data State */}
-              {processedGateData.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <Plane className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  {showAllGates ? (
-                    <div>
-                      <p>No gates available</p>
-                      <p className="text-xs">No gate data found</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p>No gates with upcoming flights in the selected time range</p>
-                      <p className="text-xs">Try selecting a longer time range or toggle "Show all gates"</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        {renderGanttContent(false)}
 
         {/* Legend - Responsive */}
         <div className="border-t pt-4 mt-4 px-4">
@@ -811,6 +848,122 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
         )
       })()}
     </Card>
+      )}
+
+      {/* Full Screen Modal */}
+      {isFullScreenOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full h-full max-w-none max-h-none flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b bg-white">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-6 w-6 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Gate Schedule Timeline - Full View</h2>
+                <span className="text-sm text-gray-500">
+                  ({processedGateData.length} gates • {processedGateData.filter(g => g.flights.length > 0).length} with flights)
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                {/* Controls in full screen */}
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-700 whitespace-nowrap">Show all gates</label>
+                  <button
+                    onClick={() => setShowAllGates(!showAllGates)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+                      showAllGates ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                        showAllGates ? 'translate-x-5' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>Timeline:</span>
+                  <span className="font-medium">
+                    {dynamicStartTime.toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      hour12: false,
+                      timeZone: 'Europe/Amsterdam'
+                    })} - {dynamicEndTime.toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      hour12: false,
+                      timeZone: 'Europe/Amsterdam'
+                    })} (AMS)
+                  </span>
+                </div>
+                
+                <button
+                  onClick={() => setIsFullScreenOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-hidden">
+              {renderGanttContent(true)}
+            </div>
+            
+            {/* Legend in full screen */}
+            <div className="border-t pt-4 pb-4 px-6 bg-gray-50">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Flight Status Legend</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 border border-green-700 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Boarding</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 border border-blue-700 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Gate Open</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 border border-yellow-700 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Gate Closing</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-500 border border-orange-700 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Gate Closed</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-500 border border-purple-700 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Scheduled</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-400 border border-red-600 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Delayed</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-gray-500 border border-gray-700 rounded flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Departed</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-0.5 h-3 bg-red-500 flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Current Time</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-0.5 h-3 bg-white border border-gray-400 flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Departure</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-0.5 h-3 bg-gray-400 border-l border-dashed border-gray-500 flex-shrink-0"></div>
+                  <span className="whitespace-nowrap">Original Time</span>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-gray-500">
+                <div className="flex items-center gap-2">
+                  <span>ℹ️</span>
+                  <span>Smart delay handling: timeline shifts or extends based on gate status</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Flight Details Dialog */}
