@@ -90,16 +90,49 @@ export function useClientData<T>(
     fetchData(false)
   }, [mounted, ...deps])
 
-  // Auto-refresh setup
+  // Auto-refresh setup with exponential backoff on errors
+  const errorCountRef = useRef(0)
+  const baseIntervalRef = useRef(autoRefreshInterval)
+  
   useEffect(() => {
     if (!mounted || !autoRefreshInterval) return
 
-    const interval = setInterval(() => {
-      // Background refresh - no loading state shown to user
-      fetchData(true)
-    }, autoRefreshInterval)
+    let currentInterval = autoRefreshInterval
+    let intervalId: NodeJS.Timeout
 
-    return () => clearInterval(interval)
+    const scheduleNextRefresh = () => {
+      // If we've had errors, use exponential backoff up to 5x the base interval
+      if (errorCountRef.current > 0) {
+        currentInterval = Math.min(
+          baseIntervalRef.current! * Math.pow(1.5, errorCountRef.current),
+          baseIntervalRef.current! * 5
+        )
+      } else {
+        currentInterval = baseIntervalRef.current!
+      }
+
+      intervalId = setTimeout(async () => {
+        // Background refresh - no loading state shown to user
+        try {
+          await fetchData(true)
+          // Reset error count on success
+          errorCountRef.current = 0
+        } catch (error) {
+          // Increment error count for backoff
+          errorCountRef.current++
+        }
+        
+        // Schedule next refresh
+        scheduleNextRefresh()
+      }, currentInterval)
+    }
+
+    // Start the refresh cycle
+    scheduleNextRefresh()
+
+    return () => {
+      if (intervalId) clearTimeout(intervalId)
+    }
   }, [mounted, autoRefreshInterval])
 
   // Debounced refetch to prevent rapid successive calls

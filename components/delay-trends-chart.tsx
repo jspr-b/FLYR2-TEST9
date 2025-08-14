@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Info, BarChart3, TrendingUp } from "lucide-react"
-import { fetchFlights } from "@/lib/api"
-import { FlightResponse } from "@/types/flight"
-import { calculateDelayMinutes, extractLocalHour } from "@/lib/timezone-utils"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 interface HourlyDelayData {
@@ -29,66 +26,14 @@ export function DelayTrendsChart() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        // Fetch real flight data with KLM filter
-        const flightsResponse = await fetchFlights({
-          flightDirection: "D",
-          scheduleDate: new Date().toISOString().split('T')[0],
-          isOperationalFlight: true,
-          prefixicao: "KL"
-        })
+        // Fetch data from the dedicated delay trends API
+        const response = await fetch('/api/delay-trends/hourly')
+        if (!response.ok) throw new Error('Failed to fetch delay trends')
         
-        const flights = flightsResponse.flights
+        const data = await response.json()
         
-        // Handle empty data gracefully
-        if (!flights || flights.length === 0) {
-          const initialHourlyDelayData: HourlyDelayData[] = [
-            { hour: "No flights", avgDelay: null, flights: 0, variance: "Low" }
-          ]
-          setHourlyDelayData(initialHourlyDelayData)
-          return
-        }
-        
-        // Calculate hourly delay data from flight data
-        const hourGroups = flights.reduce((acc, flight) => {
-          // Extract hour using corrected timezone utility
-          const scheduleHourLocal = extractLocalHour(flight.scheduleDateTime)
-          const hourKey = `${scheduleHourLocal.toString().padStart(2, '0')}:00`
-          
-          if (!acc[hourKey]) {
-            acc[hourKey] = { flights: [], delays: [] }
-          }
-          
-          acc[hourKey].flights.push(flight)
-          // Calculate delay using timezone utility
-          const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-          acc[hourKey].delays.push(delayMinutes)
-          
-          return acc
-        }, {} as Record<string, { flights: any[], delays: number[] }>)
-        
-        // Transform to chart data format
-        const hourlyData: HourlyDelayData[] = Object.entries(hourGroups).map(([hour, data]) => {
-          const avgDelay = data.delays.length > 0 ? data.delays.reduce((a, b) => a + b, 0) / data.delays.length : 0
-          
-          // Determine variance based on delay
-          let variance: "Low" | "Medium" | "High" = "Low"
-          if (avgDelay > 15) variance = "High"
-          else if (avgDelay > 5) variance = "Medium"
-          
-          return {
-            hour,
-            avgDelay: avgDelay > 0 ? avgDelay : null,
-            flights: data.flights.length,
-            variance
-          }
-        }).sort((a, b) => {
-          // Sort by hour (extract hour number for sorting)
-          const hourA = parseInt(a.hour.split(':')[0])
-          const hourB = parseInt(b.hour.split(':')[0])
-          return hourA - hourB
-        })
-        
-        setHourlyDelayData(hourlyData)
+        // Use the hourly data directly from the API
+        setHourlyDelayData(data.hourlyData || [])
       } catch (error) {
         console.error("Error fetching hourly delay data:", error)
         // Fallback to placeholder data on error

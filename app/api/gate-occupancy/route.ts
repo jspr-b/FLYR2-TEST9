@@ -4,10 +4,10 @@ import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time
 
 // Gate occupancy status definitions
 type GateOccupancyStatus = 
-  | 'DAY_USE_ACCESS' // Gate has flights scheduled today but not currently active
+  | 'SCHEDULED'      // Gate has flights scheduled today but currently idle
   | 'OCCUPIED'       // Flight currently at gate (BOARDING, ON_TIME, DELAYED)
   | 'DEPARTED'       // Flight recently departed
-  | 'APPROACHING'    // Flight scheduled soon
+  | 'PREPARING'     // Flight scheduled soon (departure prep)
   | 'CONFLICT'       // Multiple flights assigned overlapping times
   | 'MAINTENANCE'   // Gate closed for maintenance
   | 'UNKNOWN'       // Status cannot be determined
@@ -25,9 +25,9 @@ const FLIGHT_STATE_MAPPING = {
   'DEP': 'DEPARTED',    // Departed
   
   // Approaching/scheduled
-  'SCH': 'APPROACHING', // Flight Scheduled
-  'DEL': 'APPROACHING', // Delayed
-  'GCH': 'APPROACHING', // Gate Change (overridden by determineGateStatus for complex scenarios)
+  'SCH': 'PREPARING', // Flight Scheduled
+  'DEL': 'PREPARING', // Delayed
+  'GCH': 'PREPARING', // Gate Change (overridden by determineGateStatus for complex scenarios)
   
   // Special states
   'CNX': 'AVAILABLE',   // Cancelled
@@ -144,10 +144,10 @@ function classifyGateType(gate: string, pier: string): 'SCHENGEN' | 'NON_SCHENGE
 // 
 // Examples:
 // - Flight with SCH (primary), GCH, GTO → Returns OCCUPIED (gate is open)
-// - Flight with SCH (primary), GCH only → Returns APPROACHING (gate change)
+// - Flight with SCH (primary), GCH only → Returns PREPARING (gate change)
 // - Flight with DEL (primary), BRD → Returns OCCUPIED (boarding active)
 function determineGateStatus(flights: any[], currentTime: Date): GateOccupancyStatus {
-  if (flights.length === 0) return 'DAY_USE_ACCESS'
+  if (flights.length === 0) return 'SCHEDULED'
   
   // Sort by schedule time to get current/next flight
   const sortedFlights = flights.sort((a, b) => 
@@ -182,7 +182,7 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
     
     // Check for gate change (when no active states found)
     if (flightStates.includes('GCH') && timeDiffMinutes <= 120) {
-      return 'APPROACHING' // Gate change without active states
+      return 'PREPARING' // Gate change without active states
     }
     
     // Fall back to standard mapping for primary state
@@ -190,10 +190,10 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
     
     if (mappedStatus === 'OCCUPIED') return 'OCCUPIED'
     if (mappedStatus === 'DEPARTED' && timeDiffMinutes > -60) return 'DEPARTED' // Recently departed
-    if (mappedStatus === 'APPROACHING' && timeDiffMinutes <= 120) return 'APPROACHING' // Within 2 hours
+    if (mappedStatus === 'PREPARING' && timeDiffMinutes <= 120) return 'PREPARING' // Within 2 hours
   }
   
-  return 'DAY_USE_ACCESS'
+  return 'SCHEDULED'
 }
 
 // Hub gates like D6, E21, G1 have subgates and can handle multiple flights simultaneously

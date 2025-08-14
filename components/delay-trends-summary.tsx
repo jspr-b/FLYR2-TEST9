@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { AlertTriangle, Clock, Plane, TrendingUp } from "lucide-react"
-import { fetchFlights } from "@/lib/api"
-import { FlightResponse } from "@/types/flight"
-import { calculateDelayMinutes, extractLocalHour } from "@/lib/timezone-utils"
 
 interface SummaryStat {
   label: string
@@ -23,179 +20,66 @@ export function DelayTrendsSummary() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        // Fetch real flight data with KLM filter
-        const flightsResponse = await fetchFlights({
-          flightDirection: "D",
-          scheduleDate: new Date().toISOString().split('T')[0],
-          isOperationalFlight: true,
-          prefixicao: "KL"
-        })
+        // Fetch data from the dedicated delay trends API
+        const response = await fetch('/api/delay-trends/hourly')
+        if (!response.ok) throw new Error('Failed to fetch delay trends')
         
-        const flights = flightsResponse.flights
+        const data = await response.json()
         
-        // Handle empty data gracefully
-        if (!flights || flights.length === 0) {
-          const initialStats: SummaryStat[] = [
-            {
-              label: "Total Flights",
-              value: "0",
-              change: "No flights today",
-              icon: Plane,
-              color: "text-blue-600",
-              bgColor: "bg-blue-50",
-            },
-            {
-              label: "Avg Delay",
-              value: "n/v",
-              change: "No data available",
-              icon: Clock,
-              color: "text-orange-600",
-              bgColor: "bg-orange-50",
-            },
-            {
-              label: "Peak Delay Hour",
-              value: "n/v",
-              change: "No flights scheduled",
-              icon: TrendingUp,
-              color: "text-red-600",
-              bgColor: "bg-red-50",
-            },
-            {
-              label: "Worst Delay Spike",
-              value: "n/v",
-              change: "No spike detected",
-              icon: AlertTriangle,
-              color: "text-yellow-600",
-              bgColor: "bg-yellow-50",
-            },
-          ]
-          setSummaryStats(initialStats)
-          return
+        // Use the summary data from the API
+        const summary = data.summary || {
+          totalFlights: '0',
+          avgDelay: '0.0 min',
+          peakDelayHour: 'n/v',
+          highVarianceHours: '0'
         }
         
-        // Calculate total flights
-        const totalFlights = flights.length
+        // Parse values for display
+        const totalFlights = parseInt(summary.totalFlights) || 0
+        const avgDelayValue = parseFloat(summary.avgDelay) || 0
+        const peakHour = summary.peakDelayHour || 'n/v'
+        const highVarianceHours = parseInt(summary.highVarianceHours) || 0
         
-        // Calculate delays using timezone utility
-        const delays = flights.map(flight => 
-          calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-        )
-        const avgDelay = delays.length > 0 ? delays.reduce((a, b) => a + b, 0) / delays.length : 0
-        
-        // Calculate hourly delay data from raw flights for on-time calculation
-        const hourGroups = flights.reduce((acc, flight) => {
-          // Extract hour in local timezone
-          const scheduleHourLocal = extractLocalHour(flight.scheduleDateTime)
-          const hourKey = `${scheduleHourLocal.toString().padStart(2, '0')}:00-${(scheduleHourLocal + 1).toString().padStart(2, '0')}:00`
-          if (!acc[hourKey]) {
-            acc[hourKey] = { flights: [], delays: [] }
-          }
-          acc[hourKey].flights.push(flight)
-          const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-          acc[hourKey].delays.push(delayMinutes)
-          return acc
-        }, {} as Record<string, { flights: any[], delays: number[] }>)
-
-        // Compose hourly data for both delay and on-time calculations
-        const hourlyData = Object.entries(hourGroups).map(([hour, data]) => {
-          const avgDelay = data.delays.length > 0 ? data.delays.reduce((a, b) => a + b, 0) / data.delays.length : 0
-          const onTimeCount = data.delays.filter(d => d < 5).length
-          const onTimePct = data.delays.length > 0 ? (onTimeCount / data.delays.length) * 100 : 0
-          return {
-            hour,
-            avgDelay,
-            flights: data.flights.length,
-            delays: data.delays,
-            onTimeCount,
-            onTimePct
-          }
-        })
-        
-        // Find peak delay hour
-        const peakHour = hourlyData.length > 0 ? hourlyData.reduce((max, current) => 
-          current.avgDelay > max.avgDelay ? current : max
-        ) : null
-        
-        // Calculate worst delay spike (largest jump in avg delay compared to previous hour)
-        let worstSpike = null
-        let worstSpikeValue = -Infinity
-        for (let i = 1; i < hourlyData.length; i++) {
-          const prev = hourlyData[i - 1]
-          const curr = hourlyData[i]
-          const spike = curr.avgDelay - prev.avgDelay
-          if (spike > worstSpikeValue) {
-            worstSpikeValue = spike
-            worstSpike = {
-              hour: curr.hour,
-              spike
-            }
-          }
-        }
-        
-        // Get current local hour
-        const now = new Date();
-        const currentHour = now.getHours();
-
-        // Only consider hours fully in the past for best on-time hour
-        const pastHourlyData = hourlyData.filter(h => {
-          const hourNum = parseInt(h.hour.split(':')[0], 10);
-          return hourNum < currentHour;
-        });
-
-        let bestOnTimeHour = null;
-        let bestOnTimePct = -1;
-        let bestOnTimeIndex = -1;
-        for (let i = 0; i < pastHourlyData.length; i++) {
-          if (pastHourlyData[i].onTimePct > bestOnTimePct) {
-            bestOnTimePct = pastHourlyData[i].onTimePct;
-            bestOnTimeHour = pastHourlyData[i];
-            bestOnTimeIndex = i;
-          }
-        }
-        let onTimeDelta = null;
-        if (bestOnTimeIndex > 0) {
-          onTimeDelta = bestOnTimeHour.onTimePct - pastHourlyData[bestOnTimeIndex - 1].onTimePct;
-        }
-        
+        // Create summary stats
         const stats: SummaryStat[] = [
           {
             label: "Total Flights",
             value: totalFlights.toString(),
-            change: `${flights.length} KLM departures`,
+            change: `${totalFlights} KLM departures today`,
             icon: Plane,
             color: "text-blue-600",
             bgColor: "bg-blue-50",
           },
           {
             label: "Avg Delay",
-            value: avgDelay ? `${avgDelay.toFixed(1)} min` : "n/v",
-            change: `${flights.length} flights analyzed`,
+            value: summary.avgDelay,
+            change: avgDelayValue > 10 ? "Above normal" : "Within normal range",
             icon: Clock,
             color: "text-orange-600",
             bgColor: "bg-orange-50",
           },
           {
-            label: "Best On-Time Hour",
-            value: bestOnTimeHour ? bestOnTimeHour.hour : "n/v",
-            change: bestOnTimeHour ? `${bestOnTimeHour.onTimePct.toFixed(0)}% on time` + (onTimeDelta !== null ? ` (${onTimeDelta >= 0 ? "+" : ""}${onTimeDelta.toFixed(0)}% vs. previous hour)` : " (first hour)") : "No data",
+            label: "Peak Delay Hour",
+            value: peakHour,
+            change: peakHour !== 'n/v' ? "Highest average delay" : "No delays detected",
             icon: TrendingUp,
-            color: "text-green-600",
-            bgColor: "bg-green-50",
+            color: "text-red-600",
+            bgColor: "bg-red-50",
           },
           {
-            label: "Worst Delay Spike",
-            value: worstSpike && worstSpike.spike > 0 ? worstSpike.hour : "n/v",
-            change: worstSpike && worstSpike.spike > 0 ? `+${worstSpike.spike.toFixed(1)} min vs. previous hour` : "No spike detected",
+            label: "High Variance Hours",
+            value: highVarianceHours.toString(),
+            change: highVarianceHours > 0 ? `${highVarianceHours} hours with high delays` : "Consistent performance",
             icon: AlertTriangle,
             color: "text-yellow-600",
             bgColor: "bg-yellow-50",
           },
         ]
-
+        
         setSummaryStats(stats)
       } catch (error) {
-        console.error("Error fetching delay trends summary data:", error)
-        // Fallback to placeholder data on error
+        console.error("Error fetching delay trends summary:", error)
+        // Fallback to error state
         const errorStats: SummaryStat[] = [
           {
             label: "Total Flights",
@@ -222,7 +106,7 @@ export function DelayTrendsSummary() {
             bgColor: "bg-red-50",
           },
           {
-            label: "Worst Delay Spike",
+            label: "High Variance Hours",
             value: "n/v",
             change: "Error loading data",
             icon: AlertTriangle,

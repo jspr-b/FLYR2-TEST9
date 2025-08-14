@@ -7,7 +7,12 @@
       "Bash(rm:*)",
       "Bash(npm run build:*)",
       "Bash(claude-code --list-models)",
-      "Bash(npm update:*)"
+      "Bash(npm update:*)",
+      "Bash(git push:*)",
+      "Bash(npx tsc:*)",
+      "Bash(lsof:*)",
+      "Bash(killall:*)",
+      "Bash(true)"
     ],
     "deny": []
   }

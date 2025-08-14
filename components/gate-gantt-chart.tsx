@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, Fragment } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Clock, Plane, Calendar, Maximize2, X, Eye } from "lucide-react"
+import { Clock, Plane, Calendar, Maximize2, X, Eye, Info } from "lucide-react"
 import { TimeHeader } from './timeline/TimeHeader'
 import { GateRow } from './timeline/GateRow'
 import { Legend } from './timeline/Legend'
@@ -551,13 +551,13 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                               <>
                                 {/* Original scheduled time (dashed) */}
                                 <div 
-                                  className="absolute top-1 bottom-1 w-0.5 bg-gray-300/60 border-l-2 border-dashed border-gray-400"
+                                  className="absolute top-1 bottom-1 w-1 bg-amber-500 border-l-2 border-dashed border-amber-600 shadow-sm"
                                   style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
                                   title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
                                 {/* New estimated time (solid) */}
                                 <div 
-                                  className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-sm"
+                                  className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
                                   style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                   title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
@@ -565,7 +565,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                             ) : (
                               /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
                               <div 
-                                className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
+                                className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
                                 style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                 title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                               />
@@ -732,13 +732,13 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                               <>
                                 {/* Original scheduled time (dashed) */}
                                 <div 
-                                  className="absolute top-1 bottom-1 w-0.5 bg-gray-300/60 border-l-2 border-dashed border-gray-400"
+                                  className="absolute top-1 bottom-1 w-1 bg-amber-500 border-l-2 border-dashed border-amber-600 shadow-sm"
                                   style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
                                   title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
                                 {/* New estimated time (solid) */}
                                 <div 
-                                  className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-sm"
+                                  className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
                                   style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                   title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
@@ -746,7 +746,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                             ) : (
                               /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
                               <div 
-                                className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
+                                className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
                                 style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                 title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                               />
@@ -903,18 +903,18 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
               <span className="whitespace-nowrap">Current Time</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-0.5 h-3 bg-white border border-gray-400 flex-shrink-0"></div>
+              <div className="w-1 h-3 bg-blue-500 border border-blue-600 flex-shrink-0 shadow-sm"></div>
               <span className="whitespace-nowrap">Departure</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-0.5 h-3 bg-gray-400 border-l border-dashed border-gray-500 flex-shrink-0"></div>
+              <div className="w-1 h-3 bg-amber-500 border-l-2 border-dashed border-amber-600 flex-shrink-0 shadow-sm"></div>
               <span className="whitespace-nowrap">Original Time</span>
             </div>
           </div>
-          <div className="mt-3 text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              <span>ℹ️</span>
-              <span>Smart delay handling: timeline shifts or extends based on gate status</span>
+          <div className="mt-3 flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-blue-800">
+              <span className="font-medium">Smart delay handling:</span> timeline shifts or extends based on gate status
             </div>
           </div>
         </div>
@@ -1022,7 +1022,6 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
         )
       })()}
     </Card>
-      )}
 
       {/* Full Screen Modal */}
       {isFullScreenOpen && (
@@ -1129,10 +1128,10 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   <span className="whitespace-nowrap">Original Time</span>
                 </div>
               </div>
-              <div className="mt-3 text-xs text-gray-500">
-                <div className="flex items-center gap-2">
-                  <span>ℹ️</span>
-                  <span>Smart delay handling: timeline shifts or extends based on gate status</span>
+              <div className="mt-3 flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-800">
+                  <span className="font-medium">Smart delay handling:</span> timeline shifts or extends based on gate status
                 </div>
               </div>
             </div>
@@ -1285,14 +1284,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                         {timeline.isTimelineShifted && (
                           <>
                             <div 
-                              className="absolute top-1 bottom-1 w-0.5 bg-gray-600 border-l-2 border-dashed"
+                              className="absolute top-1 bottom-1 w-1 bg-amber-500 border-l-2 border-dashed border-amber-600 shadow-sm"
                               style={{ 
                                 left: `${((timeline.scheduledTime.getTime() - timeline.startTime.getTime()) / 
                                   (timeline.endTime.getTime() - timeline.startTime.getTime())) * 100}%` 
                               }}
                             />
                             <div 
-                              className="absolute top-0 bottom-0 w-1 bg-white shadow-sm"
+                              className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
                               style={{ 
                                 left: `${((timeline.actualDepartureTime.getTime() - timeline.startTime.getTime()) / 
                                   (timeline.endTime.getTime() - timeline.startTime.getTime())) * 100}%` 

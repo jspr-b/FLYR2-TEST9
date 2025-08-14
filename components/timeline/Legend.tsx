@@ -1,3 +1,5 @@
+import { Info } from 'lucide-react'
+
 export function Legend() {
   return (
     <div className="border-t p-4 bg-gray-50">
@@ -5,31 +7,31 @@ export function Legend() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-green-500 border border-green-700 rounded"></div>
-          <span>Boarding (BRD)</span>
+          <span>Boarding</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-blue-500 border border-blue-700 rounded"></div>
-          <span>Gate Open (GTO)</span>
+          <span>Gate Open</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-yellow-500 border border-yellow-700 rounded"></div>
-          <span>Gate Closing (GCL)</span>
+          <span>Gate Closing</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-orange-500 border border-orange-700 rounded"></div>
-          <span>Gate Closed (GTD)</span>
+          <span>Gate Closed</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-purple-500 border border-purple-700 rounded"></div>
-          <span>Scheduled (SCH)</span>
+          <span>Scheduled</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-400 border border-red-600 rounded"></div>
-          <span>Delayed State (DEL)</span>
+          <span>Delayed</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-gray-500 border border-gray-700 rounded"></div>
-          <span>Departed (DEP)</span>
+          <span>Departed</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-0.5 h-3 bg-red-500"></div>
@@ -37,15 +39,18 @@ export function Legend() {
         </div>
         <div className="flex items-center gap-2">
           <div className="w-0.5 h-3 bg-white border border-gray-400"></div>
-          <span>Departure Time</span>
+          <span>Departure</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-0.5 h-3 bg-gray-400 border-l-2 border-dashed border-gray-500"></div>
-          <span>Original (if delayed)</span>
+          <span>Original Time</span>
         </div>
       </div>
-      <div className="mt-2 text-xs text-gray-500">
-        ℹ️ Smart delay handling • Gate not open: timeline shifts to new departure • Gate already open: card extends to new departure + 10min
+      <div className="mt-3 flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+        <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+        <div className="text-xs text-blue-800">
+          <span className="font-medium">Smart delay handling:</span> timeline shifts or extends based on gate status
+        </div>
       </div>
     </div>
   )

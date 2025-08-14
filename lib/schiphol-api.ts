@@ -312,9 +312,18 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
 
     let data: any = {}
     try {
-      data = await response.json()
+      const text = await response.text()
+      if (!text.trim()) {
+        console.log(`Empty response on page ${page}, ending pagination`)
+        break
+      }
+      data = JSON.parse(text)
     } catch (err) {
       console.error(`Failed to parse JSON on page ${page}:`, err)
+      // If this is the first page, throw the error. Otherwise, just break.
+      if (page === 0) {
+        throw err
+      }
       break
     }
     

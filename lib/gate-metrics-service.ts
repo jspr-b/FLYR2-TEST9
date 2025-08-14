@@ -275,16 +275,16 @@ function determineGateStatus(flights: any[], currentTime: Date): string {
   
   if (activeFlights.length > 0) return 'OCCUPIED'
   
-  // Check for approaching flights
-  const approachingFlights = flights.filter(flight => {
+  // Check for preparing flights (scheduled within next 2 hours)
+  const preparingFlights = flights.filter(flight => {
     const scheduleTime = new Date(flight.scheduleDateTime)
     const timeDiff = (scheduleTime.getTime() - currentTime.getTime()) / (1000 * 60)
     return timeDiff > 0 && timeDiff <= 120
   })
   
-  if (approachingFlights.length > 0) return 'APPROACHING'
+  if (preparingFlights.length > 0) return 'PREPARING'
   
-  return 'DAY_USE_ACCESS'
+  return 'SCHEDULED'
 }
 
 function calculateUtilization(flights: any[], currentTime: Date): number {

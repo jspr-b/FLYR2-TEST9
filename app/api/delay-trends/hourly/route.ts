@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTodayLocalRange, calculateDelayMinutes, extractLocalHour } from '@/lib/timezone-utils'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
 import { getAmsterdamDateString } from '@/lib/amsterdam-time'
 
@@ -7,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get today's date in Amsterdam timezone (YYYY-MM-DD)
     const today = getAmsterdamDateString()
+    console.log(`📊 DELAY TRENDS: Querying flights for date: ${today}`)
 
     // Prepare Schiphol API configuration for KLM departures
     const apiConfig = {
@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
     // Fetch flights from Schiphol API (same as /api/flights)
     const schipholData = await fetchSchipholFlights(apiConfig)
     const allFlights = (schipholData.flights || []).map(transformSchipholFlight)
+    
+    console.log(`📊 DELAY TRENDS: Fetched ${allFlights.length} total flights for date ${today}`)
 
     // Apply the same filters and deduplication as /api/flights
     const filters = {
@@ -28,20 +30,25 @@ export async function GET(request: NextRequest) {
       prefixicao: 'KL'
     }
     let filteredFlights = filterFlights(allFlights, filters)
+    console.log(`📊 DELAY TRENDS: After filtering: ${filteredFlights.length} flights`)
+    
     filteredFlights = removeDuplicateFlights(filteredFlights)
+    console.log(`📊 DELAY TRENDS: After deduplication: ${filteredFlights.length} flights`)
+    
     filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
-
-    console.log(`📊 DELAY TRENDS: Processing ${filteredFlights.length} flights`)
+    console.log(`📊 DELAY TRENDS: After removing stale: ${filteredFlights.length} flights`)
 
     // Calculate hourly delays from real flight data
     const hourlyDelays = calculateHourlyDelaysFromFlights(filteredFlights)
+    console.log(`📊 DELAY TRENDS: Calculated ${hourlyDelays.filter(h => h.totalFlights > 0).length} hours with flights`)
 
-    // If no flights available, return empty structure
+    // If no flights available, return structure with zeros instead of nulls
     if (filteredFlights.length === 0) {
+      console.log('⚠️ DELAY TRENDS: No flights found after filtering')
       const emptyHourlyData = Array.from({ length: 24 }, (_, i) => ({
         hour: `${i.toString().padStart(2, '0')}:00`,
-        avgDelay: null,
-        flights: null,
+        avgDelay: 0,
+        flights: 0,
         variance: 'Low' as const
       }))
 
@@ -66,14 +73,14 @@ export async function GET(request: NextRequest) {
     // Transform data for the frontend
     const hourlyData = hourlyDelays.map(delay => ({
       hour: `${delay.hour.toString().padStart(2, '0')}:00`,
-      avgDelay: delay.averageDelay,
+      avgDelay: delay.totalFlights > 0 ? delay.averageDelay : 0,
       flights: delay.totalFlights,
       variance: delay.variance
     }))
 
     const tableData = hourlyDelays.map(delay => ({
       hour: `${delay.hour.toString().padStart(2, '0')}:00-${(delay.hour + 1).toString().padStart(2, '0')}:00`,
-      avgDelay: delay.averageDelay,
+      avgDelay: delay.totalFlights > 0 ? delay.averageDelay : 0,
       flights: delay.totalFlights,
       variance: delay.variance,
       flagged: delay.variance === 'High'
@@ -119,16 +126,32 @@ function calculateHourlyDelaysFromFlights(flights: any[]) {
 
   // Group flights by hour and calculate delays
   flights.forEach(flight => {
-    // Use extractLocalHour to properly convert UTC+2 API time to local timezone
-    const scheduleHour = extractLocalHour(flight.scheduleDateTime)
-    const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
+    // Extract hour in Amsterdam timezone
+    const scheduleDate = new Date(flight.scheduleDateTime)
+    // Format in Amsterdam timezone to get the correct hour
+    const amsterdamHour = parseInt(
+      scheduleDate.toLocaleString('en-US', { 
+        hour: '2-digit', 
+        hour12: false,
+        timeZone: 'Europe/Amsterdam' 
+      })
+    )
     
-    if (!hourGroups[scheduleHour]) {
-      hourGroups[scheduleHour] = { flights: [], delays: [] }
+    // Calculate delay in minutes (same as gate metrics service)
+    let delayMinutes = 0
+    if (flight.publicEstimatedOffBlockTime) {
+      const scheduledTime = new Date(flight.scheduleDateTime)
+      const estimatedTime = new Date(flight.publicEstimatedOffBlockTime)
+      const delayMs = estimatedTime.getTime() - scheduledTime.getTime()
+      delayMinutes = Math.round(delayMs / (1000 * 60))
     }
     
-    hourGroups[scheduleHour].flights.push(flight)
-    hourGroups[scheduleHour].delays.push(delayMinutes)
+    if (!hourGroups[amsterdamHour]) {
+      hourGroups[amsterdamHour] = { flights: [], delays: [] }
+    }
+    
+    hourGroups[amsterdamHour].flights.push(flight)
+    hourGroups[amsterdamHour].delays.push(Math.max(0, delayMinutes)) // Only positive delays
   })
 
   // Convert to hourly delay format

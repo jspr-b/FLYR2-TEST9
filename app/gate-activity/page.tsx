@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useClientData } from "@/lib/client-utils"
 import { Sidebar } from "@/components/sidebar"
 import { GateGanttChart } from "@/components/gate-gantt-chart"
-import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock } from "lucide-react"
+import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2 } from "lucide-react"
 
 interface GateActivityData {
   summary: {
@@ -74,17 +74,43 @@ interface GateActivityData {
 }
 
 export default function GateActivityPage() {
+  const [lastSuccessfulUpdate, setLastSuccessfulUpdate] = useState<Date | null>(null)
+  
   const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
-    const response = await fetch('/api/gate-occupancy', {
-      headers: {
-        'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
+    try {
+      const response = await fetch('/api/gate-occupancy', {
+        headers: {
+          'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
+        }
+      })
+      
+      if (!response.ok) {
+        // Try to get error details from response
+        let errorMessage = 'Failed to fetch gate activity data'
+        try {
+          const errorData = await response.json()
+          if (errorData.error) errorMessage = errorData.error
+          if (errorData.details) errorMessage += `: ${errorData.details}`
+        } catch {
+          // If parsing JSON fails, use status text
+          errorMessage += ` (${response.status} ${response.statusText})`
+        }
+        throw new Error(errorMessage)
       }
-    })
-    if (!response.ok) throw new Error('Failed to fetch gate activity data')
-    return await response.json()
+      
+      const result = await response.json()
+      setLastSuccessfulUpdate(new Date())
+      return result
+    } catch (error) {
+      // Add more context to network errors
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        throw new Error('Network connection error. Please check your internet connection.')
+      }
+      throw error
+    }
   }
 
-  const { data, loading, backgroundLoading, error, backgroundError } = useClientData(
+  const { data, loading, backgroundLoading, error, backgroundError, refetch } = useClientData(
     fetchGateActivity,
     { summary: { totalGates: 0, totalPiers: 0, activePiers: 0, activePiersList: [], statusBreakdown: {}, averageUtilization: 0, delayedFlights: { totalDelayedFlights: 0, averageDelayMinutes: 0, totalDelayMinutes: 0, maxDelay: { minutes: 0, formatted: '', flight: null } } }, gates: [] } as GateActivityData,
     [],
@@ -241,11 +267,24 @@ export default function GateActivityPage() {
               Real-Time Gate Status • Flight Operations • Activity Monitoring
             </p>
             {backgroundError && (
-              <div className="mt-2 flex items-center gap-2 text-sm text-amber-600">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>Unable to refresh data. Showing last available information.</span>
+              <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
+                <div className="flex items-start gap-2">
+                  <svg className="h-4 w-4 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm text-amber-800 font-medium">Unable to refresh data</p>
+                    <p className="text-xs text-amber-700 mt-0.5">
+                      Showing last successful update{lastSuccessfulUpdate && ` from ${lastSuccessfulUpdate.toLocaleTimeString()}`}. Data will continue to auto-refresh.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => refetch(false)}
+                    className="text-xs text-amber-700 hover:text-amber-900 underline hover:no-underline"
+                  >
+                    Retry now
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -302,13 +341,17 @@ export default function GateActivityPage() {
                         <div className="flex items-center gap-2">
                           <div className={`w-3 h-3 rounded ${
                             status === 'OCCUPIED' ? 'bg-green-500' :
-                            status === 'APPROACHING' ? 'bg-blue-500' :
+                            status === 'PREPARING' ? 'bg-blue-500' :
                             status === 'DEPARTED' ? 'bg-gray-500' :
-                            status === 'DAY_USE_ACCESS' ? 'bg-blue-300' :
+                            status === 'SCHEDULED' ? 'bg-blue-300' :
                             'bg-gray-300'
                           }`} />
                           <span className="text-sm font-medium">
-                            {status === 'DAY_USE_ACCESS' ? 'Day-use access gates' : status}
+                            {status === 'SCHEDULED' ? 'Scheduled' : 
+                             status === 'PREPARING' ? 'Preparing' :
+                             status === 'OCCUPIED' ? 'Occupied' :
+                             status === 'DEPARTED' ? 'Departed' :
+                             status.toLowerCase()}
                           </span>
                         </div>
                         <span className="text-lg font-semibold">{count}</span>
@@ -387,10 +430,18 @@ export default function GateActivityPage() {
                             description: 'Passengers boarding'
                           },
                           GCL: { 
-                            label: 'Gate Closed', 
+                            label: 'Gate Closing', 
                             color: 'bg-orange-500', 
                             bgColor: 'bg-orange-100',
                             iconColor: 'text-orange-600',
+                            Icon: DoorClosed,
+                            description: 'Gate closing'
+                          },
+                          GTD: { 
+                            label: 'Gate Closed', 
+                            color: 'bg-red-500', 
+                            bgColor: 'bg-red-100',
+                            iconColor: 'text-red-600',
                             Icon: DoorClosed,
                             description: 'Gate closed'
                           },
@@ -465,24 +516,96 @@ export default function GateActivityPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Physical Activities</CardTitle>
-                  <p className="text-xs text-gray-600">Gate operations</p>
+                  <p className="text-xs text-gray-600">Current gate operations</p>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    {Object.entries(processedData?.physicalActivities || {}).map(([activity, count]) => (
-                      <div key={activity} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded ${
-                            activity === 'DEPARTING' ? 'bg-orange-500' :
-                            activity === 'BOARDING' ? 'bg-green-500' :
-                            activity === 'NONE' ? 'bg-gray-300' :
-                            'bg-gray-400'
-                          }`} />
-                          <span className="text-sm font-medium">{activity}</span>
-                        </div>
-                        <span className="text-lg font-semibold">{count}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    {Object.entries(processedData?.physicalActivities || {})
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([activity, count]) => {
+                        const total = Object.values(processedData?.physicalActivities || {}).reduce((sum, val) => sum + val, 0)
+                        const percentage = Math.round((count / total) * 100)
+                        
+                        const activityConfig = {
+                          BOARDING: {
+                            label: 'Boarding',
+                            color: 'bg-green-500',
+                            bgColor: 'bg-green-100',
+                            iconColor: 'text-green-600',
+                            Icon: UserCheck,
+                            description: 'Passengers boarding'
+                          },
+                          DEPARTING: {
+                            label: 'Departing',
+                            color: 'bg-orange-500',
+                            bgColor: 'bg-orange-100',
+                            iconColor: 'text-orange-600',
+                            Icon: PlaneTakeoff,
+                            description: 'Aircraft departing'
+                          },
+                          NONE: {
+                            label: 'Idle',
+                            color: 'bg-gray-400',
+                            bgColor: 'bg-gray-100',
+                            iconColor: 'text-gray-500',
+                            Icon: PauseCircle,
+                            description: 'No active operations planned'
+                          },
+                          ARRIVING: {
+                            label: 'Arriving',
+                            color: 'bg-blue-500',
+                            bgColor: 'bg-blue-100',
+                            iconColor: 'text-blue-600',
+                            Icon: Plane,
+                            description: 'Aircraft arriving'
+                          }
+                        }
+                        
+                        const config = activityConfig[activity] || {
+                          label: activity,
+                          color: 'bg-gray-400',
+                          bgColor: 'bg-gray-100',
+                          iconColor: 'text-gray-600',
+                          Icon: Loader2,
+                          description: activity
+                        }
+                        
+                        return (
+                          <div key={activity} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg ${config.bgColor} flex items-center justify-center`}>
+                                  <config.Icon className={`w-5 h-5 ${config.iconColor}`} />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm">{config.label}</div>
+                                  <div className="text-xs text-gray-500">{config.description}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold">{count}</div>
+                                <div className="text-xs text-gray-500">{percentage}%</div>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div 
+                                className={`${config.color} h-1.5 rounded-full transition-all duration-500`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                  
+                  {/* Total gates indicator */}
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>Total gates monitored</span>
+                      <span className="font-semibold text-gray-900">
+                        {Object.values(processedData?.physicalActivities || {}).reduce((sum, val) => sum + val, 0)}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
