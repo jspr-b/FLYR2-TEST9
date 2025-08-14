@@ -101,12 +101,14 @@ export function useClientData<T>(
     let intervalId: NodeJS.Timeout
 
     const scheduleNextRefresh = () => {
-      // If we've had errors, use exponential backoff up to 5x the base interval
+      // If we've had errors, use gentler backoff up to 2x the base interval
       if (errorCountRef.current > 0) {
+        // More gentle backoff: 1.2x per error, max 2x base interval
         currentInterval = Math.min(
-          baseIntervalRef.current! * Math.pow(1.5, errorCountRef.current),
-          baseIntervalRef.current! * 5
+          baseIntervalRef.current! * Math.pow(1.2, errorCountRef.current),
+          baseIntervalRef.current! * 2
         )
+        console.log(`⏳ Next refresh in ${Math.round(currentInterval / 1000)}s (error count: ${errorCountRef.current})`)
       } else {
         currentInterval = baseIntervalRef.current!
       }
@@ -117,9 +119,13 @@ export function useClientData<T>(
           await fetchData(true)
           // Reset error count on success
           errorCountRef.current = 0
+          console.log('✅ Background refresh successful, error count reset')
         } catch (error) {
           // Increment error count for backoff
           errorCountRef.current++
+          console.log(`⚠️ Background refresh failed (error count: ${errorCountRef.current})`)
+          // Cap error count to prevent excessive backoff
+          errorCountRef.current = Math.min(errorCountRef.current, 5)
         }
         
         // Schedule next refresh

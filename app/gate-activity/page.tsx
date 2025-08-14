@@ -78,6 +78,7 @@ export default function GateActivityPage() {
   
   const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
     try {
+      console.log(`🔄 Fetching gate activity data (Background: ${isBackgroundRefresh})`)
       const response = await fetch('/api/gate-occupancy', {
         headers: {
           'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
@@ -87,21 +88,29 @@ export default function GateActivityPage() {
       if (!response.ok) {
         // Try to get error details from response
         let errorMessage = 'Failed to fetch gate activity data'
+        let errorDetails = null
         try {
           const errorData = await response.json()
+          console.error('API Error response:', errorData)
           if (errorData.error) errorMessage = errorData.error
-          if (errorData.details) errorMessage += `: ${errorData.details}`
+          if (errorData.details) {
+            errorDetails = errorData.details
+            errorMessage += `: ${errorData.details}`
+          }
         } catch {
           // If parsing JSON fails, use status text
           errorMessage += ` (${response.status} ${response.statusText})`
         }
+        console.error(`❌ Gate activity fetch failed (Background: ${isBackgroundRefresh}):`, errorMessage)
         throw new Error(errorMessage)
       }
       
       const result = await response.json()
+      console.log(`✅ Gate activity fetch successful (Background: ${isBackgroundRefresh})`)
       setLastSuccessfulUpdate(new Date())
       return result
     } catch (error) {
+      console.error(`❌ Gate activity fetch error (Background: ${isBackgroundRefresh}):`, error)
       // Add more context to network errors
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
         throw new Error('Network connection error. Please check your internet connection.')

@@ -685,11 +685,30 @@ export async function GET(request: NextRequest) {
     
   } catch (error) {
     console.error('❌ GATE OCCUPANCY API ERROR:', error)
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    console.error('Is background refresh:', isBackgroundRefresh)
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to analyze gate occupancy'
+    let details = 'Unknown error'
+    
+    if (error instanceof Error) {
+      details = error.message
+      if (error.message.includes('HTTP')) {
+        errorMessage = 'Schiphol API returned an error'
+      } else if (error.message.includes('timeout') || error.message.includes('aborted')) {
+        errorMessage = 'Request timed out - API may be slow'
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network connection error'
+      }
+    }
+    
     return NextResponse.json(
       { 
-        error: 'Failed to analyze gate occupancy', 
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        error: errorMessage, 
+        details: details,
+        timestamp: new Date().toISOString(),
+        isBackgroundRefresh: isBackgroundRefresh
       },
       { status: 500 }
     )

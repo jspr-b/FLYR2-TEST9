@@ -95,18 +95,23 @@ function isCacheValid(timestamp: number): boolean {
 export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<SchipholApiResponse> {
   const cacheKey = generateCacheKey(config)
   
-  // Check cache first
-  const cached = apiCache.get(cacheKey)
-  if (cached && isCacheValid(cached.timestamp)) {
-    console.log('Using cached Schiphol API data for:', cacheKey)
-    return cached.data
+  // Check cache first - but skip cache for background refresh
+  if (!config.isBackgroundRefresh) {
+    const cached = apiCache.get(cacheKey)
+    if (cached && isCacheValid(cached.timestamp)) {
+      console.log('Using cached Schiphol API data for:', cacheKey)
+      return cached.data
+    }
   }
 
   // Check if there's already a pending request for this cache key
-  const pendingRequest = pendingRequests.get(cacheKey)
-  if (pendingRequest) {
-    console.log('🔄 Waiting for pending request for:', cacheKey)
-    return await pendingRequest
+  // But skip this check for background refresh to ensure fresh data
+  if (!config.isBackgroundRefresh) {
+    const pendingRequest = pendingRequests.get(cacheKey)
+    if (pendingRequest) {
+      console.log('🔄 Waiting for pending request for:', cacheKey)
+      return await pendingRequest
+    }
   }
 
   // Create the request promise
@@ -216,12 +221,18 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
       throw error
     } finally {
       // Always clean up the pending request when done (success or failure)
-      pendingRequests.delete(cacheKey)
+      // But only if it was added (non-background refresh)
+      if (!config.isBackgroundRefresh) {
+        pendingRequests.delete(cacheKey)
+      }
     }
   })()
 
   // Add the request promise to the pending requests map
-  pendingRequests.set(cacheKey, requestPromise)
+  // But only for non-background refresh requests
+  if (!config.isBackgroundRefresh) {
+    pendingRequests.set(cacheKey, requestPromise)
+  }
 
   // Return the promise, which will resolve when the request completes
   return requestPromise
@@ -233,7 +244,9 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
 async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResponse> {
   const allFlights: any[] = []
   let page = 0
-  const maxPages = 50 // Safety limit to prevent infinite loops
+  // Reduce max pages to prevent issues with later pages failing
+  // Most KLM flights should be in the first 20 pages
+  const maxPages = 20 // Reduced from 50 to improve reliability
   
   console.log('Fetching all pages of Schiphol API data...')
   
@@ -291,6 +304,14 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
         
         if (retries >= MAX_RETRIES) {
           console.error(`Failed to fetch page ${page} after ${MAX_RETRIES} attempts`)
+          // If we've already fetched some data and this isn't the first page, 
+          // return what we have instead of failing completely
+          if (page > 0 && allFlights.length > 0) {
+            console.warn(`Continuing with ${allFlights.length} flights from ${page} pages (failed on page ${page})`)
+            response = undefined // Force exit from page loop
+            break // Exit the retry loop
+          }
+          // Only throw if this is the first page or we have no data
           throw error
         }
         
@@ -307,7 +328,13 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
     if (!response.ok) {
       const errorText = await response.text()
       console.error(`Schiphol API error on page ${page}:`, response.status, response.statusText, errorText)
-      break
+      // If we have some data and this isn't the first page, return what we have
+      if (page > 0 && allFlights.length > 0) {
+        console.warn(`HTTP error on page ${page}, continuing with ${allFlights.length} flights from ${page} pages`)
+        break
+      }
+      // Only throw if this is the first page or we have no data
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
 
     let data: any = {}
@@ -346,6 +373,11 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
   }
   
   console.log(`Total flights fetched: ${allFlights.length} from ${page} pages`)
+  
+  // Warn if we hit the max pages limit
+  if (page >= maxPages) {
+    console.warn(`⚠️ Reached maximum page limit (${maxPages}). There might be more flights available.`)
+  }
   
   const result = {
     flights: allFlights,
