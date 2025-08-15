@@ -5,7 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useClientData } from "@/lib/client-utils"
 import { Sidebar } from "@/components/sidebar"
 import { GateGanttChart } from "@/components/gate-gantt-chart"
-import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2 } from "lucide-react"
+import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2, Info, TrendingUp, ArrowRightLeft, Maximize2 } from "lucide-react"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface GateActivityData {
   summary: {
@@ -73,8 +86,13 @@ interface GateActivityData {
   }>
 }
 
+type GateMetric = 'frequency' | 'recent' | 'patterns'
+
 export default function GateActivityPage() {
   const [lastSuccessfulUpdate, setLastSuccessfulUpdate] = useState<Date | null>(null)
+  const [selectedGateMetric, setSelectedGateMetric] = useState<GateMetric>('frequency')
+  const [modalGateMetric, setModalGateMetric] = useState<GateMetric>('frequency')
+  const [isModalOpen, setIsModalOpen] = useState(false)
   
   const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
     try {
@@ -167,11 +185,51 @@ export default function GateActivityPage() {
       return acc
     }, {} as Record<string, number>),
     
-    // Physical Activities Distribution
-    physicalActivities: data.gates.reduce((acc, gate) => {
-      acc[gate.utilization.physical] = (acc[gate.utilization.physical] || 0) + 1
-      return acc
-    }, {} as Record<string, number>),
+    // Gate Changes Analysis - enhanced with time-based analysis
+    gateChanges: data.gates
+      .filter(gate => gate.scheduledFlights.length > 0)
+      .map(gate => {
+        // Calculate time between changes (in minutes)
+        const flightTimes = gate.scheduledFlights
+          .map(f => new Date(f.scheduleDateTime).getTime())
+          .sort((a, b) => a - b)
+        
+        const changeIntervals = []
+        for (let i = 1; i < flightTimes.length; i++) {
+          changeIntervals.push((flightTimes[i] - flightTimes[i-1]) / (1000 * 60)) // Convert to minutes
+        }
+        
+        const avgChangeInterval = changeIntervals.length > 0 
+          ? Math.round(changeIntervals.reduce((sum, interval) => sum + interval, 0) / changeIntervals.length)
+          : 0
+        
+        // Get the most recent flight time
+        const mostRecentFlight = gate.scheduledFlights.reduce((latest, flight) => {
+          const flightTime = new Date(flight.scheduleDateTime).getTime()
+          return flightTime > latest ? flightTime : latest
+        }, 0)
+        
+        const hoursSinceLastChange = mostRecentFlight 
+          ? Math.round((Date.now() - mostRecentFlight) / (1000 * 60 * 60) * 10) / 10
+          : 999
+        
+        return {
+          gateID: gate.gateID,
+          pier: gate.pier,
+          changes: gate.scheduledFlights.length,
+          utilization: gate.utilization.daily,
+          avgChangeInterval, // Average minutes between gate changes
+          minChangeInterval: changeIntervals.length > 0 ? Math.min(...changeIntervals) : 0,
+          hoursSinceLastChange,
+          flights: gate.scheduledFlights.map(f => ({
+            flightNumber: f.flightNumber,
+            time: f.scheduleDateTime,
+            destination: f.destination
+          })),
+          temporalStatus: gate.utilization.temporalStatus,
+          hoursUntilNext: gate.utilization.hoursUntilNextActivity
+        }
+      }),
     
     // Temporal Status Distribution
     temporalStatuses: data.gates.reduce((acc, gate) => {
@@ -185,7 +243,6 @@ export default function GateActivityPage() {
       pier: gate.pier,
       occupiedBy: gate.occupiedBy,
       flightState: gate.scheduledFlights[0]?.primaryStateReadable || 'Unknown',
-      physicalActivity: gate.utilization.physical,
       aircraftType: gate.scheduledFlights[0]?.aircraftType || 'Unknown',
       destination: gate.scheduledFlights[0]?.destination || 'Unknown',
       isDelayed: gate.scheduledFlights[0]?.isDelayed || false,
@@ -521,109 +578,533 @@ export default function GateActivityPage() {
                 </CardContent>
               </Card>
 
-              {/* Physical Activities */}
+              {/* Gate Changes Analysis */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Physical Activities</CardTitle>
-                  <p className="text-xs text-gray-600">Current gate operations</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-base">Gate Change Analysis</CardTitle>
+                      <p className="text-xs text-gray-600">Gate change frequency and patterns</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+                            <Info className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <ArrowRightLeft className="w-4 h-4 text-blue-600" />
+                              <p className="font-medium text-sm">Understanding Gate Changes</p>
+                            </div>
+                            <div className="space-y-2 text-xs text-gray-600">
+                              <p className="leading-relaxed">
+                                This analysis helps identify gate change patterns for better resource planning:
+                              </p>
+                              <div className="space-y-2 pl-2">
+                                <div>
+                                  <strong className="text-gray-700">Change Frequency:</strong>
+                                  <p>Gates with the most aircraft changes today. High frequency indicates gates that need more ground crew attention.</p>
+                                </div>
+                                <div>
+                                  <strong className="text-gray-700">Recent Changes:</strong>
+                                  <p>Gates with the most recent activity. Helps track current operations and identify active zones.</p>
+                                </div>
+                                <div>
+                                  <strong className="text-gray-700">Change Patterns:</strong>
+                                  <p>Analysis of time between gate changes. Short intervals may indicate quick turnarounds or potential congestion.</p>
+                                </div>
+                              </div>
+                              <p className="pt-2 text-gray-500 italic">
+                                Click the expand icon to see all gates and switch between different analyses.
+                              </p>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                        <DialogTrigger asChild>
+                          <button 
+                            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                            onClick={() => setModalGateMetric(selectedGateMetric)}
+                          >
+                            <Maximize2 className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                          <DialogHeader>
+                            <DialogTitle>Gate Change Analysis - Full Report</DialogTitle>
+                            <DialogDescription>
+                              Comprehensive gate change patterns and frequency analysis
+                            </DialogDescription>
+                          </DialogHeader>
+                          
+                          {/* Modal Content */}
+                          <div className="flex-1 overflow-y-auto">
+                            {/* Metric Toggle Buttons in Modal */}
+                            <div className="flex flex-wrap gap-2 mb-4 sticky top-0 bg-white z-10 pb-2">
+                              <button
+                                onClick={() => setModalGateMetric('frequency')}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                                  modalGateMetric === 'frequency'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                Change Frequency
+                              </button>
+                              <button
+                                onClick={() => setModalGateMetric('recent')}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                                  modalGateMetric === 'recent'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                Recent Changes
+                              </button>
+                              <button
+                                onClick={() => setModalGateMetric('patterns')}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                                  modalGateMetric === 'patterns'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                Change Patterns
+                              </button>
+                            </div>
+
+                            {/* All Gates Data */}
+                            <div className="space-y-3">
+                              {processedData?.gateChanges && processedData.gateChanges.length > 0 ? (
+                                (() => {
+                                  // Sort ALL gates based on selected metric
+                                  const sortedGates = [...processedData.gateChanges].sort((a, b) => {
+                                    switch (modalGateMetric) {
+                                      case 'recent':
+                                        return a.hoursSinceLastChange - b.hoursSinceLastChange
+                                      case 'patterns':
+                                        return a.avgChangeInterval - b.avgChangeInterval
+                                      default: // frequency
+                                        return b.changes - a.changes
+                                    }
+                                  })
+
+                                  const maxValue = Math.max(...sortedGates.map(gate => {
+                                    switch (modalGateMetric) {
+                                      case 'recent':
+                                        return 24 // max 24 hours for recent changes
+                                      case 'patterns':
+                                        return Math.max(...processedData.gateChanges.map(g => g.avgChangeInterval))
+                                      default:
+                                        return gate.changes
+                                    }
+                                  })) || 1
+
+                                  return sortedGates.map((gate, index) => {
+                                    const value = modalGateMetric === 'recent' 
+                                                  ? gate.hoursSinceLastChange
+                                                  : modalGateMetric === 'patterns' 
+                                                  ? gate.avgChangeInterval
+                                                  : gate.changes
+                                    
+                                    const percentage = modalGateMetric === 'recent'
+                                                      ? Math.max(100 - (gate.hoursSinceLastChange / 24 * 100), 5)
+                                                      : Math.round((value / maxValue) * 100)
+                                    
+                                    const getActivityColor = () => {
+                                      if (modalGateMetric === 'recent') {
+                                        if (value <= 1) return 'bg-green-500'
+                                        if (value <= 3) return 'bg-yellow-500'
+                                        if (value <= 6) return 'bg-orange-500'
+                                        return 'bg-red-500'
+                                      } else if (modalGateMetric === 'patterns') {
+                                        if (value <= 60) return 'bg-red-500' // Very frequent changes
+                                        if (value <= 120) return 'bg-orange-500'
+                                        if (value <= 180) return 'bg-yellow-500'
+                                        return 'bg-green-500'
+                                      } else { // frequency
+                                        if (value >= 8) return 'bg-red-500'
+                                        if (value >= 6) return 'bg-orange-500'
+                                        if (value >= 4) return 'bg-yellow-500'
+                                        if (value >= 2) return 'bg-blue-500'
+                                        return 'bg-gray-400'
+                                      }
+                                    }
+                                    
+                                    const getActivityBgColor = () => {
+                                      if (modalGateMetric === 'recent') {
+                                        if (value <= 1) return 'bg-green-100'
+                                        if (value <= 3) return 'bg-yellow-100'
+                                        if (value <= 6) return 'bg-orange-100'
+                                        return 'bg-red-100'
+                                      } else if (modalGateMetric === 'patterns') {
+                                        if (value <= 60) return 'bg-red-100'
+                                        if (value <= 120) return 'bg-orange-100'
+                                        if (value <= 180) return 'bg-yellow-100'
+                                        return 'bg-green-100'
+                                      } else { // frequency
+                                        if (value >= 8) return 'bg-red-100'
+                                        if (value >= 6) return 'bg-orange-100'
+                                        if (value >= 4) return 'bg-yellow-100'
+                                        if (value >= 2) return 'bg-blue-100'
+                                        return 'bg-gray-100'
+                                      }
+                                    }
+                                    
+                                    const getActivityIcon = () => {
+                                      if (modalGateMetric === 'recent') {
+                                        return value <= 3 ? 'text-green-600' : 'text-orange-600'
+                                      } else if (modalGateMetric === 'patterns') {
+                                        return value <= 120 ? 'text-red-600' : 'text-green-600'
+                                      } else {
+                                        if (value >= 8) return 'text-red-600'
+                                        if (value >= 6) return 'text-orange-600'
+                                        if (value >= 4) return 'text-yellow-600'
+                                        if (value >= 2) return 'text-blue-600'
+                                        return 'text-gray-600'
+                                      }
+                                    }
+
+                                    const getIcon = () => {
+                                      if (modalGateMetric === 'recent') return Clock
+                                      if (modalGateMetric === 'patterns') return TrendingUp
+                                      return ArrowRightLeft
+                                    }
+
+                                    const getValueLabel = () => {
+                                      if (modalGateMetric === 'recent') {
+                                        if (value >= 24) return '>24h ago'
+                                        if (value < 1) return `${Math.round(value * 60)}min ago`
+                                        return `${value.toFixed(1)}h ago`
+                                      }
+                                      if (modalGateMetric === 'patterns') return `${value}min avg`
+                                      return `${value} changes`
+                                    }
+
+                                    const getSubLabel = () => {
+                                      if (modalGateMetric === 'recent') return 'last change'
+                                      if (modalGateMetric === 'patterns') return 'between changes'
+                                      return 'today'
+                                    }
+
+                                    const Icon = getIcon()
+                                    
+                                    return (
+                                      <div key={gate.gateID} className="space-y-2 p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-3">
+                                            <span className="text-xs font-medium text-gray-500 w-8">#{index + 1}</span>
+                                            <div className={`w-10 h-10 rounded-lg ${getActivityBgColor()} flex items-center justify-center`}>
+                                              <Icon className={`w-5 h-5 ${getActivityIcon()}`} />
+                                            </div>
+                                            <div>
+                                              <div className="font-medium text-sm">{gate.gateID}</div>
+                                              <div className="text-xs text-gray-500">
+                                                Pier {gate.pier} • {gate.utilization}% utilization
+                                                {modalGateMetric === 'recent' && (
+                                                  <span> • Next in {gate.hoursUntilNext !== undefined && gate.hoursUntilNext < 24 ? `${gate.hoursUntilNext.toFixed(1)}h` : 'N/A'}</span>
+                                                )}
+                                                {modalGateMetric === 'patterns' && (
+                                                  <span> • Min interval: {gate.minChangeInterval}min</span>
+                                                )}
+                                                {modalGateMetric === 'frequency' && (
+                                                  <span> • {gate.changes} aircraft today</span>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="text-right">
+                                            <div className="text-lg font-bold">{getValueLabel()}</div>
+                                            <div className="text-xs text-gray-500">{getSubLabel()}</div>
+                                          </div>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                          <div 
+                                            className={`${getActivityColor()} h-1.5 rounded-full transition-all duration-500`}
+                                            style={{ width: `${percentage}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )
+                                  })
+                                })()
+                              ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                  <ArrowRightLeft className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                  <p className="text-sm">No gate data available</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Summary Statistics in Modal */}
+                            {processedData?.gateChanges && processedData.gateChanges.length > 0 && (
+                              <div className="mt-6 p-4 bg-gray-100 rounded-lg sticky bottom-0">
+                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                  <div>
+                                    <div className="text-gray-600">Total Gates Analyzed</div>
+                                    <div className="font-bold text-lg">{processedData.gateChanges.length}</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-gray-600">
+                                      {modalGateMetric === 'recent' ? 'Avg Time Since Change' :
+                                       modalGateMetric === 'patterns' ? 'Avg Change Interval' :
+                                       'Total Gate Changes'}
+                                    </div>
+                                    <div className="font-bold text-lg">
+                                      {modalGateMetric === 'recent' 
+                                        ? `${(processedData.gateChanges.reduce((sum, gate) => sum + gate.hoursSinceLastChange, 0) / processedData.gateChanges.length).toFixed(1)}h`
+                                        : modalGateMetric === 'patterns' 
+                                        ? `${Math.round(processedData.gateChanges.reduce((sum, gate) => sum + gate.avgChangeInterval, 0) / processedData.gateChanges.length)}min`
+                                        : processedData.gateChanges.reduce((sum, gate) => sum + gate.changes, 0)}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="text-gray-600">
+                                      {modalGateMetric === 'recent' ? 'Gates Changed <3h' :
+                                       modalGateMetric === 'patterns' ? 'Quick Turnaround Gates' :
+                                       'Busiest Gates (>6 changes)'}
+                                    </div>
+                                    <div className="font-bold text-lg">
+                                      {modalGateMetric === 'recent' 
+                                        ? processedData.gateChanges.filter(g => g.hoursSinceLastChange < 3).length
+                                        : modalGateMetric === 'patterns' 
+                                        ? processedData.gateChanges.filter(g => g.avgChangeInterval < 120).length
+                                        : processedData.gateChanges.filter(g => g.changes >= 6).length}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="pt-0">
+                  {/* Metric Toggle Buttons */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <button
+                      onClick={() => setSelectedGateMetric('frequency')}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                        selectedGateMetric === 'frequency'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Change Frequency
+                    </button>
+                    <button
+                      onClick={() => setSelectedGateMetric('recent')}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                        selectedGateMetric === 'recent'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Recent Changes
+                    </button>
+                    <button
+                      onClick={() => setSelectedGateMetric('patterns')}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                        selectedGateMetric === 'patterns'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Change Patterns
+                    </button>
+                  </div>
+
                   <div className="space-y-4">
-                    {Object.entries(processedData?.physicalActivities || {})
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([activity, count]) => {
-                        const total = Object.values(processedData?.physicalActivities || {}).reduce((sum, val) => sum + val, 0)
-                        const percentage = Math.round((count / total) * 100)
+                    {processedData?.gateChanges && processedData.gateChanges.length > 0 ? (
+                      (() => {
+                        // Sort gates based on selected metric
+                        const sortedGates = [...processedData.gateChanges].sort((a, b) => {
+                          switch (selectedGateMetric) {
+                            case 'recent':
+                              return a.hoursSinceLastChange - b.hoursSinceLastChange
+                            case 'patterns':
+                              return a.avgChangeInterval - b.avgChangeInterval
+                            default: // frequency
+                              return b.changes - a.changes
+                          }
+                        }).slice(0, 10)
+
+                        const maxValue = Math.max(...sortedGates.map(gate => {
+                          switch (selectedGateMetric) {
+                            case 'recent':
+                              return 24 // max 24 hours
+                            case 'patterns':
+                              return Math.max(...processedData.gateChanges.map(g => g.avgChangeInterval))
+                            default:
+                              return gate.changes
+                          }
+                        })) || 1
+
+                        return sortedGates.map((gate, index) => {
+                          const value = selectedGateMetric === 'recent' 
+                                        ? gate.hoursSinceLastChange
+                                        : selectedGateMetric === 'patterns' 
+                                        ? gate.avgChangeInterval
+                                        : gate.changes
+                          
+                          const percentage = selectedGateMetric === 'recent'
+                                            ? Math.max(100 - (gate.hoursSinceLastChange / 24 * 100), 5)
+                                            : Math.round((value / maxValue) * 100)
                         
-                        const activityConfig = {
-                          BOARDING: {
-                            label: 'Boarding',
-                            color: 'bg-green-500',
-                            bgColor: 'bg-green-100',
-                            iconColor: 'text-green-600',
-                            Icon: UserCheck,
-                            description: 'passengers boarding'
-                          },
-                          DEPARTING: {
-                            label: 'Departing',
-                            color: 'bg-orange-500',
-                            bgColor: 'bg-orange-100',
-                            iconColor: 'text-orange-600',
-                            Icon: PlaneTakeoff,
-                            description: 'aircraft departing'
-                          },
-                          OCCUPIED: {
-                            label: 'Occupied',
-                            color: 'bg-blue-500',
-                            bgColor: 'bg-blue-100',
-                            iconColor: 'text-blue-600',
-                            Icon: Plane,
-                            description: 'aircraft at gate'
-                          },
-                          NONE: {
-                            label: 'Idle',
-                            color: 'bg-gray-400',
-                            bgColor: 'bg-gray-100',
-                            iconColor: 'text-gray-500',
-                            Icon: PauseCircle,
-                            description: 'no active operations planned'
-                          },
-                          ARRIVING: {
-                            label: 'Arriving',
-                            color: 'bg-blue-500',
-                            bgColor: 'bg-blue-100',
-                            iconColor: 'text-blue-600',
-                            Icon: Plane,
-                            description: 'aircraft arriving'
+                        const getActivityColor = () => {
+                          if (selectedGateMetric === 'recent') {
+                            if (value <= 1) return 'bg-green-500'
+                            if (value <= 3) return 'bg-yellow-500'
+                            if (value <= 6) return 'bg-orange-500'
+                            return 'bg-red-500'
+                          } else if (selectedGateMetric === 'patterns') {
+                            if (value <= 60) return 'bg-red-500'
+                            if (value <= 120) return 'bg-orange-500'
+                            if (value <= 180) return 'bg-yellow-500'
+                            return 'bg-green-500'
+                          } else { // frequency
+                            if (value >= 8) return 'bg-red-500'
+                            if (value >= 6) return 'bg-orange-500'
+                            if (value >= 4) return 'bg-yellow-500'
+                            if (value >= 2) return 'bg-blue-500'
+                            return 'bg-gray-400'
                           }
                         }
                         
-                        const config = activityConfig[activity] || {
-                          label: activity,
-                          color: 'bg-gray-400',
-                          bgColor: 'bg-gray-100',
-                          iconColor: 'text-gray-600',
-                          Icon: Loader2,
-                          description: activity
+                        const getActivityBgColor = () => {
+                          if (selectedGateMetric === 'recent') {
+                            if (value <= 1) return 'bg-green-100'
+                            if (value <= 3) return 'bg-yellow-100'
+                            if (value <= 6) return 'bg-orange-100'
+                            return 'bg-red-100'
+                          } else if (selectedGateMetric === 'patterns') {
+                            if (value <= 60) return 'bg-red-100'
+                            if (value <= 120) return 'bg-orange-100'
+                            if (value <= 180) return 'bg-yellow-100'
+                            return 'bg-green-100'
+                          } else {
+                            if (value >= 8) return 'bg-red-100'
+                            if (value >= 6) return 'bg-orange-100'
+                            if (value >= 4) return 'bg-yellow-100'
+                            if (value >= 2) return 'bg-blue-100'
+                            return 'bg-gray-100'
+                          }
                         }
                         
+                        const getActivityIcon = () => {
+                          if (selectedGateMetric === 'recent') {
+                            return value <= 3 ? 'text-green-600' : 'text-orange-600'
+                          } else if (selectedGateMetric === 'patterns') {
+                            return value <= 120 ? 'text-red-600' : 'text-green-600'
+                          } else {
+                            if (value >= 8) return 'text-red-600'
+                            if (value >= 6) return 'text-orange-600'
+                            if (value >= 4) return 'text-yellow-600'
+                            if (value >= 2) return 'text-blue-600'
+                            return 'text-gray-600'
+                          }
+                        }
+
+                        const getIcon = () => {
+                          if (selectedGateMetric === 'recent') return Clock
+                          if (selectedGateMetric === 'patterns') return TrendingUp
+                          return ArrowRightLeft
+                        }
+
+                        const getValueLabel = () => {
+                          if (selectedGateMetric === 'recent') {
+                            if (value >= 24) return '>24h ago'
+                            if (value < 1) return `${Math.round(value * 60)}min ago`
+                            return `${value.toFixed(1)}h ago`
+                          }
+                          if (selectedGateMetric === 'patterns') return `${value}min avg`
+                          return `${value} changes`
+                        }
+
+                        const getSubLabel = () => {
+                          if (selectedGateMetric === 'recent') return 'last change'
+                          if (selectedGateMetric === 'patterns') return 'between changes'
+                          return 'today'
+                        }
+
+                        const Icon = getIcon()
+                        
                         return (
-                          <div key={activity} className="space-y-2">
+                          <div key={gate.gateID} className="space-y-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-lg ${config.bgColor} flex items-center justify-center`}>
-                                  <config.Icon className={`w-5 h-5 ${config.iconColor}`} />
+                                <div className={`w-10 h-10 rounded-lg ${getActivityBgColor()} flex items-center justify-center`}>
+                                  <Icon className={`w-5 h-5 ${getActivityIcon()}`} />
                                 </div>
                                 <div>
-                                  <div className="font-medium text-sm">{config.label}</div>
-                                  <div className="text-xs text-gray-500">{config.description}</div>
+                                  <div className="font-medium text-sm">{gate.gateID}</div>
+                                  <div className="text-xs text-gray-500">
+                                    Pier {gate.pier} • {gate.utilization}% utilization
+                                    {selectedGateMetric === 'recent' && (
+                                      <span> • Next: {gate.hoursUntilNext < 24 ? `in ${gate.hoursUntilNext.toFixed(1)}h` : 'N/A'}</span>
+                                    )}
+                                    {selectedGateMetric === 'patterns' && (
+                                      <span> • Min: {gate.minChangeInterval}min</span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="text-lg font-bold">{count}</div>
-                                <div className="text-xs text-gray-500">{percentage}%</div>
+                                <div className="text-lg font-bold">{getValueLabel()}</div>
+                                <div className="text-xs text-gray-500">{getSubLabel()}</div>
                               </div>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5">
                               <div 
-                                className={`${config.color} h-1.5 rounded-full transition-all duration-500`}
+                                className={`${getActivityColor()} h-1.5 rounded-full transition-all duration-500`}
                                 style={{ width: `${percentage}%` }}
                               />
                             </div>
                           </div>
                         )
-                      })}
+                        })
+                      })()
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <ArrowRightLeft className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No gate data available</p>
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Total gates indicator */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>total gates monitored</span>
-                      <span className="font-semibold text-gray-900">
-                        {Object.values(processedData?.physicalActivities || {}).reduce((sum, val) => sum + val, 0)}
-                      </span>
+                  {/* Summary Statistics */}
+                  {processedData?.gateChanges && processedData.gateChanges.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between text-sm text-gray-600">
+                        <span>
+                          {selectedGateMetric === 'recent' ? 'Most recent change' :
+                           selectedGateMetric === 'patterns' ? 'Quickest turnaround' :
+                           'Total gate changes today'}
+                        </span>
+                        <span className="font-semibold text-gray-900">
+                          {(() => {
+                            if (selectedGateMetric === 'recent') {
+                              const mostRecent = [...processedData.gateChanges].sort((a, b) => a.hoursSinceLastChange - b.hoursSinceLastChange)[0]
+                              return mostRecent && mostRecent.hoursSinceLastChange < 1 
+                                ? `${Math.round(mostRecent.hoursSinceLastChange * 60)}min ago`
+                                : mostRecent ? `${mostRecent.hoursSinceLastChange.toFixed(1)}h ago` : 'N/A'
+                            } else if (selectedGateMetric === 'patterns') {
+                              const quickest = [...processedData.gateChanges].sort((a, b) => a.avgChangeInterval - b.avgChangeInterval)[0]
+                              return quickest ? `${quickest.avgChangeInterval}min` : 'N/A'
+                            } else {
+                              return processedData.gateChanges.reduce((sum, gate) => sum + gate.changes, 0)
+                            }
+                          })()}
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

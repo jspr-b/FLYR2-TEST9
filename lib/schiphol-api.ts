@@ -15,8 +15,8 @@ const BACKGROUND_API_TIMEOUT = 45000 // 45 seconds for background refreshes
 const MAX_RETRIES = 2 // Reduced from 3
 const RETRY_DELAY = 500 // Reduced from 1000ms
 
-// Cache for API responses (2.5 minutes)
-const CACHE_DURATION = 2.5 * 60 * 1000 // 2.5 minutes in milliseconds
+// Cache for API responses
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
 const apiCache = new Map<string, { data: any; timestamp: number }>()
 
 // Track pending requests to prevent race conditions
@@ -32,6 +32,7 @@ export interface SchipholApiConfig {
   scheduleDate?: string
   fetchAllPages?: boolean
   isBackgroundRefresh?: boolean // Added to determine timeout duration
+  maxPagesToFetch?: number // Limit pages for background refresh
 }
 
 export interface SchipholFlight {
@@ -244,11 +245,10 @@ export async function fetchSchipholFlights(config: SchipholApiConfig): Promise<S
 async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResponse> {
   const allFlights: any[] = []
   let page = 0
-  // Reduce max pages to prevent issues with later pages failing
-  // Most KLM flights should be in the first 20 pages
-  const maxPages = 20 // Reduced from 50 to improve reliability
+  // Use custom max pages if provided (for background refresh), otherwise default
+  const maxPages = config.maxPagesToFetch || 20
   
-  console.log('Fetching all pages of Schiphol API data...')
+  console.log(`Fetching ${config.isBackgroundRefresh ? 'background refresh' : 'all'} pages of Schiphol API data (max: ${maxPages})...`)
   
   while (page < maxPages) {
     const params = new URLSearchParams()

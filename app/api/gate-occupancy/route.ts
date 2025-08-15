@@ -422,6 +422,11 @@ export async function GET(request: NextRequest) {
     // Check if this is a background refresh
     const isBackgroundRefresh = request.headers.get('X-Background-Refresh') === 'true'
     
+    // Refresh Strategy:
+    // - Initial load: Fetch up to 20 pages to get comprehensive data
+    // - Background refresh (every 10 min): Only fetch 5 pages for recent updates
+    // - This prevents timeouts and reduces server load while keeping data fresh
+    
     console.log(`🔍 GATE OCCUPANCY ANALYSIS for ${today} (Background: ${isBackgroundRefresh})`)
     console.log('=' .repeat(60))
 
@@ -431,7 +436,10 @@ export async function GET(request: NextRequest) {
       airline: 'KL',
       scheduleDate: today,
       fetchAllPages: true,
-      isBackgroundRefresh
+      isBackgroundRefresh,
+      // For background refresh, only fetch first 5 pages to get recent updates
+      // This reduces load and prevents timeouts during automatic refresh
+      maxPagesToFetch: isBackgroundRefresh ? 5 : 20
     }
 
     const schipholData = await fetchSchipholFlights(apiConfig)
