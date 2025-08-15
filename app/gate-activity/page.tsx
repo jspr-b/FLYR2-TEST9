@@ -201,7 +201,7 @@ export default function GateActivityPage() {
         
         const avgChangeInterval = changeIntervals.length > 0 
           ? Math.round(changeIntervals.reduce((sum, interval) => sum + interval, 0) / changeIntervals.length)
-          : 0
+          : 999 // Set high value if no intervals
         
         // Get the most recent flight time
         const mostRecentFlight = gate.scheduledFlights.reduce((latest, flight) => {
@@ -213,23 +213,35 @@ export default function GateActivityPage() {
           ? Math.round((Date.now() - mostRecentFlight) / (1000 * 60 * 60) * 10) / 10
           : 999
         
+        // Determine operational priority
+        const isRecentlyActive = hoursSinceLastChange < 2 // Active in last 2 hours
+        const isHighFrequency = gate.scheduledFlights.length >= 6
+        const hasQuickTurnaround = changeIntervals.some(interval => interval < 45) // Less than 45 min turnaround
+        
         return {
           gateID: gate.gateID,
           pier: gate.pier,
           changes: gate.scheduledFlights.length,
           utilization: gate.utilization.daily,
           avgChangeInterval, // Average minutes between gate changes
-          minChangeInterval: changeIntervals.length > 0 ? Math.min(...changeIntervals) : 0,
+          minChangeInterval: changeIntervals.length > 0 ? Math.min(...changeIntervals) : 999,
           hoursSinceLastChange,
+          isRecentlyActive,
+          isHighFrequency,
+          hasQuickTurnaround,
           flights: gate.scheduledFlights.map(f => ({
             flightNumber: f.flightNumber,
             time: f.scheduleDateTime,
             destination: f.destination
           })),
           temporalStatus: gate.utilization.temporalStatus,
-          hoursUntilNext: gate.utilization.hoursUntilNextActivity
+          hoursUntilNext: gate.utilization.hoursUntilNextActivity,
+          currentStatus: gate.status,
+          occupiedBy: gate.occupiedBy
         }
-      }),
+      })
+      // Filter out gates with no recent activity for operational relevance
+      .filter(gate => gate.hoursSinceLastChange < 24), // Only show gates with activity in last 24 hours
     
     // Temporal Status Distribution
     temporalStatuses: data.gates.reduce((acc, gate) => {
@@ -681,16 +693,32 @@ export default function GateActivityPage() {
                             <div className="space-y-3">
                               {processedData?.gateChanges && processedData.gateChanges.length > 0 ? (
                                 (() => {
-                                  // Sort ALL gates based on selected metric
+                                  // Sort ALL gates based on selected metric with operational priority
                                   const sortedGates = [...processedData.gateChanges].sort((a, b) => {
                                     switch (modalGateMetric) {
                                       case 'recent':
+                                        // Priority: Currently occupied > Recent activity (< 1hr) > Less recent
+                                        if (a.currentStatus === 'OCCUPIED' && b.currentStatus !== 'OCCUPIED') return -1
+                                        if (b.currentStatus === 'OCCUPIED' && a.currentStatus !== 'OCCUPIED') return 1
                                         return a.hoursSinceLastChange - b.hoursSinceLastChange
                                       case 'patterns':
-                                        return a.avgChangeInterval - b.avgChangeInterval
+                                        // Priority: Quick turnarounds that are still active
+                                        const aScore = a.avgChangeInterval * (1 + a.hoursSinceLastChange / 24)
+                                        const bScore = b.avgChangeInterval * (1 + b.hoursSinceLastChange / 24)
+                                        return aScore - bScore
                                       default: // frequency
-                                        return b.changes - a.changes
+                                        // Priority: High frequency + recent activity
+                                        const aFreqScore = a.changes * (a.isRecentlyActive ? 1.5 : 1) * (1 - a.hoursSinceLastChange / 24)
+                                        const bFreqScore = b.changes * (b.isRecentlyActive ? 1.5 : 1) * (1 - b.hoursSinceLastChange / 24)
+                                        return bFreqScore - aFreqScore
                                     }
+                                  })
+                                  .filter(gate => {
+                                    // Show more in modal but still filter very old data
+                                    if (modalGateMetric === 'recent' && gate.hoursSinceLastChange > 12) {
+                                      return false // Hide anything older than 12 hours in recent view
+                                    }
+                                    return true
                                   })
 
                                   const maxValue = Math.max(...sortedGates.map(gate => {
@@ -802,17 +830,34 @@ export default function GateActivityPage() {
                                               <Icon className={`w-5 h-5 ${getActivityIcon()}`} />
                                             </div>
                                             <div>
-                                              <div className="font-medium text-sm">{gate.gateID}</div>
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-medium text-sm">{gate.gateID}</span>
+                                                {gate.currentStatus === 'OCCUPIED' && (
+                                                  <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded font-medium">ACTIVE</span>
+                                                )}
+                                                {gate.isHighFrequency && modalGateMetric === 'frequency' && (
+                                                  <span className="px-1.5 py-0.5 text-xs bg-red-100 text-red-700 rounded font-medium">HIGH</span>
+                                                )}
+                                                {gate.hasQuickTurnaround && modalGateMetric === 'patterns' && (
+                                                  <span className="px-1.5 py-0.5 text-xs bg-orange-100 text-orange-700 rounded font-medium">QUICK</span>
+                                                )}
+                                                {gate.hoursSinceLastChange < 1 && modalGateMetric === 'recent' && (
+                                                  <span className="px-1.5 py-0.5 text-xs bg-yellow-100 text-yellow-700 rounded font-medium">NEW</span>
+                                                )}
+                                              </div>
                                               <div className="text-xs text-gray-500">
                                                 Pier {gate.pier} • {gate.utilization}% utilization
-                                                {modalGateMetric === 'recent' && (
-                                                  <span> • Next in {gate.hoursUntilNext !== undefined && gate.hoursUntilNext < 24 ? `${gate.hoursUntilNext.toFixed(1)}h` : 'N/A'}</span>
+                                                {modalGateMetric === 'recent' && gate.currentStatus === 'OCCUPIED' && (
+                                                  <span className="text-green-600 font-medium"> • {gate.occupiedBy || 'Occupied'}</span>
+                                                )}
+                                                {modalGateMetric === 'recent' && gate.hoursUntilNext !== undefined && gate.hoursUntilNext < 3 && (
+                                                  <span className="text-orange-600"> • Next in {gate.hoursUntilNext.toFixed(1)}h</span>
                                                 )}
                                                 {modalGateMetric === 'patterns' && (
-                                                  <span> • Min interval: {gate.minChangeInterval}min</span>
+                                                  <span> • Quick: {gate.minChangeInterval}min | Avg: {gate.avgChangeInterval}min</span>
                                                 )}
                                                 {modalGateMetric === 'frequency' && (
-                                                  <span> • {gate.changes} aircraft today</span>
+                                                  <span> • {gate.changes} changes {gate.isRecentlyActive && <span className="text-blue-600">(active)</span>}</span>
                                                 )}
                                               </div>
                                             </div>
@@ -923,17 +968,37 @@ export default function GateActivityPage() {
                   <div className="space-y-4">
                     {processedData?.gateChanges && processedData.gateChanges.length > 0 ? (
                       (() => {
-                        // Sort gates based on selected metric
+                        // Sort gates based on selected metric with operational priority
                         const sortedGates = [...processedData.gateChanges].sort((a, b) => {
                           switch (selectedGateMetric) {
                             case 'recent':
+                              // Priority: Currently occupied > Recent activity (< 1hr) > Less recent
+                              // Filter out anything older than 8 hours for main view
+                              if (a.currentStatus === 'OCCUPIED' && b.currentStatus !== 'OCCUPIED') return -1
+                              if (b.currentStatus === 'OCCUPIED' && a.currentStatus !== 'OCCUPIED') return 1
                               return a.hoursSinceLastChange - b.hoursSinceLastChange
                             case 'patterns':
-                              return a.avgChangeInterval - b.avgChangeInterval
+                              // Priority: Quick turnarounds that are still active
+                              // Weight by recency - older quick turnarounds are less relevant
+                              const aScore = a.avgChangeInterval * (1 + a.hoursSinceLastChange / 24)
+                              const bScore = b.avgChangeInterval * (1 + b.hoursSinceLastChange / 24)
+                              return aScore - bScore
                             default: // frequency
-                              return b.changes - a.changes
+                              // Priority: High frequency + recent activity
+                              // Penalize high frequency gates that haven't been used recently
+                              const aFreqScore = a.changes * (a.isRecentlyActive ? 1.5 : 1) * (1 - a.hoursSinceLastChange / 24)
+                              const bFreqScore = b.changes * (b.isRecentlyActive ? 1.5 : 1) * (1 - b.hoursSinceLastChange / 24)
+                              return bFreqScore - aFreqScore
                           }
-                        }).slice(0, 10)
+                        })
+                        .filter(gate => {
+                          // Additional filtering for operational relevance
+                          if (selectedGateMetric === 'recent') {
+                            return gate.hoursSinceLastChange < 8 // Only show changes from last 8 hours
+                          }
+                          return true
+                        })
+                        .slice(0, 10)
 
                         const maxValue = Math.max(...sortedGates.map(gate => {
                           switch (selectedGateMetric) {
@@ -1043,14 +1108,28 @@ export default function GateActivityPage() {
                                   <Icon className={`w-5 h-5 ${getActivityIcon()}`} />
                                 </div>
                                 <div>
-                                  <div className="font-medium text-sm">{gate.gateID}</div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-sm">{gate.gateID}</span>
+                                    {gate.currentStatus === 'OCCUPIED' && (
+                                      <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded font-medium">ACTIVE</span>
+                                    )}
+                                    {gate.hasQuickTurnaround && selectedGateMetric === 'patterns' && (
+                                      <span className="px-1.5 py-0.5 text-xs bg-orange-100 text-orange-700 rounded font-medium">QUICK</span>
+                                    )}
+                                  </div>
                                   <div className="text-xs text-gray-500">
                                     Pier {gate.pier} • {gate.utilization}% utilization
-                                    {selectedGateMetric === 'recent' && (
-                                      <span> • Next: {gate.hoursUntilNext < 24 ? `in ${gate.hoursUntilNext.toFixed(1)}h` : 'N/A'}</span>
+                                    {selectedGateMetric === 'recent' && gate.currentStatus === 'OCCUPIED' && (
+                                      <span className="text-green-600 font-medium"> • {gate.occupiedBy || 'Occupied'}</span>
+                                    )}
+                                    {selectedGateMetric === 'recent' && gate.hoursUntilNext < 2 && (
+                                      <span className="text-orange-600"> • Next in {gate.hoursUntilNext.toFixed(1)}h</span>
                                     )}
                                     {selectedGateMetric === 'patterns' && (
                                       <span> • Min: {gate.minChangeInterval}min</span>
+                                    )}
+                                    {selectedGateMetric === 'frequency' && gate.isRecentlyActive && (
+                                      <span className="text-blue-600"> • Recently active</span>
                                     )}
                                   </div>
                                 </div>
