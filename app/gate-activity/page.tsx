@@ -123,7 +123,7 @@ export default function GateActivityPage() {
     fetchGateActivity,
     { summary: { totalGates: 0, totalPiers: 0, activePiers: 0, activePiersList: [], statusBreakdown: {}, averageUtilization: 0, delayedFlights: { totalDelayedFlights: 0, averageDelayMinutes: 0, totalDelayMinutes: 0, maxDelay: { minutes: 0, formatted: '', flight: null } } }, gates: [] } as GateActivityData,
     [],
-    2.5 * 60 * 1000 // Auto-refresh every 2.5 minutes
+    10 * 60 * 1000 // Auto-refresh every 10 minutes (background refresh fetches fewer pages for efficiency)
   )
 
   // Transform data for Gantt chart - only if we have actual gate data (not just loading state)
@@ -436,7 +436,7 @@ export default function GateActivityPage() {
                             bgColor: 'bg-green-100',
                             iconColor: 'text-green-600',
                             Icon: Users,
-                            description: 'Passengers boarding'
+                            description: 'passengers boarding'
                           },
                           GCL: { 
                             label: 'Gate Closing', 
@@ -542,7 +542,7 @@ export default function GateActivityPage() {
                             bgColor: 'bg-green-100',
                             iconColor: 'text-green-600',
                             Icon: UserCheck,
-                            description: 'Passengers boarding'
+                            description: 'passengers boarding'
                           },
                           DEPARTING: {
                             label: 'Departing',
@@ -550,7 +550,15 @@ export default function GateActivityPage() {
                             bgColor: 'bg-orange-100',
                             iconColor: 'text-orange-600',
                             Icon: PlaneTakeoff,
-                            description: 'Aircraft departing'
+                            description: 'aircraft departing'
+                          },
+                          OCCUPIED: {
+                            label: 'Occupied',
+                            color: 'bg-blue-500',
+                            bgColor: 'bg-blue-100',
+                            iconColor: 'text-blue-600',
+                            Icon: Plane,
+                            description: 'aircraft at gate'
                           },
                           NONE: {
                             label: 'Idle',
@@ -558,7 +566,7 @@ export default function GateActivityPage() {
                             bgColor: 'bg-gray-100',
                             iconColor: 'text-gray-500',
                             Icon: PauseCircle,
-                            description: 'No active operations planned'
+                            description: 'no active operations planned'
                           },
                           ARRIVING: {
                             label: 'Arriving',
@@ -566,7 +574,7 @@ export default function GateActivityPage() {
                             bgColor: 'bg-blue-100',
                             iconColor: 'text-blue-600',
                             Icon: Plane,
-                            description: 'Aircraft arriving'
+                            description: 'aircraft arriving'
                           }
                         }
                         
@@ -610,7 +618,7 @@ export default function GateActivityPage() {
                   {/* Total gates indicator */}
                   <div className="mt-4 pt-3 border-t border-gray-200">
                     <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>Total gates monitored</span>
+                      <span>total gates monitored</span>
                       <span className="font-semibold text-gray-900">
                         {Object.values(processedData?.physicalActivities || {}).reduce((sum, val) => sum + val, 0)}
                       </span>
