@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
+import { ensureCacheWarmed } from '@/lib/cache-manager'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,12 +11,26 @@ export async function GET(request: NextRequest) {
     const todayDate = getTodayAmsterdam()
     console.log(`📅 Fetching gate changes for date: ${todayDate}`)
     
-    const rawData = await fetchSchipholFlights({
-      flightDirection: 'D', // Departures only
+    const apiConfig = {
+      flightDirection: 'D' as const, // Departures only
       airline: 'KL', // Need to specify airline to get gate data from API
       scheduleDate: todayDate,
       fetchAllPages: true
+    }
+    
+    // Ensure cache is warmed and register for background refresh
+    await ensureCacheWarmed('gate-changes-kl-departures', apiConfig)
+    
+    // Create a timeout promise that rejects after 25 seconds
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout - data fetch taking too long')), 25000)
     })
+    
+    // Race between data fetch and timeout
+    const rawData = await Promise.race([
+      fetchSchipholFlights(apiConfig),
+      timeoutPromise
+    ])
 
     if (!rawData.flights) {
       console.error('❌ No flights data received from Schiphol API')
@@ -29,8 +44,8 @@ export async function GET(request: NextRequest) {
     const filteredFlights = filterFlights(transformedFlights, {
       flightDirection: 'D',
       scheduleDate: todayDate,
-      isOperationalFlight: true
-      // Temporarily removed KL filter to debug
+      isOperationalFlight: true,
+      prefixicao: 'KL' // Include all KL flights (including codeshares)
     })
     
     // Remove stale and duplicate flights
@@ -52,15 +67,13 @@ export async function GET(request: NextRequest) {
           console.log(`✅ Found GCH flight: ${flight.flightName} to ${flight.route.destinations[0]}, states: ${flight.publicFlightState?.flightStates?.join(', ')}`)
         }
         
-        // Check if this is actually operated by KLM (not a codeshare)
-        const mainFlight = flight.mainFlight || flight.flightName || ''
-        const isKLMOperated = mainFlight.startsWith('KL')
-        
-        if (hasGateChange && !isKLMOperated) {
-          console.log(`⚠️ Excluding non-KLM operated flight: ${flight.flightName} (operated by ${mainFlight}) to ${flight.route.destinations[0]}`)
+        // Include all KL-prefixed flights with gate changes (including codeshares)
+        // This matches the behavior of other APIs like gate-occupancy
+        if (hasGateChange && flight.mainFlight && !flight.mainFlight.startsWith('KL')) {
+          console.log(`ℹ️ Including KL codeshare: ${flight.flightName} (operated by ${flight.mainFlight}) to ${flight.route.destinations[0]}`)
         }
         
-        return hasGateChange && flight.gate && isKLMOperated // Must have gate and be KLM-operated
+        return hasGateChange && flight.gate // Must have gate change and gate assigned
       })
       .map(flight => {
         const scheduleTime = new Date(flight.scheduleDateTime)
