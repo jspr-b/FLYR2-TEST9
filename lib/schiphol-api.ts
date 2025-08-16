@@ -247,10 +247,47 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
   let page = 0
   // Use custom max pages if provided (for background refresh), otherwise default
   const maxPages = config.maxPagesToFetch || 20
+  let consecutiveEmptyPages = 0
+  const maxEmptyPages = 2 // Stop after 2 consecutive empty pages
   
   console.log(`Fetching ${config.isBackgroundRefresh ? 'background refresh' : 'all'} pages of Schiphol API data (max: ${maxPages})...`)
   
-  while (page < maxPages) {
+  // Fetch first few pages concurrently for faster initial load
+  if (!config.isBackgroundRefresh && page === 0) {
+    const concurrentPages = Math.min(3, maxPages)
+    const pagePromises = []
+    
+    for (let i = 0; i < concurrentPages; i++) {
+      pagePromises.push(fetchSinglePage(config, i))
+    }
+    
+    try {
+      const results = await Promise.all(pagePromises)
+      for (const result of results) {
+        if (result && result.flights && result.flights.length > 0) {
+          allFlights.push(...result.flights)
+          consecutiveEmptyPages = 0
+        } else {
+          consecutiveEmptyPages++
+        }
+      }
+      page = concurrentPages
+      
+      console.log(`✈️ Concurrent fetch complete: ${allFlights.length} flights from first ${concurrentPages} pages`)
+      
+      // If we got empty pages early, stop
+      if (consecutiveEmptyPages >= maxEmptyPages) {
+        console.log(`🛑 Stopping early: ${consecutiveEmptyPages} consecutive empty pages`)
+        return createResponse(allFlights, page)
+      }
+    } catch (error) {
+      console.error('Concurrent fetch failed, falling back to sequential:', error)
+      page = 0
+      allFlights.length = 0
+    }
+  }
+  
+  while (page < maxPages && consecutiveEmptyPages < maxEmptyPages) {
     const params = new URLSearchParams()
     
     if (config.flightDirection) {
@@ -358,34 +395,37 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
     
     console.log(`Page ${page}: ${flights.length} flights`)
     
-    // If no flights returned, we've reached the end
+    // Track empty pages
     if (flights.length === 0) {
+      consecutiveEmptyPages++
+      console.log(`📭 Empty page detected (${consecutiveEmptyPages}/${maxEmptyPages})`)
+    } else {
+      consecutiveEmptyPages = 0
+      allFlights.push(...flights)
+    }
+    
+    page++
+    
+    // Stop if we've seen enough empty pages
+    if (consecutiveEmptyPages >= maxEmptyPages) {
+      console.log(`🛑 Stopping: ${consecutiveEmptyPages} consecutive empty pages`)
       break
     }
     
-    allFlights.push(...flights)
-    page++
-    
     // Reduced delay for faster performance
-    if (page < maxPages) {
+    if (page < maxPages && flights.length > 0) {
       await new Promise(resolve => setTimeout(resolve, PAGE_DELAY))
     }
   }
   
   console.log(`Total flights fetched: ${allFlights.length} from ${page} pages`)
   
-  // Warn if we hit the max pages limit
-  if (page >= maxPages) {
+  // Only warn if we hit max pages without empty pages
+  if (page >= maxPages && consecutiveEmptyPages < maxEmptyPages) {
     console.warn(`⚠️ Reached maximum page limit (${maxPages}). There might be more flights available.`)
   }
   
-  const result = {
-    flights: allFlights,
-    meta: {
-      totalCount: allFlights.length,
-      pages: page
-    }
-  }
+  const result = createResponse(allFlights, page)
   
   // Cache the complete result
   const cacheKey = generateCacheKey(config)
@@ -395,6 +435,80 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
   })
   
   return result
+}
+
+/**
+ * Helper function to create API response
+ */
+function createResponse(flights: any[], pagesFetched: number): SchipholApiResponse {
+  return {
+    flights,
+    meta: {
+      totalCount: flights.length,
+      pages: pagesFetched
+    }
+  }
+}
+
+/**
+ * Fetch a single page of data
+ */
+async function fetchSinglePage(config: SchipholApiConfig, pageNumber: number): Promise<{ flights: any[] } | null> {
+  const params = new URLSearchParams()
+  
+  if (config.flightDirection) {
+    params.append('flightDirection', config.flightDirection)
+  }
+  
+  if (config.airline) {
+    params.append('airline', config.airline)
+  }
+  
+  if (config.scheduleDate) {
+    params.append('scheduleDate', config.scheduleDate)
+  }
+  
+  params.append('page', pageNumber.toString())
+  
+  const apiUrl = `${SCHIPHOL_API_BASE}/flights?${params.toString()}`
+  
+  // Create AbortController for timeout
+  const timeout = config.isBackgroundRefresh ? BACKGROUND_API_TIMEOUT : DEFAULT_API_TIMEOUT
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+  
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'app_id': SCHIPHOL_APP_ID,
+        'app_key': SCHIPHOL_APP_KEY,
+        'ResourceVersion': 'v4'
+      },
+      signal: controller.signal
+    })
+    
+    clearTimeout(timeoutId)
+    
+    if (!response.ok) {
+      console.error(`Page ${pageNumber} failed with status ${response.status}`)
+      return null
+    }
+    
+    const text = await response.text()
+    if (!text.trim()) {
+      return { flights: [] }
+    }
+    
+    const data = JSON.parse(text)
+    return { flights: data.flights || [] }
+  } catch (error) {
+    console.error(`Failed to fetch page ${pageNumber}:`, error)
+    return null
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 
 /**

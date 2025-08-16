@@ -32,16 +32,31 @@ interface GateChangesResponse {
   }
 }
 
-export function GateChangesDashboard() {
+interface GateChangesDashboardProps {
+  data?: GateChangesResponse | null
+  loading?: boolean
+  error?: string | null
+}
+
+export function GateChangesDashboard({ data: propData, loading: propLoading, error: propError }: GateChangesDashboardProps = {}) {
   const [data, setData] = useState<GateChangesResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Use prop data if provided, otherwise fetch independently
+  const usePropsData = propData !== undefined
+
   useEffect(() => {
-    fetchGateChanges()
-    const interval = setInterval(fetchGateChanges, 60000) // Refresh every minute
-    return () => clearInterval(interval)
-  }, [])
+    if (usePropsData) {
+      setData(propData || null)
+      setLoading(propLoading || false)
+      setError(propError || null)
+    } else {
+      fetchGateChanges()
+      const interval = setInterval(fetchGateChanges, 10 * 60 * 1000) // Refresh every 10 minutes
+      return () => clearInterval(interval)
+    }
+  }, [propData, propLoading, propError, usePropsData])
 
   async function fetchGateChanges() {
     try {

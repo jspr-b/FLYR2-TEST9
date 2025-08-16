@@ -89,11 +89,12 @@ interface GateActivityData {
 
 export default function GateActivityPage() {
   const [lastSuccessfulUpdate, setLastSuccessfulUpdate] = useState<Date | null>(null)
+  const [gateChangesData, setGateChangesData] = useState<any>(null)
   
   const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
     try {
       console.log(`🔄 Fetching gate activity data (Background: ${isBackgroundRefresh})`)
-      const response = await fetch('/api/gate-occupancy', {
+      const response = await fetch('/api/dashboard-data?includeGateOccupancy=true&includeGateChanges=true', {
         headers: {
           'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
         }
@@ -122,6 +123,15 @@ export default function GateActivityPage() {
       const result = await response.json()
       console.log(`✅ Gate activity fetch successful (Background: ${isBackgroundRefresh})`)
       setLastSuccessfulUpdate(new Date())
+      
+      // Extract gate occupancy data from combined response
+      if (result.gateOccupancy && result.gateChanges) {
+        // Store gate changes data for the dashboard component
+        setGateChangesData(result.gateChanges)
+        return result.gateOccupancy
+      }
+      
+      // Fallback for backward compatibility
       return result
     } catch (error) {
       console.error(`❌ Gate activity fetch error (Background: ${isBackgroundRefresh}):`, error)
@@ -588,7 +598,11 @@ export default function GateActivityPage() {
 
               {/* Real Gate Changes (GCH) */}
               <div className="lg:col-span-1">
-                <GateChangesDashboard />
+                <GateChangesDashboard 
+                  data={gateChangesData}
+                  loading={loading}
+                  error={error ? 'Failed to load gate changes' : null}
+                />
               </div>
             </div>
 
