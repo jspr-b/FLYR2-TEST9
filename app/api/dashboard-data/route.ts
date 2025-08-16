@@ -102,6 +102,49 @@ export async function GET(request: NextRequest) {
 }
 
 /**
+ * Helper function to get readable flight state
+ */
+function getFlightStateReadable(state: string): string {
+  const stateMap: Record<string, string> = {
+    'SCH': 'Flight Scheduled',
+    'DEL': 'Delayed',
+    'WIL': 'Wait in Lounge',
+    'GTO': 'Gate Open',
+    'BRD': 'Boarding',
+    'GCL': 'Gate Closing',
+    'GTD': 'Gate Closed',
+    'DEP': 'Departed',
+    'CNX': 'Cancelled',
+    'GCH': 'Gate Change',
+    'TOM': 'Tomorrow'
+  }
+  return stateMap[state] || state
+}
+
+/**
+ * Calculate delay in minutes
+ */
+function calculateDelay(flight: any): number {
+  if (flight.publicEstimatedOffBlockTime && flight.scheduleDateTime) {
+    const scheduled = new Date(flight.scheduleDateTime)
+    const estimated = new Date(flight.publicEstimatedOffBlockTime)
+    return Math.max(0, Math.round((estimated.getTime() - scheduled.getTime()) / (1000 * 60)))
+  }
+  return 0
+}
+
+/**
+ * Format delay for display
+ */
+function formatDelay(minutes: number): string {
+  if (minutes === 0) return ''
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+}
+
+/**
  * Process flights for gate occupancy analysis
  */
 function processGateOccupancy(flights: any[], currentTime: Date) {
@@ -159,8 +202,30 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
       pier: gateID.charAt(0),
       status,
       occupiedBy,
-      scheduledFlights: gateFlights.length,
-      flights: gateFlights
+      utilization: {
+        current: status === 'OCCUPIED' ? 100 : 0,
+        daily: Math.round((gateFlights.length / 20) * 100), // Estimate based on typical daily flights
+        physical: status,
+        logical: gateFlights.length,
+        temporalStatus: status === 'OCCUPIED' ? 'ACTIVE' : 'IDLE',
+        hoursUntilNextActivity: 0
+      },
+      scheduledFlights: gateFlights.map(flight => ({
+        flightName: flight.flightName,
+        flightNumber: flight.flightNumber.toString(),
+        aircraftType: flight.aircraftType?.iataMain || flight.aircraftType?.iataSub || 'Unknown',
+        destination: flight.route?.destinations?.[0] || 'Unknown',
+        primaryState: flight.publicFlightState?.flightStates?.[0] || 'SCH',
+        primaryStateReadable: getFlightStateReadable(flight.publicFlightState?.flightStates?.[0] || 'SCH'),
+        flightStates: flight.publicFlightState?.flightStates || [],
+        flightStatesReadable: (flight.publicFlightState?.flightStates || []).map(getFlightStateReadable),
+        delayMinutes: calculateDelay(flight),
+        delayFormatted: formatDelay(calculateDelay(flight)),
+        delayReason: flight.delayMinutes > 0 ? 'Operational' : '',
+        isDelayed: flight.publicFlightState?.flightStates?.includes('DEL') || calculateDelay(flight) > 15,
+        scheduleDateTime: flight.scheduleDateTime,
+        estimatedDateTime: flight.publicEstimatedOffBlockTime || null
+      }))
     }
   })
 
@@ -174,6 +239,16 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
   const activePiers = gates.filter(g => g.status !== 'AVAILABLE').map(g => g.pier)
   const uniqueActivePiers = [...new Set(activePiers)]
 
+  // Calculate delay statistics
+  const delayedFlights = flights.filter(f => calculateDelay(f) > 0)
+  const totalDelayMinutes = delayedFlights.reduce((sum, f) => sum + calculateDelay(f), 0)
+  const averageDelayMinutes = delayedFlights.length > 0 ? Math.round(totalDelayMinutes / delayedFlights.length) : 0
+  
+  const maxDelayFlight = delayedFlights.reduce((max, f) => {
+    const delay = calculateDelay(f)
+    return delay > calculateDelay(max) ? f : max
+  }, delayedFlights[0] || null)
+
   return {
     summary: {
       totalGates: gates.length,
@@ -181,7 +256,21 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
       activePiers: uniqueActivePiers.length,
       activePiersList: uniqueActivePiers,
       statusBreakdown,
-      averageUtilization: Math.round((gates.filter(g => g.status === 'OCCUPIED').length / gates.length) * 100)
+      averageUtilization: Math.round((gates.filter(g => g.status === 'OCCUPIED').length / gates.length) * 100),
+      delayedFlights: {
+        totalDelayedFlights: delayedFlights.length,
+        averageDelayMinutes,
+        totalDelayMinutes,
+        maxDelay: maxDelayFlight ? {
+          minutes: calculateDelay(maxDelayFlight),
+          formatted: formatDelay(calculateDelay(maxDelayFlight)),
+          flight: maxDelayFlight
+        } : {
+          minutes: 0,
+          formatted: '',
+          flight: null
+        }
+      }
     },
     gates: gates.slice(0, 100) // Limit to 100 gates for performance
   }
