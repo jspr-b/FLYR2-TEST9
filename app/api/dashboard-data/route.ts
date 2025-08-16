@@ -221,7 +221,7 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         flightStatesReadable: (flight.publicFlightState?.flightStates || []).map(getFlightStateReadable),
         delayMinutes: calculateDelay(flight),
         delayFormatted: formatDelay(calculateDelay(flight)),
-        delayReason: flight.delayMinutes > 0 ? 'Operational' : '',
+        delayReason: calculateDelay(flight) > 0 ? 'Operational' : '',
         isDelayed: flight.publicFlightState?.flightStates?.includes('DEL') || calculateDelay(flight) > 15,
         scheduleDateTime: flight.scheduleDateTime,
         estimatedDateTime: flight.publicEstimatedOffBlockTime || null
