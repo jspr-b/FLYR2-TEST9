@@ -158,15 +158,45 @@ export default function GateActivityPage() {
     if (!data || !data.gates) return
 
     // Track all flights
+    let boardingFlightCount = 0
+    let departedWithBRD = 0
     data.gates.forEach(gate => {
       gate.scheduledFlights.forEach(flight => {
+        if (flight.flightStates.includes('BRD')) {
+          boardingFlightCount++
+          // Check if this flight also has DEP state
+          if (flight.flightStates.includes('DEP')) {
+            departedWithBRD++
+          }
+        }
+        // Track all flights, not just those currently in BRD state
         boardingTracker.trackFlight({
           flightNumber: flight.flightNumber,
           flightStates: flight.flightStates,
-          expectedTimeBoarding: flight.expectedTimeBoarding
+          expectedTimeBoarding: flight.expectedTimeBoarding,
+          scheduleDateTime: flight.scheduleDateTime
         })
       })
     })
+
+    // Log tracking info
+    console.log(`📊 Boarding Tracker Status:`)
+    console.log(`   Total flights with BRD state: ${boardingFlightCount}`)
+    console.log(`   Departed flights with BRD state: ${departedWithBRD}`)
+    console.log(`   Total tracked flights: ${boardingTracker.getCacheSize()}`)
+    
+    // Debug: Check sample flight data
+    const sampleFlight = data.gates[0]?.scheduledFlights[0]
+    if (sampleFlight) {
+      console.log(`📋 Sample flight data:`, {
+        flightNumber: sampleFlight.flightNumber,
+        flightStates: sampleFlight.flightStates,
+        isDelayed: sampleFlight.isDelayed,
+        delayMinutes: sampleFlight.delayMinutes,
+        scheduleDateTime: sampleFlight.scheduleDateTime,
+        expectedTimeBoarding: sampleFlight.expectedTimeBoarding
+      })
+    }
 
     // Cleanup old records periodically
     boardingTracker.cleanupOldRecords()
@@ -616,35 +646,76 @@ export default function GateActivityPage() {
                       <div>
                         <div className="text-xs text-gray-600">Delayed + Gate Changed</div>
                         <div className={`text-lg font-bold ${
-                          (processedData?.flightStates?.['DEL'] && processedData?.flightStates?.['GCH']) 
-                            ? 'text-red-600' 
-                            : 'text-green-600'
+                          (() => {
+                            const flightsWithBothIssues = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => 
+                                f.flightStates.includes('DEL') && f.flightStates.includes('GCH')
+                              )
+                            ) || [];
+                            return flightsWithBothIssues.length > 0 ? 'text-red-600' : 'text-green-600';
+                          })()
                         }`}>
                           {(() => {
-                            const delayedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => f.flightStates.includes('DEL'))
+                            // Find flights that have BOTH DEL and GCH states
+                            const flightsWithBothIssues = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => 
+                                f.flightStates.includes('DEL') && f.flightStates.includes('GCH')
+                              )
                             ) || [];
-                            const gateChangedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => f.flightStates.includes('GCH'))
-                            ) || [];
-                            const bothIssues = delayedFlights.filter(df => 
-                              gateChangedFlights.some(gcf => gcf.flightNumber === df.flightNumber)
-                            ).length;
-                            return bothIssues > 0 ? `${bothIssues} flights` : 'None';
+                            
+                            console.log(`🔍 Delayed + Gate Changed flights:`, flightsWithBothIssues.map(f => ({
+                              flight: f.flightNumber,
+                              states: f.flightStates
+                            })));
+                            
+                            return flightsWithBothIssues.length > 0 
+                              ? `${flightsWithBothIssues.length} flights` 
+                              : 'None';
                           })()}
                         </div>
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">Avg Delay Time</div>
+                        <div className="text-xs text-gray-600">Median Delay Time</div>
                         <div className={`text-lg font-bold ${
-                          data?.summary.delayedFlights.averageDelayMinutes > 30 
-                            ? 'text-amber-600' 
-                            : 'text-blue-600'
+                          (() => {
+                            // Get all delayed flights with their delay times
+                            const delayedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.isDelayed && f.delayMinutes > 0)
+                            ) || [];
+                            
+                            if (delayedFlights.length === 0) return 'text-blue-600';
+                            
+                            // Calculate median
+                            const delays = delayedFlights.map(f => f.delayMinutes).sort((a, b) => a - b);
+                            const median = delays.length % 2 === 0
+                              ? (delays[delays.length / 2 - 1] + delays[delays.length / 2]) / 2
+                              : delays[Math.floor(delays.length / 2)];
+                            
+                            return median > 30 ? 'text-amber-600' : 'text-blue-600';
+                          })()
                         }`}>
-                          {data?.summary.delayedFlights.averageDelayMinutes 
-                            ? `${Math.round(data.summary.delayedFlights.averageDelayMinutes)} min` 
-                            : '0 min'}
+                          {(() => {
+                            const delayedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.isDelayed && f.delayMinutes > 0)
+                            ) || [];
+                            
+                            if (delayedFlights.length === 0) return '0 min';
+                            
+                            const delays = delayedFlights.map(f => f.delayMinutes).sort((a, b) => a - b);
+                            const median = delays.length % 2 === 0
+                              ? (delays[delays.length / 2 - 1] + delays[delays.length / 2]) / 2
+                              : delays[Math.floor(delays.length / 2)];
+                            
+                            console.log(`📊 Delay statistics:`, {
+                              totalDelayed: delayedFlights.length,
+                              delays: delays.slice(0, 10), // Show first 10
+                              median: median,
+                              average: data?.summary.delayedFlights.averageDelayMinutes
+                            });
+                            
+                            return `${Math.round(median)} min`;
+                          })()}
                         </div>
                       </div>
                       
@@ -675,6 +746,14 @@ export default function GateActivityPage() {
                             
                             const stats = boardingTracker.getBoardingStats(departedFlightNumbers);
                             
+                            // Debug log
+                            console.log(`📊 Early Boarding Stats:`)
+                            console.log(`   Departed flights: ${departedFlightNumbers.length}`)
+                            console.log(`   Departed flight numbers:`, departedFlightNumbers.slice(0, 5))
+                            console.log(`   Tracked with boarding time: ${stats.total}`)
+                            console.log(`   Early: ${stats.early}, On-time: ${stats.onTime}, Late: ${stats.late}`)
+                            console.log(`   All tracked flights:`, boardingTracker.getAllTrackedFlights().map(f => f.flightNumber))
+                            
                             return (
                               <>
                                 {stats.earlyBoardingRate}%
@@ -690,19 +769,33 @@ export default function GateActivityPage() {
                       <div>
                         <div className="text-xs text-gray-600">Critical Delays</div>
                         <div className={`text-lg font-bold ${
-                          data?.summary.delayedFlights.maxDelay.minutes > 60 
-                            ? 'text-red-600' 
-                            : 'text-orange-600'
+                          (() => {
+                            const criticalDelays = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.delayMinutes > 60)
+                            ) || [];
+                            return criticalDelays.length > 0 ? 'text-red-600' : 'text-green-600';
+                          })()
                         }`}>
                           {(() => {
                             const criticalDelays = data?.gates.flatMap(g => 
                               g.scheduledFlights.filter(f => f.delayMinutes > 60)
-                            ).length || 0;
-                            return criticalDelays > 0 ? `${criticalDelays} flights` : 'None';
+                            ) || [];
+                            
+                            console.log(`🚨 Critical delays (>60min):`, criticalDelays.map(f => ({
+                              flight: f.flightNumber,
+                              delay: f.delayMinutes,
+                              formatted: f.delayFormatted
+                            })));
+                            
+                            return (
+                              <>
+                                {criticalDelays.length > 0 ? `${criticalDelays.length} flights` : 'None'}
+                                <span className="text-xs font-normal text-gray-500 ml-1">
+                                  (&gt;60min)
+                                </span>
+                              </>
+                            );
                           })()}
-                          <span className="text-xs font-normal text-gray-500 ml-1">
-                            (&gt;60min)
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -740,6 +833,29 @@ export default function GateActivityPage() {
                 <GateTypeDistribution />
               </div>
             </div>
+
+            {/* Debug: Boarding Tracker Info (temporary) */}
+            {process.env.NODE_ENV === 'development' && (
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle className="text-sm">Boarding Tracker Debug Info</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xs space-y-1">
+                    <p>Total tracked: {boardingTracker.getCacheSize()} flights</p>
+                    <p>Recent boardings:</p>
+                    <div className="max-h-32 overflow-y-auto">
+                      {boardingTracker.getAllTrackedFlights().slice(0, 5).map(record => (
+                        <div key={record.flightNumber} className="ml-2 text-gray-600">
+                          Flight {record.flightNumber}: {record.boardingStatus} 
+                          ({record.minutesDifference > 0 ? '+' : ''}{record.minutesDifference} min)
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           </div>
         </div>
