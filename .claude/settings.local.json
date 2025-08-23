@@ -12,7 +12,26 @@
       "Bash(npx tsc:*)",
       "Bash(lsof:*)",
       "Bash(killall:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(grep:*)",
+      "Bash(node:*)",
+      "Bash(awk:*)",
+      "Bash(grep:*)",
+      "Bash(npm i:*)",
+      "Bash(lsof:*)",
+      "Bash(/dev/null)",
+      "Bash(true)",
+      "Bash(chmod:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(claude-code --version)",
+      "Bash(npm:*)"
     ],
     "deny": []
   }

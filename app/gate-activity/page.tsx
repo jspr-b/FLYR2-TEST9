@@ -6,7 +6,9 @@ import { useClientData } from "@/lib/client-utils"
 import { Sidebar } from "@/components/sidebar"
 import { GateGanttChart } from "@/components/gate-gantt-chart"
 import { GateChangesDashboard } from "@/components/gate-changes-dashboard"
+import { GateTypeDistribution } from "@/components/gate-type-distribution"
 import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2, Info, TrendingUp, ArrowRightLeft, Maximize2 } from "lucide-react"
+import { boardingTracker } from "@/lib/boarding-tracker"
 import {
   Popover,
   PopoverContent,
@@ -150,6 +152,25 @@ export default function GateActivityPage() {
     [],
     10 * 60 * 1000 // Auto-refresh every 10 minutes (background refresh fetches fewer pages for efficiency)
   )
+
+  // Track boarding states
+  useEffect(() => {
+    if (!data || !data.gates) return
+
+    // Track all flights
+    data.gates.forEach(gate => {
+      gate.scheduledFlights.forEach(flight => {
+        boardingTracker.trackFlight({
+          flightNumber: flight.flightNumber,
+          flightStates: flight.flightStates,
+          expectedTimeBoarding: flight.expectedTimeBoarding
+        })
+      })
+    })
+
+    // Cleanup old records periodically
+    boardingTracker.cleanupOldRecords()
+  }, [data])
 
   // Transform data for Gantt chart - only if we have actual gate data (not just loading state)
   const ganttData = (data && data.gates.length > 0) ? data.gates.map(gate => ({
@@ -628,48 +649,37 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">On-Time Departures</div>
+                        <div className="text-xs text-gray-600">Early Boarding Rate</div>
                         <div className={`text-lg font-bold ${
                           (() => {
-                            // Get all departed flights
-                            const departedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => 
-                                f.flightStates.includes('DEP')
-                              )
+                            // Get departed flight numbers
+                            const departedFlightNumbers = data?.gates.flatMap(g => 
+                              g.scheduledFlights
+                                .filter(f => f.flightStates.includes('DEP'))
+                                .map(f => f.flightNumber)
                             ) || [];
                             
-                            // Count departed flights that were not delayed
-                            // These flights likely boarded on time to depart on time
-                            const onTimeDepartures = departedFlights.filter(f => !f.isDelayed).length;
-                            const totalDeparted = departedFlights.length;
+                            // Get boarding stats from tracker
+                            const stats = boardingTracker.getBoardingStats(departedFlightNumbers);
                             
-                            const onTimeRate = totalDeparted > 0 
-                              ? Math.round((onTimeDepartures / totalDeparted) * 100) 
-                              : 0;
-                            
-                            return onTimeRate > 85 ? 'text-green-600' : 
-                                   onTimeRate > 70 ? 'text-blue-600' : 'text-amber-600';
+                            return stats.earlyBoardingRate > 30 ? 'text-green-600' : 
+                                   stats.earlyBoardingRate > 15 ? 'text-blue-600' : 'text-amber-600';
                           })()
                         }`}>
                           {(() => {
-                            const departedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => 
-                                f.flightStates.includes('DEP')
-                              )
+                            const departedFlightNumbers = data?.gates.flatMap(g => 
+                              g.scheduledFlights
+                                .filter(f => f.flightStates.includes('DEP'))
+                                .map(f => f.flightNumber)
                             ) || [];
                             
-                            const onTimeDepartures = departedFlights.filter(f => !f.isDelayed).length;
-                            const totalDeparted = departedFlights.length;
-                            
-                            const onTimeRate = totalDeparted > 0 
-                              ? Math.round((onTimeDepartures / totalDeparted) * 100) 
-                              : 0;
+                            const stats = boardingTracker.getBoardingStats(departedFlightNumbers);
                             
                             return (
                               <>
-                                {onTimeRate}%
+                                {stats.earlyBoardingRate}%
                                 <span className="text-xs font-normal text-gray-500 ml-1">
-                                  ({onTimeDepartures}/{totalDeparted})
+                                  ({stats.early}/{stats.total})
                                 </span>
                               </>
                             );
@@ -724,88 +734,13 @@ export default function GateActivityPage() {
               </div>
             </div>
 
-            {/* Currently Active Gates */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Currently Active Gates</CardTitle>
-                <p className="text-sm text-gray-600">Gates with occupied flights</p>
-              </CardHeader>
-              <CardContent>
-                {processedData?.activeGates && processedData.activeGates.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {processedData.activeGates.map((gate) => (
-                      <div key={gate.gateID} className="p-4 border rounded-lg bg-white">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-lg">{gate.gateID}</h4>
-                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                            Pier {gate.pier}
-                          </span>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Flight:</span>
-                            <span className="font-medium">{gate.occupiedBy}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Destination:</span>
-                            <span className="font-medium">{gate.destination}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Aircraft:</span>
-                            <span className="font-medium">{gate.aircraftType}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Status:</span>
-                            <span className={`font-medium ${gate.isDelayed ? 'text-red-600' : 'text-green-600'}`}>
-                              {gate.flightState}
-                            </span>
-                          </div>
-                          {gate.isDelayed && (
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Delay:</span>
-                              <span className="font-medium text-red-600">{gate.delayMinutes}min</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>No gates currently active</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Gate Type Distribution */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <div className="lg:col-span-1">
+                <GateTypeDistribution />
+              </div>
+            </div>
 
-            {/* Summary Statistics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Summary Statistics</CardTitle>
-                <p className="text-sm text-gray-600">Overall gate activity metrics</p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{data?.summary.totalGates}</div>
-                    <div className="text-sm text-gray-600">Total Gates</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{data?.summary.activePiers}</div>
-                    <div className="text-sm text-gray-600">Active Piers</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{data?.summary.averageUtilization}%</div>
-                    <div className="text-sm text-gray-600">Avg Utilization</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{data?.summary.delayedFlights.totalDelayedFlights}</div>
-                    <div className="text-sm text-gray-600">Delayed Flights</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

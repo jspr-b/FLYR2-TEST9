@@ -1,0 +1,2937 @@
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.2.4
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.88.181:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 2.5s
+ ○ Compiling /api/clear-cache ...
+ ✓ Compiled /api/clear-cache in 522ms (360 modules)
+🧹 Cache cleared: { message: 'Cache cleared successfully', clearedEntries: 0 }
+ POST /api/clear-cache 200 in 631ms
+ ✓ Compiled /api/gate-occupancy in 343ms (363 modules)
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: true)
+============================================================
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+KLM filter: 100 → 83 flights (removed 17 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 83 → 83 flights (removed 0 date mismatches)
+Operational filter: 83 → 81 flights (removed 2 non-operational)
+Total filtering: 100 → 81 flights (removed 19 total)
+Deduplication: 81 → 81 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 81 → 80 flights (removed 1 stale)
+📊 Processing 80 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 40
+  • Total Piers: 5
+  • Active Piers: 0 ()
+  • Status Breakdown: { SCHEDULED: 39, PREPARING: 1 }
+  • Average Utilization: 0%
+  • Delayed Flights: 10
+  • Average Delay: 208 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 5663ms
+ ○ Compiling /busiest-gates-and-terminals ...
+ ✓ Compiled /busiest-gates-and-terminals in 1449ms (799 modules)
+ ✓ Compiled in 715ms (356 modules)
+ GET /busiest-gates-and-terminals 200 in 2221ms
+ ✓ Compiled /api/gate-occupancy in 195ms (463 modules)
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Fetching all pages of Schiphol API data (max: 20)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 Processing 326 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 94
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { PREPARING: 17, DEPARTED: 2, OCCUPIED: 27, SCHEDULED: 48 }
+  • Average Utilization: 10%
+  • Delayed Flights: 60
+  • Average Delay: 63 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 13447ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 Processing 326 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 94
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { PREPARING: 17, DEPARTED: 2, OCCUPIED: 27, SCHEDULED: 48 }
+  • Average Utilization: 10%
+  • Delayed Flights: 60
+  • Average Delay: 63 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 8ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 Processing 326 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 94
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { PREPARING: 17, DEPARTED: 2, OCCUPIED: 27, SCHEDULED: 48 }
+  • Average Utilization: 10%
+  • Delayed Flights: 60
+  • Average Delay: 63 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 6ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 Processing 326 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 94
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { PREPARING: 17, DEPARTED: 2, OCCUPIED: 27, SCHEDULED: 48 }
+  • Average Utilization: 10%
+  • Delayed Flights: 60
+  • Average Delay: 63 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 6ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: true)
+============================================================
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+KLM filter: 100 → 83 flights (removed 17 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 83 → 83 flights (removed 0 date mismatches)
+Operational filter: 83 → 81 flights (removed 2 non-operational)
+Total filtering: 100 → 81 flights (removed 19 total)
+Deduplication: 81 → 81 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 81 → 80 flights (removed 1 stale)
+📊 Processing 80 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 40
+  • Total Piers: 5
+  • Active Piers: 0 ()
+  • Status Breakdown: { SCHEDULED: 39, PREPARING: 1 }
+  • Average Utilization: 0%
+  • Delayed Flights: 10
+  • Average Delay: 208 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 5095ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-08-16
+KLM filter: 100 → 83 flights (removed 17 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 83 → 83 flights (removed 0 date mismatches)
+Operational filter: 83 → 81 flights (removed 2 non-operational)
+Total filtering: 100 → 81 flights (removed 19 total)
+Deduplication: 81 → 81 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 81 → 80 flights (removed 1 stale)
+📊 Processing 80 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 40
+  • Total Piers: 5
+  • Active Piers: 0 ()
+  • Status Breakdown: { SCHEDULED: 39, PREPARING: 1 }
+  • Average Utilization: 0%
+  • Delayed Flights: 10
+  • Average Delay: 208 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 6ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-08-16
+KLM filter: 100 → 83 flights (removed 17 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 83 → 83 flights (removed 0 date mismatches)
+Operational filter: 83 → 81 flights (removed 2 non-operational)
+Total filtering: 100 → 81 flights (removed 19 total)
+Deduplication: 81 → 81 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 81 → 80 flights (removed 1 stale)
+📊 Processing 80 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 40
+  • Total Piers: 5
+  • Active Piers: 0 ()
+  • Status Breakdown: { SCHEDULED: 39, PREPARING: 1 }
+  • Average Utilization: 0%
+  • Delayed Flights: 10
+  • Average Delay: 208 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 8ms
+ ○ Compiling /api/gate-changes ...
+ ✓ Compiled /api/gate-changes in 540ms (806 modules)
+📍 Gate Changes API: Starting request
+📅 Fetching gate changes for date: 2025-08-16
+🔄 Registered cache refresh task: gate-changes-kl-departures, next refresh in 240s
+📌 Skipping initial cache warm for gate-changes-kl-departures in development mode
+Fetching all pages of Schiphol API data (max: 20)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+🏃 Background cache refresh cycle started
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+🔥 Warming cache for gate-changes-kl-departures...
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-08-16
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+✅ Received 400 raw flights from API
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+Deduplication: 326 → 326 flights (removed 0 duplicates)
+🔍 Processing 326 unique operational flights
+✅ Found GCH flight: KL1577 to OPO, states: GTO, GCH, DEL
+✅ Found GCH flight: KL1425 to NTE, states: BRD, GCH
+✅ Found GCH flight: KL1481 to NCE, states: SCH, GCH, DEL
+✅ Found GCH flight: KL1609 to FCO, states: SCH, GCH, DEL
+✅ Found GCH flight: KL1521 to BCN, states: GTO, GCH, DEL
+✅ Found GCH flight: KL1637 to VCE, states: BRD, GCH
+✅ Found GCH flight: KL1155 to TRD, states: BRD, GCH
+✅ Found GCH flight: KL1985 to BEG, states: SCH, GCH
+✅ Found GCH flight: KL1549 to AGP, states: GTO, GCH
+✅ Found GCH flight: KL1759 to HAM, states: GTO, GCH
+✅ Found GCH flight: KL0701 to EZE, states: BRD, GCH
+✅ Found GCH flight: KL0835 to SIN, states: BRD, GCH
+✅ Found GCH flight: KL1509 to MAD, states: GTO, GCH, DEL
+✅ Found GCH flight: KL1587 to LIS, states: GTO, GCH, DEL
+✅ Found GCH flight: KL1939 to GVA, states: SCH, GCH
+✅ Found GCH flight: KL1969 to ZAG, states: GTO, GCH
+✅ Found GCH flight: KL1227 to ARN, states: GTO, GCH, DEL
+✅ Found GCH flight: KL1309 to GDN, states: SCH, GCH
+✅ Found GCH flight: KL1471 to MRS, states: SCH, GCH, DEL
+✅ Found GCH flight: KL1785 to BER, states: GTO, GCH, DEL
+✅ Found GCH flight: KL1255 to HEL, states: SCH, GCH, DEL
+✅ Found GCH flight: KL1927 to ZRH, states: SCH, GCH
+✅ Found GCH flight: KL1975 to SPU, states: SCH, GCH, DEL
+✅ Found GCH flight: KL1279 to CPH, states: SCH, GCH, DEL
+✅ Found GCH flight: KL1447 to BOD, states: SCH, GCH
+✅ Found GCH flight: KL1171 to BGO, states: SCH, GCH
+🚨 Found 26 gate change events
+ GET /api/gate-changes 200 in 25341ms
+ ✓ Compiled /api/gate-occupancy in 177ms (463 modules)
+🔍 GATE OCCUPANCY ANALYSIS for 2025-08-16 (Background: false)
+============================================================
+Fetching all pages of Schiphol API data (max: 20)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 Processing 326 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 94
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { PREPARING: 14, DEPARTED: 2, OCCUPIED: 30, SCHEDULED: 48 }
+  • Average Utilization: 11%
+  • Delayed Flights: 60
+  • Average Delay: 63 minutes
+  • Max Delay: 30h 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 6194ms
+ ✓ Compiled /_not-found in 295ms (809 modules)
+ GET /api/gate-occupancy 404 in 375ms
+ GET /busiest-gates-and-terminals 200 in 49ms
+ ○ Compiling /delay-trends-by-hour ...
+ ✓ Compiled /delay-trends-by-hour in 524ms (891 modules)
+ GET /delay-trends-by-hour 200 in 601ms
+ ✓ Compiled /api/delay-trends/hourly in 177ms (893 modules)
+📊 DELAY TRENDS: Querying flights for date: 2025-08-16
+Fetching all pages of Schiphol API data (max: 20)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+ ○ Compiling /route-analytics ...
+ ✓ Compiled /route-analytics in 575ms (930 modules)
+ GET /route-analytics 200 in 664ms
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+📊 DELAY TRENDS: Fetched 400 total flights for date 2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+📊 DELAY TRENDS: After filtering: 327 flights
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 327 flights
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 DELAY TRENDS: After removing stale: 326 flights
+📊 DELAY TRENDS: Calculated 15 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 10237ms
+📊 DELAY TRENDS: Querying flights for date: 2025-08-16
+Fetching all pages of Schiphol API data (max: 20)...
+ ✓ Compiled /api/route-analytics/delays in 322ms (935 modules)
+Fetching all pages of Schiphol API data (max: 20)...
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-08-16
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 5: 20 flights
+Page 3: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Page 6: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 5: 20 flights
+Page 7: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 6: 20 flights
+Page 8: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Page 7: 20 flights
+Page 9: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 8: 20 flights
+Page 10: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 9: 20 flights
+Page 11: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 10: 20 flights
+Page 12: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 11: 20 flights
+Page 13: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 12: 20 flights
+Page 14: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 16: 20 flights
+Page 18: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 17: 20 flights
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+📊 DELAY TRENDS: Fetched 400 total flights for date 2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+📊 DELAY TRENDS: After filtering: 327 flights
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 327 flights
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 DELAY TRENDS: After removing stale: 326 flights
+📊 DELAY TRENDS: Calculated 15 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 5948ms
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+ ○ Compiling /_error ...
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+ GET /api/route-analytics/delays 200 in 6708ms
+ GET /api/route-analytics/destinations 200 in 6726ms
+ ✓ Compiled /_error in 877ms (1264 modules)
+ ✓ Compiled in 0ms (628 modules)
+Could not find files for /_error in .next/build-manifest.json
+Could not find files for /_error in .next/build-manifest.json
+ GET /api/delay-trends/hourly 404 in 2145ms
+ ✓ Compiled in 1ms (628 modules)
+ ✓ Compiled in 1ms (628 modules)
+ GET /route-analytics 200 in 2344ms
+ ✓ Compiled in 1ms (628 modules)
+📊 DELAY TRENDS: Querying flights for date: 2025-08-16
+Fetching all pages of Schiphol API data (max: 20)...
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-08-16
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-08-16
+ GET /route-analytics 200 in 524ms
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 DELAY TRENDS: Fetched 400 total flights for date 2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+📊 DELAY TRENDS: After filtering: 327 flights
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 327 flights
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+📊 DELAY TRENDS: After removing stale: 326 flights
+📊 DELAY TRENDS: Calculated 15 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/route-analytics/delays 200 in 10390ms
+ GET /api/route-analytics/destinations 200 in 10389ms
+ GET /api/delay-trends/hourly 200 in 9016ms
+ GET /api/delay-trends/hourly 404 in 60ms
+ GET /api/delay-trends/hourly 404 in 29ms
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+Fetching all pages of Schiphol API data (max: 20)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=19
+Page 19: 20 flights
+Total flights fetched: 400 from 20 pages
+⚠️ Reached maximum page limit (20). There might be more flights available.
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+ GET /api/route-analytics/delays 200 in 18846ms
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-08-16
+KLM filter: 400 → 330 flights (removed 70 codeshares)
+Filtering by date: 2025-08-16
+Date filter: 330 → 330 flights (removed 0 date mismatches)
+Operational filter: 330 → 327 flights (removed 3 non-operational)
+Total filtering: 400 → 327 flights (removed 73 total)
+Deduplication: 327 → 327 flights (removed 0 duplicates)
+🗑️ Filtering stale flight: KL9960 (updated 2025-07-25T08:02:36.164Z)
+Stale data filter: 327 → 326 flights (removed 1 stale)
+ GET /api/route-analytics/delays 200 in 4ms
+ ○ Compiling /gate-activity ...
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 7s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error: getaddrinfo ENOTFOUND api.schiphol.nl] {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'api.schiphol.nl'
+  }
+}
+Page 0 attempt 2 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error: getaddrinfo ENOTFOUND api.schiphol.nl] {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'api.schiphol.nl'
+  }
+}
+Failed to fetch page 0 after 2 attempts
+Error fetching Schiphol flights: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error: getaddrinfo ENOTFOUND api.schiphol.nl] {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'api.schiphol.nl'
+  }
+}
+❌ Background refresh failed for: gate-changes-kl-departures TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error: getaddrinfo ENOTFOUND api.schiphol.nl] {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'api.schiphol.nl'
+  }
+}
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 539s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+Page 0 attempt 2 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+Failed to fetch page 0 after 2 attempts
+Error fetching Schiphol flights: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+❌ Background refresh failed for: gate-changes-kl-departures TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+Page 0 attempt 2 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+Failed to fetch page 0 after 2 attempts
+Error fetching Schiphol flights: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+❌ Background refresh failed for: gate-changes-kl-departures TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error [ConnectTimeoutError]: Connect Timeout Error (attempted address: api.schiphol.nl:443, timeout: 10000ms)] {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3 attempt 1 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error: read ECONNRESET] {
+    errno: -54,
+    code: 'ECONNRESET',
+    syscall: 'read'
+  }
+}
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 144s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 542s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 541s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 540s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 542s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 6s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 10s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 6s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 6s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 139s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 212s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 178s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 540s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 542s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 6s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 543s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 6s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 4s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 6s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 10s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 16s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: Error [AbortError]: This operation was aborted
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  code: 20,
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 277s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 5s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0 attempt 1 failed: TypeError: fetch failed
+    at async fetchAllPages (lib/schiphol-api.ts:323:21)
+    at async eval (lib/schiphol-api.ts:123:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  321 |         
+  322 |         try {
+> 323 |           response = await fetch(apiUrl, {
+      |                     ^
+  324 |             method: 'GET',
+  325 |             headers: {
+  326 |               'Accept': 'application/json', {
+  [cause]: [Error: read ECONNRESET] {
+    errno: -54,
+    code: 'ECONNRESET',
+    syscall: 'read'
+  }
+}
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 7s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 2s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: gate-changes-kl-departures
+Fetching background refresh pages of Schiphol API data (max: 5)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-08-16&page=4
+Page 4: 20 flights
+Total flights fetched: 100 from 5 pages
+⚠️ Reached maximum page limit (5). There might be more flights available.
+✅ Background refresh completed for: gate-changes-kl-departures (took 3s)
