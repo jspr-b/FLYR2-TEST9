@@ -83,6 +83,7 @@ interface GateActivityData {
       isDelayed: boolean
       scheduleDateTime: string
       estimatedDateTime: string | null
+      expectedTimeBoarding: string | null
     }>
   }>
 }
@@ -169,7 +170,8 @@ export default function GateActivityPage() {
       delayMinutes: flight.delayMinutes,
       delayFormatted: flight.delayFormatted,
       delayReason: flight.delayReason,
-      gate: gate.gateID
+      gate: gate.gateID,
+      expectedTimeBoarding: flight.expectedTimeBoarding
     }))
   })).filter(gate => gate.flights.length > 0) : []
 
@@ -626,49 +628,48 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">On-Time Performance</div>
+                        <div className="text-xs text-gray-600">On-Time Departures</div>
                         <div className={`text-lg font-bold ${
                           (() => {
-                            // Get all scheduled flights (not departed yet)
-                            const scheduledFlights = data?.gates.flatMap(g => 
+                            // Get all departed flights
+                            const departedFlights = data?.gates.flatMap(g => 
                               g.scheduledFlights.filter(f => 
-                                f.flightStates.includes('SCH') && !f.flightStates.includes('DEP')
+                                f.flightStates.includes('DEP')
                               )
                             ) || [];
                             
-                            // Count how many scheduled flights are NOT delayed
-                            const onTimeFlights = scheduledFlights.filter(f => !f.isDelayed).length;
-                            const totalScheduled = scheduledFlights.length;
+                            // Count departed flights that were not delayed
+                            // These flights likely boarded on time to depart on time
+                            const onTimeDepartures = departedFlights.filter(f => !f.isDelayed).length;
+                            const totalDeparted = departedFlights.length;
                             
-                            const onTimeRate = totalScheduled > 0 
-                              ? Math.round((onTimeFlights / totalScheduled) * 100) 
+                            const onTimeRate = totalDeparted > 0 
+                              ? Math.round((onTimeDepartures / totalDeparted) * 100) 
                               : 0;
                             
-                            return onTimeRate > 80 ? 'text-green-600' : 
-                                   onTimeRate > 60 ? 'text-amber-600' : 'text-red-600';
+                            return onTimeRate > 85 ? 'text-green-600' : 
+                                   onTimeRate > 70 ? 'text-blue-600' : 'text-amber-600';
                           })()
                         }`}>
                           {(() => {
-                            // Get all scheduled flights (not departed yet)
-                            const scheduledFlights = data?.gates.flatMap(g => 
+                            const departedFlights = data?.gates.flatMap(g => 
                               g.scheduledFlights.filter(f => 
-                                f.flightStates.includes('SCH') && !f.flightStates.includes('DEP')
+                                f.flightStates.includes('DEP')
                               )
                             ) || [];
                             
-                            // Count how many scheduled flights are NOT delayed
-                            const onTimeFlights = scheduledFlights.filter(f => !f.isDelayed).length;
-                            const totalScheduled = scheduledFlights.length;
+                            const onTimeDepartures = departedFlights.filter(f => !f.isDelayed).length;
+                            const totalDeparted = departedFlights.length;
                             
-                            const onTimeRate = totalScheduled > 0 
-                              ? Math.round((onTimeFlights / totalScheduled) * 100) 
+                            const onTimeRate = totalDeparted > 0 
+                              ? Math.round((onTimeDepartures / totalDeparted) * 100) 
                               : 0;
                             
                             return (
                               <>
                                 {onTimeRate}%
                                 <span className="text-xs font-normal text-gray-500 ml-1">
-                                  ({onTimeFlights}/{totalScheduled})
+                                  ({onTimeDepartures}/{totalDeparted})
                                 </span>
                               </>
                             );

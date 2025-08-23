@@ -224,7 +224,8 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         delayReason: calculateDelay(flight) > 0 ? 'Operational' : '',
         isDelayed: flight.publicFlightState?.flightStates?.includes('DEL') || calculateDelay(flight) > 15,
         scheduleDateTime: flight.scheduleDateTime,
-        estimatedDateTime: flight.publicEstimatedOffBlockTime || null
+        estimatedDateTime: flight.publicEstimatedOffBlockTime || null,
+        expectedTimeBoarding: flight.expectedTimeBoarding || null
       }))
     }
   })

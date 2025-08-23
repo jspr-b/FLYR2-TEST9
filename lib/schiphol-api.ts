@@ -55,6 +55,8 @@ export interface SchipholFlight {
     destinations: string[]
   }
   lastUpdatedAt: string
+  expectedTimeBoarding?: string
+  actualOffBlockTime?: string
   // Operating carrier information
   mainFlight?: string
   prefixIATA?: string
@@ -535,6 +537,7 @@ export function transformSchipholFlight(flight: any): SchipholFlight {
       destinations: flight.route?.destinations || flight.destinations || []
     },
     lastUpdatedAt: flight.lastUpdatedAt || flight.updatedAt || new Date().toISOString(),
+    expectedTimeBoarding: flight.expectedTimeBoarding || undefined,
     // Operating carrier information
     mainFlight: flight.mainFlight || undefined,
     prefixIATA: flight.prefixIATA || undefined,
