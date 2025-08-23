@@ -239,14 +239,6 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
               </div>
             </div>
             
-            <div className="text-xs text-gray-500 pt-2">
-              <div className="font-medium mb-1">Data Notes:</div>
-              <ul className="space-y-0.5">
-                <li>• Real-time data from Schiphol CISS API</li>
-                <li>• KLM-operated flights only (excludes codeshares)</li>
-                <li>• Current gate shown (previous gate not available)</li>
-              </ul>
-            </div>
           </div>
         </CardContent>
       </Card>
