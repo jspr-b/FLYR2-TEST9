@@ -480,6 +480,7 @@ export default function GateActivityPage() {
                   <p className="text-xs text-gray-600">Current flight phases</p>
                 </CardHeader>
                 <CardContent className="pt-0">
+                  {/* Flight State Distribution */}
                   <div className="space-y-4">
                     {Object.entries(processedData?.flightStates || {})
                       .sort(([, a], [, b]) => b - a)
@@ -582,6 +583,122 @@ export default function GateActivityPage() {
                           </div>
                         )
                       })}
+                  </div>
+                  
+                  {/* Operational Impact Section */}
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <div className="text-sm font-medium text-gray-700 mb-3">Operational Impact:</div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <div className="text-xs text-gray-600">Delayed + Gate Changed</div>
+                        <div className={`text-lg font-bold ${
+                          (processedData?.flightStates?.['DEL'] && processedData?.flightStates?.['GCH']) 
+                            ? 'text-red-600' 
+                            : 'text-green-600'
+                        }`}>
+                          {(() => {
+                            const delayedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEL'))
+                            ) || [];
+                            const gateChangedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('GCH'))
+                            ) || [];
+                            const bothIssues = delayedFlights.filter(df => 
+                              gateChangedFlights.some(gcf => gcf.flightNumber === df.flightNumber)
+                            ).length;
+                            return bothIssues > 0 ? `${bothIssues} flights` : 'None';
+                          })()}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-xs text-gray-600">Avg Delay Time</div>
+                        <div className={`text-lg font-bold ${
+                          data?.summary.delayedFlights.averageDelayMinutes > 30 
+                            ? 'text-amber-600' 
+                            : 'text-blue-600'
+                        }`}>
+                          {data?.summary.delayedFlights.averageDelayMinutes 
+                            ? `${Math.round(data.summary.delayedFlights.averageDelayMinutes)} min` 
+                            : '0 min'}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-xs text-gray-600">On-Time Performance</div>
+                        <div className={`text-lg font-bold ${
+                          (() => {
+                            // Get all scheduled flights (not departed yet)
+                            const scheduledFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => 
+                                f.flightStates.includes('SCH') && !f.flightStates.includes('DEP')
+                              )
+                            ) || [];
+                            
+                            // Count how many scheduled flights are NOT delayed
+                            const onTimeFlights = scheduledFlights.filter(f => !f.isDelayed).length;
+                            const totalScheduled = scheduledFlights.length;
+                            
+                            const onTimeRate = totalScheduled > 0 
+                              ? Math.round((onTimeFlights / totalScheduled) * 100) 
+                              : 0;
+                            
+                            return onTimeRate > 80 ? 'text-green-600' : 
+                                   onTimeRate > 60 ? 'text-amber-600' : 'text-red-600';
+                          })()
+                        }`}>
+                          {(() => {
+                            // Get all scheduled flights (not departed yet)
+                            const scheduledFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => 
+                                f.flightStates.includes('SCH') && !f.flightStates.includes('DEP')
+                              )
+                            ) || [];
+                            
+                            // Count how many scheduled flights are NOT delayed
+                            const onTimeFlights = scheduledFlights.filter(f => !f.isDelayed).length;
+                            const totalScheduled = scheduledFlights.length;
+                            
+                            const onTimeRate = totalScheduled > 0 
+                              ? Math.round((onTimeFlights / totalScheduled) * 100) 
+                              : 0;
+                            
+                            return (
+                              <>
+                                {onTimeRate}%
+                                <span className="text-xs font-normal text-gray-500 ml-1">
+                                  ({onTimeFlights}/{totalScheduled})
+                                </span>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-xs text-gray-600">Critical Delays</div>
+                        <div className={`text-lg font-bold ${
+                          data?.summary.delayedFlights.maxDelay.minutes > 60 
+                            ? 'text-red-600' 
+                            : 'text-orange-600'
+                        }`}>
+                          {(() => {
+                            const criticalDelays = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.delayMinutes > 60)
+                            ).length || 0;
+                            return criticalDelays > 0 ? `${criticalDelays} flights` : 'None';
+                          })()}
+                          <span className="text-xs font-normal text-gray-500 ml-1">
+                            (&gt;60min)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500 mt-2">
+                      Impact analysis based on combined flight states and operational data
+                    </div>
                   </div>
                   
                   {/* Total flights indicator */}
