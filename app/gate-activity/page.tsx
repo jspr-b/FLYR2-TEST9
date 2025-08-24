@@ -678,39 +678,39 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">On-Time Performance</div>
+                        <div className="text-xs text-gray-600">Zero Delay Rate</div>
                         <div className={`text-lg font-bold ${
                           (() => {
                             // Calculate percentage of flights with NO delay
                             const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
-                            const onTimeFlights = allFlights.filter(f => f.delayMinutes === 0);
-                            const onTimeRate = allFlights.length > 0 
-                              ? Math.round((onTimeFlights.length / allFlights.length) * 100)
+                            const zeroDelayFlights = allFlights.filter(f => f.delayMinutes === 0);
+                            const zeroDelayRate = allFlights.length > 0 
+                              ? Math.round((zeroDelayFlights.length / allFlights.length) * 100)
                               : 0;
                             
-                            return onTimeRate > 80 ? 'text-green-600' : 
-                                   onTimeRate > 60 ? 'text-blue-600' : 'text-amber-600';
+                            return zeroDelayRate > 80 ? 'text-green-600' : 
+                                   zeroDelayRate > 60 ? 'text-blue-600' : 'text-amber-600';
                           })()
                         }`}>
                           {(() => {
                             const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
-                            const onTimeFlights = allFlights.filter(f => f.delayMinutes === 0);
-                            const onTimeRate = allFlights.length > 0 
-                              ? Math.round((onTimeFlights.length / allFlights.length) * 100)
+                            const zeroDelayFlights = allFlights.filter(f => f.delayMinutes === 0);
+                            const zeroDelayRate = allFlights.length > 0 
+                              ? Math.round((zeroDelayFlights.length / allFlights.length) * 100)
                               : 0;
                             
-                            console.log(`📊 On-Time Performance:`, {
+                            console.log(`📊 Zero Delay Rate:`, {
                               totalFlights: allFlights.length,
-                              onTimeFlights: onTimeFlights.length,
+                              zeroDelayFlights: zeroDelayFlights.length,
                               delayedFlights: allFlights.filter(f => f.delayMinutes > 0).length,
-                              onTimeRate: onTimeRate
+                              zeroDelayRate: zeroDelayRate
                             });
                             
                             return (
                               <>
-                                {onTimeRate}%
+                                {zeroDelayRate}%
                                 <span className="text-xs font-normal text-gray-500 ml-1">
-                                  ({onTimeFlights.length}/{allFlights.length})
+                                  ({zeroDelayFlights.length}/{allFlights.length})
                                 </span>
                               </>
                             );
