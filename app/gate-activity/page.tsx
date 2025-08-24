@@ -729,7 +729,7 @@ export default function GateActivityPage() {
                         <div className="text-xs text-gray-600">Critical Delays</div>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <button className={`text-lg font-bold hover:underline cursor-pointer ${
+                            <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-red-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
                               (() => {
                                 const criticalDelays = data?.gates.flatMap(g => 
                                   g.scheduledFlights.filter(f => f.delayMinutes >= 60)
@@ -755,6 +755,11 @@ export default function GateActivityPage() {
                                     <span className="text-xs font-normal text-gray-500 ml-1">
                                       (≥60min)
                                     </span>
+                                    {criticalDelays.length > 0 && (
+                                      <svg className="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                      </svg>
+                                    )}
                                   </>
                                 );
                               })()}
