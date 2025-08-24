@@ -8,7 +8,6 @@ import { GateGanttChart } from "@/components/gate-gantt-chart"
 import { GateChangesDashboard } from "@/components/gate-changes-dashboard"
 import { GateTypeDistribution } from "@/components/gate-type-distribution"
 import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2, Info, TrendingUp, ArrowRightLeft, Maximize2 } from "lucide-react"
-import { boardingTracker } from "@/lib/boarding-tracker"
 import {
   Popover,
   PopoverContent,
@@ -153,54 +152,6 @@ export default function GateActivityPage() {
     10 * 60 * 1000 // Auto-refresh every 10 minutes (background refresh fetches fewer pages for efficiency)
   )
 
-  // Track boarding states
-  useEffect(() => {
-    if (!data || !data.gates) return
-
-    // Track all flights
-    let boardingFlightCount = 0
-    let departedWithBRD = 0
-    data.gates.forEach(gate => {
-      gate.scheduledFlights.forEach(flight => {
-        if (flight.flightStates.includes('BRD')) {
-          boardingFlightCount++
-          // Check if this flight also has DEP state
-          if (flight.flightStates.includes('DEP')) {
-            departedWithBRD++
-          }
-        }
-        // Track all flights, not just those currently in BRD state
-        boardingTracker.trackFlight({
-          flightNumber: flight.flightNumber,
-          flightStates: flight.flightStates,
-          expectedTimeBoarding: flight.expectedTimeBoarding,
-          scheduleDateTime: flight.scheduleDateTime
-        })
-      })
-    })
-
-    // Log tracking info
-    console.log(`📊 Boarding Tracker Status:`)
-    console.log(`   Total flights with BRD state: ${boardingFlightCount}`)
-    console.log(`   Departed flights with BRD state: ${departedWithBRD}`)
-    console.log(`   Total tracked flights: ${boardingTracker.getCacheSize()}`)
-    
-    // Debug: Check sample flight data
-    const sampleFlight = data.gates[0]?.scheduledFlights[0]
-    if (sampleFlight) {
-      console.log(`📋 Sample flight data:`, {
-        flightNumber: sampleFlight.flightNumber,
-        flightStates: sampleFlight.flightStates,
-        isDelayed: sampleFlight.isDelayed,
-        delayMinutes: sampleFlight.delayMinutes,
-        scheduleDateTime: sampleFlight.scheduleDateTime,
-        expectedTimeBoarding: sampleFlight.expectedTimeBoarding
-      })
-    }
-
-    // Cleanup old records periodically
-    boardingTracker.cleanupOldRecords()
-  }, [data])
 
   // Transform data for Gantt chart - only if we have actual gate data (not just loading state)
   const ganttData = (data && data.gates.length > 0) ? data.gates.map(gate => ({
@@ -720,45 +671,39 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">Early Boarding Rate</div>
+                        <div className="text-xs text-gray-600">On-Time Performance</div>
                         <div className={`text-lg font-bold ${
                           (() => {
-                            // Get departed flight numbers
-                            const departedFlightNumbers = data?.gates.flatMap(g => 
-                              g.scheduledFlights
-                                .filter(f => f.flightStates.includes('DEP'))
-                                .map(f => f.flightNumber)
-                            ) || [];
+                            // Calculate percentage of non-delayed flights
+                            const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
+                            const nonDelayedFlights = allFlights.filter(f => !f.isDelayed);
+                            const onTimeRate = allFlights.length > 0 
+                              ? Math.round((nonDelayedFlights.length / allFlights.length) * 100)
+                              : 0;
                             
-                            // Get boarding stats from tracker
-                            const stats = boardingTracker.getBoardingStats(departedFlightNumbers);
-                            
-                            return stats.earlyBoardingRate > 30 ? 'text-green-600' : 
-                                   stats.earlyBoardingRate > 15 ? 'text-blue-600' : 'text-amber-600';
+                            return onTimeRate > 80 ? 'text-green-600' : 
+                                   onTimeRate > 60 ? 'text-blue-600' : 'text-amber-600';
                           })()
                         }`}>
                           {(() => {
-                            const departedFlightNumbers = data?.gates.flatMap(g => 
-                              g.scheduledFlights
-                                .filter(f => f.flightStates.includes('DEP'))
-                                .map(f => f.flightNumber)
-                            ) || [];
+                            const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
+                            const nonDelayedFlights = allFlights.filter(f => !f.isDelayed);
+                            const onTimeRate = allFlights.length > 0 
+                              ? Math.round((nonDelayedFlights.length / allFlights.length) * 100)
+                              : 0;
                             
-                            const stats = boardingTracker.getBoardingStats(departedFlightNumbers);
-                            
-                            // Debug log
-                            console.log(`📊 Early Boarding Stats:`)
-                            console.log(`   Departed flights: ${departedFlightNumbers.length}`)
-                            console.log(`   Departed flight numbers:`, departedFlightNumbers.slice(0, 5))
-                            console.log(`   Tracked with boarding time: ${stats.total}`)
-                            console.log(`   Early: ${stats.early}, On-time: ${stats.onTime}, Late: ${stats.late}`)
-                            console.log(`   All tracked flights:`, boardingTracker.getAllTrackedFlights().map(f => f.flightNumber))
+                            console.log(`📊 On-Time Performance:`, {
+                              totalFlights: allFlights.length,
+                              onTimeFlights: nonDelayedFlights.length,
+                              delayedFlights: allFlights.length - nonDelayedFlights.length,
+                              onTimeRate: onTimeRate
+                            });
                             
                             return (
                               <>
-                                {stats.earlyBoardingRate}%
+                                {onTimeRate}%
                                 <span className="text-xs font-normal text-gray-500 ml-1">
-                                  ({stats.early}/{stats.total})
+                                  ({nonDelayedFlights.length}/{allFlights.length})
                                 </span>
                               </>
                             );
@@ -834,28 +779,6 @@ export default function GateActivityPage() {
               </div>
             </div>
 
-            {/* Debug: Boarding Tracker Info (temporary) */}
-            {process.env.NODE_ENV === 'development' && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle className="text-sm">Boarding Tracker Debug Info</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xs space-y-1">
-                    <p>Total tracked: {boardingTracker.getCacheSize()} flights</p>
-                    <p>Recent boardings:</p>
-                    <div className="max-h-32 overflow-y-auto">
-                      {boardingTracker.getAllTrackedFlights().slice(0, 5).map(record => (
-                        <div key={record.flightNumber} className="ml-2 text-gray-600">
-                          Flight {record.flightNumber}: {record.boardingStatus} 
-                          ({record.minutesDifference > 0 ? '+' : ''}{record.minutesDifference} min)
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
           </div>
         </div>
