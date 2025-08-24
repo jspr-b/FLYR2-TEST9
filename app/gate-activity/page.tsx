@@ -725,69 +725,69 @@ export default function GateActivityPage() {
                         </div>
                       </div>
                       
-                      <div className="relative">
+                      <div>
                         <div className="text-xs text-gray-600">Critical Delays</div>
-                        <div className={`text-lg font-bold ${
-                          (() => {
-                            const criticalDelays = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => f.delayMinutes >= 60)
-                            ) || [];
-                            return criticalDelays.length > 0 ? 'text-red-600' : 'text-green-600';
-                          })()
-                        }`}>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className={`text-lg font-bold hover:underline cursor-pointer ${
+                              (() => {
+                                const criticalDelays = data?.gates.flatMap(g => 
+                                  g.scheduledFlights.filter(f => f.delayMinutes >= 60)
+                                ) || [];
+                                return criticalDelays.length > 0 ? 'text-red-600' : 'text-green-600';
+                              })()
+                            }`}>
+                              {(() => {
+                                const criticalDelays = data?.gates.flatMap(g => 
+                                  g.scheduledFlights.filter(f => f.delayMinutes >= 60)
+                                ) || [];
+                                
+                                console.log(`🚨 Critical delays (≥60min):`, criticalDelays.map(f => ({
+                                  flight: f.flightNumber,
+                                  delay: f.delayMinutes,
+                                  formatted: f.delayFormatted,
+                                  states: f.flightStates
+                                })));
+                                
+                                return (
+                                  <>
+                                    {criticalDelays.length}
+                                    <span className="text-xs font-normal text-gray-500 ml-1">
+                                      (≥60min)
+                                    </span>
+                                  </>
+                                );
+                              })()}
+                            </button>
+                          </PopoverTrigger>
                           {(() => {
                             const criticalDelays = data?.gates.flatMap(g => 
                               g.scheduledFlights.filter(f => f.delayMinutes >= 60)
                             ) || [];
                             
-                            console.log(`🚨 Critical delays (≥60min):`, criticalDelays.map(f => ({
-                              flight: f.flightNumber,
-                              delay: f.delayMinutes,
-                              formatted: f.delayFormatted,
-                              states: f.flightStates
-                            })));
+                            if (criticalDelays.length === 0) return null;
                             
                             return (
-                              <>
-                                {criticalDelays.length}
-                                <span className="text-xs font-normal text-gray-500 ml-1">
-                                  (≥60min)
-                                </span>
-                              </>
+                              <PopoverContent className="w-64" align="start">
+                                <div className="space-y-2">
+                                  <div className="text-sm font-semibold text-red-700">Critical Delay Flights</div>
+                                  {criticalDelays
+                                    .sort((a, b) => b.delayMinutes - a.delayMinutes)
+                                    .map((flight) => (
+                                      <div key={flight.flightNumber} className="flex items-center justify-between text-sm py-1 border-b border-gray-100 last:border-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium">KL{flight.flightNumber}</span>
+                                          <span className="text-gray-400">→</span>
+                                          <span className="text-gray-600">{flight.destination}</span>
+                                        </div>
+                                        <span className="font-bold text-red-600">{flight.delayFormatted}</span>
+                                      </div>
+                                    ))}
+                                </div>
+                              </PopoverContent>
                             );
                           })()}
-                        </div>
-                        {/* Critical delay details */}
-                        {(() => {
-                          const criticalDelays = data?.gates.flatMap(g => 
-                            g.scheduledFlights.filter(f => f.delayMinutes >= 60)
-                          ) || [];
-                          
-                          if (criticalDelays.length === 0) return null;
-                          
-                          return (
-                            <div className="mt-2 space-y-1">
-                              {criticalDelays
-                                .sort((a, b) => b.delayMinutes - a.delayMinutes)
-                                .slice(0, 3)
-                                .map((flight, idx) => (
-                                  <div key={flight.flightNumber} className="flex items-center justify-between text-xs bg-red-50 px-2 py-1 rounded">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium text-red-700">KL{flight.flightNumber}</span>
-                                      <span className="text-red-600">→</span>
-                                      <span className="text-red-600">{flight.destination}</span>
-                                    </div>
-                                    <span className="font-bold text-red-700">{flight.delayFormatted}</span>
-                                  </div>
-                                ))}
-                              {criticalDelays.length > 3 && (
-                                <div className="text-xs text-center text-gray-500 mt-1">
-                                  +{criticalDelays.length - 3} more
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
+                        </Popover>
                       </div>
                     </div>
                     
