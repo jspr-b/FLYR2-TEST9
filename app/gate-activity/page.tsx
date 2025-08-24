@@ -678,39 +678,43 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">Zero Delay Rate</div>
+                        <div className="text-xs text-gray-600">Punctual Departures</div>
                         <div className={`text-lg font-bold ${
                           (() => {
-                            // Calculate percentage of flights with NO delay
-                            const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
-                            const zeroDelayFlights = allFlights.filter(f => f.delayMinutes === 0);
-                            const zeroDelayRate = allFlights.length > 0 
-                              ? Math.round((zeroDelayFlights.length / allFlights.length) * 100)
+                            // Calculate percentage of DEPARTED flights with NO delay
+                            const departedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEP'))
+                            ) || [];
+                            const punctualDepartures = departedFlights.filter(f => f.delayMinutes === 0);
+                            const punctualRate = departedFlights.length > 0 
+                              ? Math.round((punctualDepartures.length / departedFlights.length) * 100)
                               : 0;
                             
-                            return zeroDelayRate > 80 ? 'text-green-600' : 
-                                   zeroDelayRate > 60 ? 'text-blue-600' : 'text-amber-600';
+                            return punctualRate > 80 ? 'text-green-600' : 
+                                   punctualRate > 60 ? 'text-blue-600' : 'text-amber-600';
                           })()
                         }`}>
                           {(() => {
-                            const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
-                            const zeroDelayFlights = allFlights.filter(f => f.delayMinutes === 0);
-                            const zeroDelayRate = allFlights.length > 0 
-                              ? Math.round((zeroDelayFlights.length / allFlights.length) * 100)
+                            const departedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEP'))
+                            ) || [];
+                            const punctualDepartures = departedFlights.filter(f => f.delayMinutes === 0);
+                            const punctualRate = departedFlights.length > 0 
+                              ? Math.round((punctualDepartures.length / departedFlights.length) * 100)
                               : 0;
                             
-                            console.log(`📊 Zero Delay Rate:`, {
-                              totalFlights: allFlights.length,
-                              zeroDelayFlights: zeroDelayFlights.length,
-                              delayedFlights: allFlights.filter(f => f.delayMinutes > 0).length,
-                              zeroDelayRate: zeroDelayRate
+                            console.log(`📊 Punctual Departures:`, {
+                              departedFlights: departedFlights.length,
+                              punctualDepartures: punctualDepartures.length,
+                              delayedDepartures: departedFlights.filter(f => f.delayMinutes > 0).length,
+                              punctualRate: punctualRate
                             });
                             
                             return (
                               <>
-                                {zeroDelayRate}%
+                                {punctualRate}%
                                 <span className="text-xs font-normal text-gray-500 ml-1">
-                                  ({zeroDelayFlights.length}/{allFlights.length})
+                                  ({punctualDepartures.length}/{departedFlights.length})
                                 </span>
                               </>
                             );
