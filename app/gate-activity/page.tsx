@@ -595,29 +595,32 @@ export default function GateActivityPage() {
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <div className="text-xs text-gray-600">Delayed Flights</div>
+                        <div className="text-xs text-gray-600">Delayed Departures</div>
                         <div className={`text-lg font-bold ${
                           (() => {
-                            const delayedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => f.delayMinutes > 0)
+                            const departedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEP'))
                             ) || [];
-                            const percentage = data?.gates.flatMap(g => g.scheduledFlights).length > 0
-                              ? Math.round((delayedFlights.length / data.gates.flatMap(g => g.scheduledFlights).length) * 100)
+                            const delayedDepartures = departedFlights.filter(f => f.delayMinutes > 0);
+                            const percentage = departedFlights.length > 0
+                              ? Math.round((delayedDepartures.length / departedFlights.length) * 100)
                               : 0;
                             return percentage > 20 ? 'text-red-600' : percentage > 10 ? 'text-amber-600' : 'text-green-600';
                           })()
                         }`}>
                           {(() => {
-                            // Count flights with actual delay time > 0
-                            const allFlights = data?.gates.flatMap(g => g.scheduledFlights) || [];
-                            const delayedFlights = allFlights.filter(f => f.delayMinutes > 0);
-                            const percentage = allFlights.length > 0
-                              ? Math.round((delayedFlights.length / allFlights.length) * 100)
+                            // Count DEPARTED flights with actual delay time > 0
+                            const departedFlights = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEP'))
+                            ) || [];
+                            const delayedDepartures = departedFlights.filter(f => f.delayMinutes > 0);
+                            const percentage = departedFlights.length > 0
+                              ? Math.round((delayedDepartures.length / departedFlights.length) * 100)
                               : 0;
                             
-                            console.log(`🔍 Delayed flights:`, {
-                              total: allFlights.length,
-                              delayed: delayedFlights.length,
+                            console.log(`🔍 Delayed departures:`, {
+                              totalDeparted: departedFlights.length,
+                              delayedDeparted: delayedDepartures.length,
                               percentage: percentage
                             });
                             
@@ -625,7 +628,7 @@ export default function GateActivityPage() {
                               <>
                                 {percentage}%
                                 <span className="text-xs font-normal text-gray-500 ml-1">
-                                  ({delayedFlights.length}/{allFlights.length})
+                                  ({delayedDepartures.length}/{departedFlights.length})
                                 </span>
                               </>
                             );
@@ -634,18 +637,18 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">Median Delay</div>
+                        <div className="text-xs text-gray-600">Median Departure Delay</div>
                         <div className={`text-lg font-bold ${
                           (() => {
-                            // Get all flights with actual delay time > 0
-                            const delayedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => f.delayMinutes > 0)
+                            // Get DEPARTED flights with actual delay time > 0
+                            const delayedDepartures = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEP') && f.delayMinutes > 0)
                             ) || [];
                             
-                            if (delayedFlights.length === 0) return 'text-green-600';
+                            if (delayedDepartures.length === 0) return 'text-green-600';
                             
                             // Calculate median
-                            const delays = delayedFlights.map(f => f.delayMinutes).sort((a, b) => a - b);
+                            const delays = delayedDepartures.map(f => f.delayMinutes).sort((a, b) => a - b);
                             const median = delays.length % 2 === 0
                               ? (delays[delays.length / 2 - 1] + delays[delays.length / 2]) / 2
                               : delays[Math.floor(delays.length / 2)];
@@ -654,19 +657,19 @@ export default function GateActivityPage() {
                           })()
                         }`}>
                           {(() => {
-                            const delayedFlights = data?.gates.flatMap(g => 
-                              g.scheduledFlights.filter(f => f.delayMinutes > 0)
+                            const delayedDepartures = data?.gates.flatMap(g => 
+                              g.scheduledFlights.filter(f => f.flightStates.includes('DEP') && f.delayMinutes > 0)
                             ) || [];
                             
-                            if (delayedFlights.length === 0) return '0 min';
+                            if (delayedDepartures.length === 0) return '0 min';
                             
-                            const delays = delayedFlights.map(f => f.delayMinutes).sort((a, b) => a - b);
+                            const delays = delayedDepartures.map(f => f.delayMinutes).sort((a, b) => a - b);
                             const median = delays.length % 2 === 0
                               ? (delays[delays.length / 2 - 1] + delays[delays.length / 2]) / 2
                               : delays[Math.floor(delays.length / 2)];
                             
-                            console.log(`📊 Delay statistics:`, {
-                              flightsWithDelay: delayedFlights.length,
+                            console.log(`📊 Departure delay statistics:`, {
+                              delayedDepartures: delayedDepartures.length,
                               delays: delays.slice(0, 10),
                               median: Math.round(median),
                               average: data?.summary.delayedFlights.averageDelayMinutes
@@ -722,7 +725,7 @@ export default function GateActivityPage() {
                         </div>
                       </div>
                       
-                      <div>
+                      <div className="relative">
                         <div className="text-xs text-gray-600">Critical Delays</div>
                         <div className={`text-lg font-bold ${
                           (() => {
@@ -754,6 +757,37 @@ export default function GateActivityPage() {
                             );
                           })()}
                         </div>
+                        {/* Critical delay details */}
+                        {(() => {
+                          const criticalDelays = data?.gates.flatMap(g => 
+                            g.scheduledFlights.filter(f => f.delayMinutes >= 60)
+                          ) || [];
+                          
+                          if (criticalDelays.length === 0) return null;
+                          
+                          return (
+                            <div className="mt-2 space-y-1">
+                              {criticalDelays
+                                .sort((a, b) => b.delayMinutes - a.delayMinutes)
+                                .slice(0, 3)
+                                .map((flight, idx) => (
+                                  <div key={flight.flightNumber} className="flex items-center justify-between text-xs bg-red-50 px-2 py-1 rounded">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-red-700">KL{flight.flightNumber}</span>
+                                      <span className="text-red-600">→</span>
+                                      <span className="text-red-600">{flight.destination}</span>
+                                    </div>
+                                    <span className="font-bold text-red-700">{flight.delayFormatted}</span>
+                                  </div>
+                                ))}
+                              {criticalDelays.length > 3 && (
+                                <div className="text-xs text-center text-gray-500 mt-1">
+                                  +{criticalDelays.length - 3} more
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                     
