@@ -4,10 +4,9 @@ import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time
 
 // Gate occupancy status definitions
 type GateOccupancyStatus = 
-  | 'SCHEDULED'      // Gate has flights scheduled today but currently idle
-  | 'OCCUPIED'       // Flight currently at gate (BOARDING, ON_TIME, DELAYED)
-  | 'DEPARTED'       // Flight recently departed
-  | 'PREPARING'     // Flight scheduled soon (departure prep)
+  | 'SCHEDULED'      // Gate has flights scheduled (SCH, DEL, GCH states)
+  | 'OCCUPIED'       // Flight currently at gate (BRD, GTO, GCL, GTD, WIL states)
+  | 'DEPARTED'       // Flight recently departed (DEP state within 60 min)
   | 'CONFLICT'       // Multiple flights assigned overlapping times
   | 'MAINTENANCE'   // Gate closed for maintenance
   | 'UNKNOWN'       // Status cannot be determined
@@ -24,10 +23,10 @@ const FLIGHT_STATE_MAPPING = {
   // Recently departed
   'DEP': 'DEPARTED',    // Departed
   
-  // Approaching/scheduled
-  'SCH': 'PREPARING', // Flight Scheduled
-  'DEL': 'PREPARING', // Delayed
-  'GCH': 'PREPARING', // Gate Change (overridden by determineGateStatus for complex scenarios)
+  // Scheduled flights
+  'SCH': 'SCHEDULED', // Flight Scheduled
+  'DEL': 'SCHEDULED', // Delayed (still scheduled, just delayed)
+  'GCH': 'SCHEDULED', // Gate Change (still a scheduled flight)
   
   // Special states
   'CNX': 'AVAILABLE',   // Cancelled
@@ -143,8 +142,8 @@ function classifyGateType(gate: string, pier: string): 'SCHENGEN' | 'NON_SCHENGE
 // Priority order: Active gate states > Departed > Gate changes > Primary state mapping
 // 
 // Examples:
-// - Flight with SCH (primary), GCH, GTO → Returns OCCUPIED (gate is open)
-// - Flight with SCH (primary), GCH only → Returns PREPARING (gate change)
+// - Flight with SCH (primary), GTO → Returns OCCUPIED (gate is open)
+// - Flight with SCH (primary) only → Returns SCHEDULED
 // - Flight with DEL (primary), BRD → Returns OCCUPIED (boarding active)
 function determineGateStatus(flights: any[], currentTime: Date): GateOccupancyStatus {
   if (flights.length === 0) return 'SCHEDULED'
@@ -180,17 +179,12 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
       return 'DEPARTED' // Recently departed
     }
     
-    // Check for gate change (when no active states found)
-    if (flightStates.includes('GCH') && timeDiffMinutes <= 120) {
-      return 'PREPARING' // Gate change without active states
-    }
-    
     // Fall back to standard mapping for primary state
     const mappedStatus = FLIGHT_STATE_MAPPING[primaryState as keyof typeof FLIGHT_STATE_MAPPING]
     
     if (mappedStatus === 'OCCUPIED') return 'OCCUPIED'
     if (mappedStatus === 'DEPARTED' && timeDiffMinutes > -60) return 'DEPARTED' // Recently departed
-    if (mappedStatus === 'PREPARING' && timeDiffMinutes <= 120) return 'PREPARING' // Within 2 hours
+    if (mappedStatus === 'SCHEDULED') return 'SCHEDULED' // All scheduled flights (SCH, DEL, GCH)
   }
   
   return 'SCHEDULED'
@@ -656,7 +650,7 @@ export async function GET(request: NextRequest) {
         unusedSchipholGates: TOTAL_SCHIPHOL_GATES - gateOccupancyData.length,
         pierUtilization: pierUtilization,
         busiestPier: pierUtilization[0]?.pier || 'N/A',
-        totalFlightsHandled: gateOccupancyData.reduce((sum, gate) => sum + gate.utilization.logical, 0)
+        totalFlightsHandled: filteredFlights.length
       },
       
       lastAnalyzed: currentTime.toISOString(),

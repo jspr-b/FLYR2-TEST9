@@ -383,99 +383,10 @@ export default function GateActivityPage() {
 
             {/* Status Overview Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              
-              {/* Gate Status Breakdown */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Gate Status Distribution</CardTitle>
-                  <p className="text-xs text-gray-600">KLM operational footprint at Schiphol</p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {/* Operational Context */}
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">KLM Gates Today:</span>
-                        <div className="font-semibold text-blue-700">
-                          {data?.summary.schipholContext?.klmGatesUsedToday || 99} / {data?.summary.schipholContext?.totalSchipholGates || 223}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Operational Footprint:</span>
-                        <div className="font-semibold text-blue-700">
-                          {data?.summary.schipholContext?.klmOperationalFootprint || 44}%
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Flights Handled:</span>
-                        <div className="font-semibold text-green-700">
-                          {data?.summary.schipholContext?.totalFlightsHandled || 356}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Busiest Pier:</span>
-                        <div className="font-semibold text-orange-700">
-                          {data?.summary.schipholContext?.busiestPier || 'D'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Current Status */}
-                  <div className="space-y-3">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Current Gate Status:</div>
-                    {Object.entries(processedData?.statusBreakdown || {}).map(([status, count]) => (
-                      <div key={status} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded ${
-                            status === 'OCCUPIED' ? 'bg-green-500' :
-                            status === 'PREPARING' ? 'bg-blue-500' :
-                            status === 'DEPARTED' ? 'bg-gray-500' :
-                            status === 'SCHEDULED' ? 'bg-blue-300' :
-                            'bg-gray-300'
-                          }`} />
-                          <span className="text-sm font-medium">
-                            {status === 'SCHEDULED' ? 'Scheduled' : 
-                             status === 'PREPARING' ? 'Preparing' :
-                             status === 'OCCUPIED' ? 'Occupied' :
-                             status === 'DEPARTED' ? 'Departed' :
-                             status.toLowerCase()}
-                          </span>
-                        </div>
-                        <span className="text-lg font-semibold">{count}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Pier Breakdown */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Top Piers by Activity:</div>
-                    <div className="space-y-2">
-                      {data?.summary.schipholContext?.pierUtilization?.slice(0, 4).map((pier, index) => (
-                        <div key={pier.pier} className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded ${
-                              index === 0 ? 'bg-orange-500' :
-                              index === 1 ? 'bg-red-500' :
-                              index === 2 ? 'bg-blue-500' :
-                              'bg-green-500'
-                            }`} />
-                            <span className={`${
-                              pier.pier.includes('D-') ? 'font-medium' : ''
-                            }`}>
-                              {pier.pier.includes('D-') ? pier.pier : `Pier ${pier.pier}`}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-medium">{pier.flights} flights</div>
-                            <div className="text-gray-500">{pier.gates} gates</div>
-                          </div>
-                        </div>
-                      )) || []}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Gate Type Distribution - Enhanced with merged metrics */}
+              <div className="lg:col-span-1">
+                <GateTypeDistribution />
+              </div>
 
               {/* Flight States */}
               <Card>
@@ -820,13 +731,6 @@ export default function GateActivityPage() {
                   loading={loading}
                   error={error ? 'Failed to load gate changes' : null}
                 />
-              </div>
-            </div>
-
-            {/* Gate Type Distribution */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              <div className="lg:col-span-1">
-                <GateTypeDistribution />
               </div>
             </div>
 
