@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useClientData, safeGet } from "@/lib/client-utils"
 import { useEffect, useState } from "react"
+import { Info } from "lucide-react"
 import {
   Popover,
   PopoverContent,
@@ -37,6 +38,7 @@ export function GateTypeDistribution() {
   const [operationalData, setOperationalData] = useState<any>(null)
   const [schipholContext, setSchipholContext] = useState<any>(null)
   const [gateStatusMetrics, setGateStatusMetrics] = useState<any>(null)
+  const [unknownGateFlights, setUnknownGateFlights] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
 
@@ -61,6 +63,14 @@ export function GateTypeDistribution() {
             const tbdFlights = data.flights.filter((f: any) => f.gate === 'TBD').length
             const noGateFlights = data.flights.filter((f: any) => !f.gate).length
             const assignedGateFlights = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').length
+            
+            // Find departed flights without gates (these are "unknown" gate type)
+            const departedNoGate = data.flights.filter((f: any) => 
+              !f.gate && 
+              f.publicFlightState?.flightStates?.includes('DEP')
+            );
+            
+            setUnknownGateFlights(departedNoGate);
             
             setGateStatusMetrics({
               tbdFlights,
@@ -112,6 +122,7 @@ export function GateTypeDistribution() {
           setOperationalData({
             busGateFlights: busGateFlights.length,
             jetBridgeFlights: jetBridgeFlights.length,
+            unknownGateFlights: departedNoGate?.length || 0,
             busGateDelayRate: busGateFlights.length > 0
               ? Math.round((busGateDelays.length / busGateFlights.length) * 100)
               : 0,
@@ -187,12 +198,18 @@ export function GateTypeDistribution() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Bus Gates ({operationalData?.busGateFlights || 0} flights)</span>
-              <span>{gatesData?.gateData.length > 0 ? ((gatesData.gateData.filter((gate: any) => gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) / gatesData.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0)) * 100).toFixed(1) : 0}%</span>
+              <span>{(() => {
+                const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
+                return total > 0 ? ((operationalData?.busGateFlights || 0) / total * 100).toFixed(1) : '0';
+              })()}%</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-amber-500 rounded-full transition-all duration-500" 
-                style={{ width: `${gatesData?.gateData.length > 0 ? ((gatesData.gateData.filter((gate: any) => gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) / gatesData.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0)) * 100) : 0}%` }}
+                style={{ width: `${(() => {
+                  const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
+                  return total > 0 ? ((operationalData?.busGateFlights || 0) / total * 100) : 0;
+                })()}%` }}
               />
             </div>
           </div>
@@ -200,15 +217,71 @@ export function GateTypeDistribution() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Jet Bridges ({operationalData?.jetBridgeFlights || 0} flights)</span>
-              <span>{gatesData?.gateData.length > 0 ? ((gatesData.gateData.filter((gate: any) => !gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) / gatesData.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0)) * 100).toFixed(1) : 0}%</span>
+              <span>{(() => {
+                const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
+                return total > 0 ? ((operationalData?.jetBridgeFlights || 0) / total * 100).toFixed(1) : '0';
+              })()}%</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-blue-500 rounded-full transition-all duration-500" 
-                style={{ width: `${gatesData?.gateData.length > 0 ? ((gatesData.gateData.filter((gate: any) => !gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) / gatesData.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0)) * 100) : 0}%` }}
+                style={{ width: `${(() => {
+                  const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
+                  return total > 0 ? ((operationalData?.jetBridgeFlights || 0) / total * 100) : 0;
+                })()}%` }}
               />
             </div>
           </div>
+
+          {/* Unknown Gate Type - Departed flights without gate data */}
+          {unknownGateFlights.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1 hover:bg-gray-50 px-1 -mx-1 rounded transition-colors cursor-pointer">
+                      <span>Gate Type Unknown ({unknownGateFlights.length} flight{unknownGateFlights.length > 1 ? 's' : ''})</span>
+                      <Info className="w-3 h-3 text-gray-400" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" align="start">
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900 mb-1">Departed Flights - Gate Unknown</div>
+                        <p className="text-xs text-gray-600">These flights have departed but their gate assignment was not preserved in the system.</p>
+                      </div>
+                      <div className="space-y-2">
+                        {unknownGateFlights.map((flight: any) => (
+                          <div key={flight.flightNumber} className="text-sm border-b border-gray-100 pb-2 last:border-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{flight.flightName}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(flight.scheduleDateTime).toLocaleTimeString('nl-NL', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit',
+                                  timeZone: 'Europe/Amsterdam'
+                                })}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-600 mt-0.5">
+                              To {flight.route?.destinations?.[0] || 'Unknown'} • Status: Departed
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <span>{((unknownGateFlights.length / (operationalData?.busGateFlights + operationalData?.jetBridgeFlights + unknownGateFlights.length || 1)) * 100).toFixed(1)}%</span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gray-400 rounded-full transition-all duration-500" 
+                  style={{ width: `${((unknownGateFlights.length / (operationalData?.busGateFlights + operationalData?.jetBridgeFlights + unknownGateFlights.length || 1)) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Operational Impact Section */}
           <div className="mt-4 pt-3 border-t border-gray-200">
@@ -400,11 +473,19 @@ export function GateTypeDistribution() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-gray-600 text-xs">Total Flights</div>
-                <div className="text-2xl font-bold">{gatesData?.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0}</div>
+                <div className="text-2xl font-bold">
+                  {(gatesData?.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0) + unknownGateFlights.length}
+                </div>
               </div>
               <div>
                 <div className="text-gray-600 text-xs">Bus Gate Usage</div>
-                <div className="text-2xl font-bold">{gatesData?.gateData.length > 0 ? ((gatesData.gateData.filter((gate: any) => gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) / gatesData.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0)) * 100).toFixed(1) : 0}%</div>
+                <div className="text-2xl font-bold">
+                  {(() => {
+                    const totalWithUnknown = (gatesData?.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0) + unknownGateFlights.length;
+                    const busGateFlights = gatesData?.gateData.filter((gate: any) => gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0;
+                    return totalWithUnknown > 0 ? (busGateFlights / totalWithUnknown * 100).toFixed(1) : 0;
+                  })()}%
+                </div>
               </div>
             </div>
           </div>
