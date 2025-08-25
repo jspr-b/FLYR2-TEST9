@@ -389,14 +389,14 @@ export default function GateActivityPage() {
               </div>
 
               {/* Flight States */}
-              <Card>
-                <CardHeader className="pb-3">
+              <Card className="h-[600px] flex flex-col">
+                <CardHeader className="pb-3 flex-shrink-0">
                   <CardTitle className="text-base">Flight States</CardTitle>
                   <p className="text-xs text-gray-600">Current flight phases</p>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
                   {/* Flight State Distribution */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                     {(() => {
                       // Define all possible flight states
                       const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL'];
@@ -484,11 +484,11 @@ export default function GateActivityPage() {
                         }
                         
                         return (
-                          <div key={state} className="space-y-2">
+                          <div key={state} className="space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-lg ${config.bgColor} flex items-center justify-center`}>
-                                  <config.Icon className={`w-5 h-5 ${config.iconColor}`} />
+                              <div className="flex items-center gap-2">
+                                <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
+                                  <config.Icon className={`w-4 h-4 ${config.iconColor}`} />
                                 </div>
                                 <div>
                                   <div className="font-medium text-sm">{config.label}</div>
@@ -500,9 +500,9 @@ export default function GateActivityPage() {
                                 <div className="text-xs text-gray-500">{percentage}%</div>
                               </div>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div className="w-full bg-gray-200 rounded-full h-1">
                               <div 
-                                className={`${config.color} h-1.5 rounded-full transition-all duration-500`}
+                                className={`${config.color} h-1 rounded-full transition-all duration-500`}
                                 style={{ width: `${percentage}%` }}
                               />
                             </div>
@@ -513,10 +513,10 @@ export default function GateActivityPage() {
                   </div>
                   
                   {/* Operational Impact Section */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <div className="text-sm font-medium text-gray-700 mb-3">Operational Impact:</div>
+                  <div className="mt-3 pt-2 border-t border-gray-200 flex-shrink-0">
+                    <div className="text-sm font-medium text-gray-700 mb-2">Operational Impact:</div>
                     
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <div className="text-xs text-gray-600">Delayed Departures</div>
                         <div className={`text-lg font-bold ${
@@ -725,7 +725,7 @@ export default function GateActivityPage() {
                   </div>
                   
                   {/* Total flights indicator */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
+                  <div className="mt-3 pt-2 border-t border-gray-200 flex-shrink-0">
                     <div className="flex items-center justify-between text-sm text-gray-600">
                       <span>Total active flights</span>
                       <span className="font-semibold text-gray-900">

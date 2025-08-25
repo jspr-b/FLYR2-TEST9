@@ -46,12 +46,6 @@ export function Legend() {
           <span>Original Time</span>
         </div>
       </div>
-      <div className="mt-3 flex items-start gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-        <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-        <div className="text-xs text-blue-800">
-          <span className="font-medium">Smart delay handling:</span> timeline shifts or extends based on gate status
-        </div>
-      </div>
     </div>
   )
 }

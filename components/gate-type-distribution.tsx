@@ -210,14 +210,12 @@ export function GateTypeDistribution() {
 
   if (!mounted) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="h-[600px] flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <CardTitle>Gate Type Distribution</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[100px]">
-            <div className="text-muted-foreground">Loading...</div>
-          </div>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <div className="text-muted-foreground">Loading...</div>
         </CardContent>
       </Card>
     )
@@ -225,27 +223,25 @@ export function GateTypeDistribution() {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="h-[600px] flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <CardTitle>Gate Type Distribution</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[100px]">
-            <div className="text-muted-foreground">Loading...</div>
-          </div>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <div className="text-muted-foreground">Loading...</div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="h-[600px] flex flex-col">
+      <CardHeader className="pb-3 flex-shrink-0">
         <CardTitle className="text-base">Gate Type Distribution</CardTitle>
         <p className="text-xs text-gray-600">Bus gates vs jet bridge operations</p>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-4">
+      <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
+        <div className="space-y-4 flex-1 overflow-y-auto pr-2">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Bus Gates ({operationalData?.busGateFlights || 0} flights)</span>
@@ -335,8 +331,8 @@ export function GateTypeDistribution() {
           )}
 
           {/* Operational Impact Section */}
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <div className="text-sm font-medium text-gray-700 mb-3">Operational Impact:</div>
+          <div className="mt-3 pt-2 border-t border-gray-200">
+            <div className="text-sm font-medium text-gray-700 mb-2">Operational Impact:</div>
             
             {/* KLM Operational Context - Always show */}
             <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -519,9 +515,10 @@ export function GateTypeDistribution() {
               </>
             )}
           </div>
+        </div>
 
-          <div className="pt-4 border-t">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="pt-4 border-t flex-shrink-0">
+          <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-gray-600 text-xs">Total Flights</div>
                 <div className="text-2xl font-bold">
@@ -539,7 +536,6 @@ export function GateTypeDistribution() {
               </div>
             </div>
           </div>
-        </div>
       </CardContent>
     </Card>
   )

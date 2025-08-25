@@ -77,8 +77,8 @@ export function GateChangesDashboard({ data: propData, loading: propLoading, err
 
   if (loading) {
     return (
-      <Card className="bg-white dark:bg-gray-900">
-        <CardContent className="flex items-center justify-center h-[400px]">
+      <Card className="bg-white dark:bg-gray-900 h-[600px] flex flex-col">
+        <CardContent className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
         </CardContent>
       </Card>
@@ -87,8 +87,8 @@ export function GateChangesDashboard({ data: propData, loading: propLoading, err
 
   if (error) {
     return (
-      <Card className="bg-white dark:bg-gray-900">
-        <CardContent className="flex items-center justify-center h-[400px]">
+      <Card className="bg-white dark:bg-gray-900 h-[600px] flex flex-col">
+        <CardContent className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <p className="text-red-600 dark:text-red-400">{error}</p>
@@ -100,8 +100,8 @@ export function GateChangesDashboard({ data: propData, loading: propLoading, err
 
   if (!data || data.gateChangeEvents.length === 0) {
     return (
-      <Card className="bg-white dark:bg-gray-900">
-        <CardContent className="flex items-center justify-center h-[400px]">
+      <Card className="bg-white dark:bg-gray-900 h-[600px] flex flex-col">
+        <CardContent className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-gray-500 dark:text-gray-400">No gate changes detected</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
