@@ -36,6 +36,7 @@ export function GateTypeDistribution() {
   const [gatesData, setGatesData] = useState<any>(null)
   const [operationalData, setOperationalData] = useState<any>(null)
   const [schipholContext, setSchipholContext] = useState<any>(null)
+  const [gateStatusMetrics, setGateStatusMetrics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
 
@@ -53,6 +54,23 @@ export function GateTypeDistribution() {
           // Store Schiphol context data
           if (data.gateOccupancy.summary && data.gateOccupancy.summary.schipholContext) {
             setSchipholContext(data.gateOccupancy.summary.schipholContext)
+          }
+          
+          // Calculate TBD and no gate metrics from raw flights data
+          if (data.flights) {
+            const tbdFlights = data.flights.filter((f: any) => f.gate === 'TBD').length
+            const noGateFlights = data.flights.filter((f: any) => !f.gate).length
+            const assignedGateFlights = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').length
+            
+            setGateStatusMetrics({
+              tbdFlights,
+              noGateFlights,
+              assignedGateFlights,
+              totalFlights: data.flights.length,
+              tbdPercentage: Math.round((tbdFlights / data.flights.length) * 100),
+              noGatePercentage: Math.round((noGateFlights / data.flights.length) * 100),
+              assignedPercentage: Math.round((assignedGateFlights / data.flights.length) * 100)
+            })
           }
           
           // Calculate operational metrics for bus gates vs jet bridges
@@ -209,6 +227,30 @@ export function GateTypeDistribution() {
                   <span className="text-gray-600">Operational Footprint:</span>
                   <div className="font-semibold text-blue-700">
                     {schipholContext?.klmOperationalFootprint || 44}%
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-600">Gates TBD:</span>
+                  <div className={`font-semibold ${
+                    gateStatusMetrics?.tbdPercentage > 20 ? 'text-amber-700' : 
+                    gateStatusMetrics?.tbdPercentage > 10 ? 'text-yellow-700' : 'text-green-700'
+                  }`}>
+                    {gateStatusMetrics?.tbdFlights || 0}
+                    <span className="text-xs font-normal text-gray-500 ml-1">
+                      ({gateStatusMetrics?.tbdPercentage || 0}%)
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-600">No Gate Assigned:</span>
+                  <div className={`font-semibold ${
+                    gateStatusMetrics?.noGatePercentage > 15 ? 'text-red-700' : 
+                    gateStatusMetrics?.noGatePercentage > 5 ? 'text-amber-700' : 'text-green-700'
+                  }`}>
+                    {gateStatusMetrics?.noGateFlights || 0}
+                    <span className="text-xs font-normal text-gray-500 ml-1">
+                      ({gateStatusMetrics?.noGatePercentage || 0}%)
+                    </span>
                   </div>
                 </div>
               </div>

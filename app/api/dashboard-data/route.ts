@@ -61,7 +61,13 @@ export async function GET(request: NextRequest) {
     const freshFlights = removeStaleFlights(filteredFlights)
     const uniqueFlights = removeDuplicateFlights(freshFlights)
 
+    // Count TBD gates
+    const tbdGates = uniqueFlights.filter(f => f.gate === 'TBD').length
+    const assignedGates = uniqueFlights.filter(f => f.gate && f.gate !== 'TBD').length
+    const noGates = uniqueFlights.filter(f => !f.gate).length
+    
     console.log(`🔍 Processing ${uniqueFlights.length} unique operational flights`)
+    console.log(`📊 Gate Status: ${assignedGates} assigned, ${tbdGates} TBD, ${noGates} no gate`)
 
     // Get current Amsterdam time
     const currentTime = getCurrentAmsterdamTime()
@@ -80,6 +86,8 @@ export async function GET(request: NextRequest) {
     if (includeGateOccupancy) {
       const gateOccupancyData = processGateOccupancy(uniqueFlights, currentTime)
       response.gateOccupancy = gateOccupancyData
+      // Also add raw flights data for gate status metrics
+      response.flights = uniqueFlights
     }
 
     // Add gate changes data if requested
