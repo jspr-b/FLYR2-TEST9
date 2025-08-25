@@ -397,12 +397,23 @@ export default function GateActivityPage() {
                 <CardContent className="pt-0">
                   {/* Flight State Distribution */}
                   <div className="space-y-4">
-                    {Object.entries(processedData?.flightStates || {})
-                      .sort(([, a], [, b]) => b - a)
-                      .slice(0, 5)
-                      .map(([state, count]) => {
+                    {(() => {
+                      // Define all possible flight states
+                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL'];
+                      const currentStates = processedData?.flightStates || {};
+                      
+                      // Create entries for all states, defaulting to 0 if not present
+                      const stateEntries = allFlightStates.map(state => [
+                        state,
+                        currentStates[state] || 0
+                      ]);
+                      
+                      // Sort by count (descending) but keep all states
+                      return stateEntries
+                        .sort(([, a], [, b]) => b - a)
+                        .map(([state, count]) => {
                         const total = Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)
-                        const percentage = Math.round((count / total) * 100)
+                        const percentage = total > 0 ? Math.round((count / total) * 100) : 0
                         
                         const stateConfig = {
                           SCH: { 
@@ -497,7 +508,8 @@ export default function GateActivityPage() {
                             </div>
                           </div>
                         )
-                      })}
+                      })
+                    })()}
                   </div>
                   
                   {/* Operational Impact Section */}

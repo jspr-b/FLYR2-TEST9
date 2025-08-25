@@ -50,6 +50,10 @@ export function GateTypeDistribution() {
         const response = await fetch('/api/dashboard-data?includeGateOccupancy=true')
         const data = await response.json()
         
+        // console.log('Gate Type Distribution - API Response:', data)
+        // console.log('Gate Type Distribution - data.flights exists?', !!data.flights)
+        // console.log('Gate Type Distribution - data.gateOccupancy exists?', !!data.gateOccupancy)
+        
         if (data.gateOccupancy && data.gateOccupancy.gates && data.gateOccupancy.gates.length > 0) {
           const gates = data.gateOccupancy.gates
           
@@ -84,23 +88,58 @@ export function GateTypeDistribution() {
           }
           
           // Calculate operational metrics for bus gates vs jet bridges
-          const busGateFlights = gates.filter((gate: any) => BUS_GATES.includes(gate.gateID))
-            .flatMap((gate: any) => gate.scheduledFlights)
+          // Use the flights data directly instead of gate.scheduledFlights
+          console.log('Total gates:', gates.length)
+          console.log('Total flights for gate analysis:', data.flights?.length)
           
-          const jetBridgeFlights = gates.filter((gate: any) => !BUS_GATES.includes(gate.gateID))
-            .flatMap((gate: any) => gate.scheduledFlights)
+          // Verify unique gates calculation
+          const uniqueGatesFromFlights = new Set(data.flights?.filter((f: any) => f.gate && f.gate !== 'TBD').map((f: any) => f.gate))
+          console.log('Unique gates from flights:', uniqueGatesFromFlights.size)
+          console.log('Gates in gateOccupancyData:', gates.length)
+          console.log('KLM Gates Today from API:', schipholContext?.klmGatesUsedToday)
+          
+          // Calculate from flights that have gates assigned
+          if (!data.flights) {
+            console.error('Gate Type Distribution - No flights data in response!')
+            setLoading(false)
+            return
+          }
+          
+          const flightsWithGates = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD')
+          console.log('Gate Type Distribution - Flights with gates:', flightsWithGates.length)
+          
+          const busGateFlights = flightsWithGates.filter((flight: any) => BUS_GATES.includes(flight.gate))
+          const jetBridgeFlights = flightsWithGates.filter((flight: any) => !BUS_GATES.includes(flight.gate))
+          
+          console.log('Flights at bus gates:', busGateFlights.length)
+          console.log('Flights at jet bridges:', jetBridgeFlights.length)
           
           // Calculate delay metrics
-          const busGateDelays = busGateFlights.filter((f: any) => f.delayMinutes > 0)
-          const jetBridgeDelays = jetBridgeFlights.filter((f: any) => f.delayMinutes > 0)
+          // For flights, we need to calculate delays from schedule vs actual times
+          const calculateDelay = (flight: any) => {
+            if (!flight.publicEstimatedOffBlockTime || !flight.scheduleDateTime) return 0
+            const scheduled = new Date(flight.scheduleDateTime)
+            const estimated = new Date(flight.publicEstimatedOffBlockTime)
+            return Math.max(0, Math.round((estimated.getTime() - scheduled.getTime()) / (1000 * 60)))
+          }
+          
+          const busGateDelays = busGateFlights.filter((f: any) => {
+            const delay = calculateDelay(f)
+            return delay > 0
+          })
+          
+          const jetBridgeDelays = jetBridgeFlights.filter((f: any) => {
+            const delay = calculateDelay(f)
+            return delay > 0
+          })
           
           // Calculate average delays
           const avgBusGateDelay = busGateDelays.length > 0
-            ? Math.round(busGateDelays.reduce((sum: number, f: any) => sum + f.delayMinutes, 0) / busGateDelays.length)
+            ? Math.round(busGateDelays.reduce((sum: number, f: any) => sum + calculateDelay(f), 0) / busGateDelays.length)
             : 0
           
           const avgJetBridgeDelay = jetBridgeDelays.length > 0
-            ? Math.round(jetBridgeDelays.reduce((sum: number, f: any) => sum + f.delayMinutes, 0) / jetBridgeDelays.length)
+            ? Math.round(jetBridgeDelays.reduce((sum: number, f: any) => sum + calculateDelay(f), 0) / jetBridgeDelays.length)
             : 0
           
           // Transform data to match expected structure
@@ -119,10 +158,14 @@ export function GateTypeDistribution() {
           }
           
           // Store operational metrics
+          // console.log('Gate Type Distribution - Bus gate flights:', busGateFlights.length)
+          // console.log('Gate Type Distribution - Jet bridge flights:', jetBridgeFlights.length)
+          // console.log('Gate Type Distribution - Unknown gate flights:', unknownGateFlights.length)
+          
           setOperationalData({
             busGateFlights: busGateFlights.length,
             jetBridgeFlights: jetBridgeFlights.length,
-            unknownGateFlights: departedNoGate?.length || 0,
+            unknownGateFlights: unknownGateFlights.length,
             busGateDelayRate: busGateFlights.length > 0
               ? Math.round((busGateDelays.length / busGateFlights.length) * 100)
               : 0,
@@ -141,8 +184,16 @@ export function GateTypeDistribution() {
                 .reduce((sum: number, g: any) => sum + g.utilization.current, 0) /
               Math.max(1, gates.filter((g: any) => !BUS_GATES.includes(g.gateID)).length)
             ),
-            criticalBusGateDelays: busGateFlights.filter((f: any) => f.delayMinutes >= 60),
-            criticalJetBridgeDelays: jetBridgeFlights.filter((f: any) => f.delayMinutes >= 60)
+            criticalBusGateDelays: busGateFlights.filter((f: any) => calculateDelay(f) >= 60).map((f: any) => ({
+              ...f,
+              delayMinutes: calculateDelay(f),
+              delayFormatted: `${calculateDelay(f)} min`
+            })),
+            criticalJetBridgeDelays: jetBridgeFlights.filter((f: any) => calculateDelay(f) >= 60).map((f: any) => ({
+              ...f,
+              delayMinutes: calculateDelay(f),
+              delayFormatted: `${calculateDelay(f)} min`
+            }))
           })
           
           setGatesData(transformedData)
@@ -474,16 +525,15 @@ export function GateTypeDistribution() {
               <div>
                 <div className="text-gray-600 text-xs">Total Flights</div>
                 <div className="text-2xl font-bold">
-                  {(gatesData?.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0) + unknownGateFlights.length}
+                  {(operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length}
                 </div>
               </div>
               <div>
                 <div className="text-gray-600 text-xs">Bus Gate Usage</div>
                 <div className="text-2xl font-bold">
                   {(() => {
-                    const totalWithUnknown = (gatesData?.gateData.reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0) + unknownGateFlights.length;
-                    const busGateFlights = gatesData?.gateData.filter((gate: any) => gate.isBusGate).reduce((sum: number, gate: any) => sum + gate.flights, 0) || 0;
-                    return totalWithUnknown > 0 ? (busGateFlights / totalWithUnknown * 100).toFixed(1) : 0;
+                    const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
+                    return total > 0 ? ((operationalData?.busGateFlights || 0) / total * 100).toFixed(1) : '0';
                   })()}%
                 </div>
               </div>

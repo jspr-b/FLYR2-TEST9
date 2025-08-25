@@ -183,38 +183,53 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
             </div>
           )}
           
-          {/* Operational Metrics */}
-          {gateChangeEvents.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <div className="text-sm font-medium text-gray-700">Operational Impact:</div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="text-xs text-gray-600">Most Affected Pier</div>
-                  <div className="text-lg font-bold">
-                    {stats.mostAffectedPier ? `Pier ${stats.mostAffectedPier[0]}` : 'N/A'}
-                    <span className="text-xs font-normal text-gray-500 ml-1">
-                      ({stats.mostAffectedPier?.[1] || 0} changes)
-                    </span>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="text-xs text-gray-600">Departing Soon</div>
-                  <div className="text-lg font-bold text-amber-600">
-                    {stats.urgent}
-                    <span className="text-xs font-normal text-gray-500 ml-1">
-                      ({Math.round((stats.urgent / stats.total) * 100)}%)
-                    </span>
-                  </div>
+          {/* Operational Metrics - Always show */}
+          <div className="mt-4 space-y-2">
+            <div className="text-sm font-medium text-gray-700">Operational Impact:</div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-xs text-gray-600">Most Affected Pier</div>
+                <div className="text-lg font-bold">
+                  {stats.mostAffectedPier ? `Pier ${stats.mostAffectedPier[0]}` : 'None'}
+                  <span className="text-xs font-normal text-gray-500 ml-1">
+                    ({stats.mostAffectedPier?.[1] || 0} changes)
+                  </span>
                 </div>
               </div>
               
-              <div className="text-xs text-gray-500 mt-2">
-                Piers affected: {Object.keys(stats.gatesByPier).sort().join(', ')}
+              <div>
+                <div className="text-xs text-gray-600">Departing Soon</div>
+                <div className={`text-lg font-bold ${stats.urgent > 0 ? 'text-amber-600' : 'text-gray-600'}`}>
+                  {stats.urgent}
+                  <span className="text-xs font-normal text-gray-500 ml-1">
+                    ({stats.total > 0 ? Math.round((stats.urgent / stats.total) * 100) : 0}%)
+                  </span>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-xs text-gray-600">Delayed + GCH</div>
+                <div className={`text-lg font-bold ${stats.delayedAndChanged > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
+                  {stats.delayedAndChanged}
+                  <span className="text-xs font-normal text-gray-500 ml-1">
+                    ({stats.total > 0 ? Math.round((stats.delayedAndChanged / stats.total) * 100) : 0}%)
+                  </span>
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-xs text-gray-600">Total Changes</div>
+                <div className="text-lg font-bold">
+                  {stats.total}
+                </div>
               </div>
             </div>
-          )}
+            
+            <div className="text-xs text-gray-500 mt-2">
+              Piers affected: {Object.keys(stats.gatesByPier).length > 0 ? Object.keys(stats.gatesByPier).sort().join(', ') : 'None'}
+            </div>
+          </div>
           
           {/* Status Legend */}
           <div className="mt-4 space-y-3">
