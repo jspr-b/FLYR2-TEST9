@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ArrowRightLeft, Clock, Plane, ArrowRight, Info, MapPin } from 'lucide-react'
 import { getCurrentAmsterdamTime } from '@/lib/amsterdam-time'
 
@@ -44,7 +45,11 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
         events = events.filter(event => event.isPriority)
         break
       case 'delayed':
-        events = events.filter(event => event.isDelayed && event.flightStates.includes('GCH'))
+        events = events.filter(event => {
+          const hasMultipleStates = event.flightStates.length > 1
+          const hasDelay = event.isDelayed || event.flightStates.includes('DEL')
+          return hasMultipleStates && hasDelay
+        })
         break
       case 'time':
       default:
@@ -61,7 +66,13 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
     const total = gateChangeEvents.length
     const urgent = gateChangeEvents.filter(e => e.isPriority).length
     const delayed = gateChangeEvents.filter(e => e.isDelayed).length
-    const delayedAndChanged = gateChangeEvents.filter(e => e.isDelayed && e.flightStates.includes('GCH')).length
+    // Calculate flights with multiple operational issues (GCH + DEL or other states)
+    const multipleIssues = gateChangeEvents.filter(e => {
+      // Count flights that have gate change PLUS other operational states
+      const hasMultipleStates = e.flightStates.length > 1 // GCH + other states
+      const hasDelay = e.isDelayed || e.flightStates.includes('DEL')
+      return hasMultipleStates && hasDelay
+    }).length
     
     // Gate distribution
     const gatesByPier = gateChangeEvents.reduce((acc, event) => {
@@ -73,7 +84,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
     
     const mostAffectedPier = Object.entries(gatesByPier).sort((a, b) => b[1] - a[1])[0]
     
-    return { total, urgent, delayed, delayedAndChanged, gatesByPier, mostAffectedPier }
+    return { total, urgent, delayed, multipleIssues, gatesByPier, mostAffectedPier }
   }, [gateChangeEvents])
 
   // Display first 8 events in card (more space with compact design)
@@ -141,7 +152,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
               <SelectContent>
                 <SelectItem value="time">By Time</SelectItem>
                 <SelectItem value="priority">Priority Only</SelectItem>
-                <SelectItem value="delayed">Delayed + GCH</SelectItem>
+                <SelectItem value="delayed">Complex Issues</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -155,7 +166,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
                 <ArrowRightLeft className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">
                   {viewMode === 'priority' && 'No urgent gate changes'}
-                  {viewMode === 'delayed' && 'No delayed flights with gate changes'}
+                  {viewMode === 'delayed' && 'No flights with multiple operational issues'}
                   {viewMode === 'time' && 'No gate changes detected'}
                 </p>
               </div>
@@ -199,22 +210,116 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
               
               <div>
                 <div className="text-xs text-gray-600">Departing Soon</div>
-                <div className={`text-lg font-bold ${stats.urgent > 0 ? 'text-amber-600' : 'text-gray-600'}`}>
-                  {stats.urgent}
-                  <span className="text-xs font-normal text-gray-500 ml-1">
-                    ({stats.total > 0 ? Math.round((stats.urgent / stats.total) * 100) : 0}%)
-                  </span>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-amber-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                      stats.urgent > 0 ? 'text-amber-600' : 'text-gray-600'
+                    }`}>
+                      {stats.urgent}
+                      <span className="text-xs font-normal text-gray-500 ml-1">
+                        ({stats.total > 0 ? Math.round((stats.urgent / stats.total) * 100) : 0}%)
+                      </span>
+                      {stats.urgent > 0 && (
+                        <svg className="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  {stats.urgent > 0 && (
+                    <PopoverContent className="w-80" align="start">
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-sm font-semibold text-amber-700 mb-1">Departing Soon (Next Hour)</div>
+                          <p className="text-xs text-gray-600">Gate changes for flights departing within 60 minutes</p>
+                        </div>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {gateChangeEvents
+                            .filter(e => e.isPriority)
+                            .sort((a, b) => a.timeUntilDeparture - b.timeUntilDeparture)
+                            .map((flight) => (
+                              <div key={flight.flightNumber} className="text-sm border-b border-gray-100 pb-2 last:border-0">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <span className="font-medium">{flight.flightName}</span>
+                                    {flight.flightStates.includes('BRD') && (
+                                      <span className="text-xs ml-2 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">BRD</span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-amber-600 font-semibold">{formatTime(flight.timeUntilDeparture)}</span>
+                                </div>
+                                <div className="text-xs text-gray-600 mt-0.5">
+                                  Gate {flight.currentGate} → {flight.destination}
+                                  {flight.isDelayed && <span className="ml-2 text-orange-600">Delayed {flight.delayMinutes}m</span>}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  )}
+                </Popover>
               </div>
               
               <div>
-                <div className="text-xs text-gray-600">Delayed + GCH</div>
-                <div className={`text-lg font-bold ${stats.delayedAndChanged > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
-                  {stats.delayedAndChanged}
-                  <span className="text-xs font-normal text-gray-500 ml-1">
-                    ({stats.total > 0 ? Math.round((stats.delayedAndChanged / stats.total) * 100) : 0}%)
-                  </span>
-                </div>
+                <div className="text-xs text-gray-600">Multiple Issues</div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-purple-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                      stats.multipleIssues > 0 ? 'text-purple-600' : 'text-gray-600'
+                    }`}>
+                      {stats.multipleIssues}
+                      <span className="text-xs font-normal text-gray-500 ml-1">
+                        ({stats.total > 0 ? Math.round((stats.multipleIssues / stats.total) * 100) : 0}%)
+                      </span>
+                      {stats.multipleIssues > 0 && (
+                        <svg className="w-3 h-3 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  {stats.multipleIssues > 0 && (
+                    <PopoverContent className="w-80" align="start">
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-sm font-semibold text-purple-700 mb-1">Complex Operational Issues</div>
+                          <p className="text-xs text-gray-600">Flights with gate changes AND delays or multiple operational states</p>
+                        </div>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {gateChangeEvents
+                            .filter(e => {
+                              const hasMultipleStates = e.flightStates.length > 1
+                              const hasDelay = e.isDelayed || e.flightStates.includes('DEL')
+                              return hasMultipleStates && hasDelay
+                            })
+                            .sort((a, b) => a.timeUntilDeparture - b.timeUntilDeparture)
+                            .map((flight) => (
+                              <div key={flight.flightNumber} className="text-sm border-b border-gray-100 pb-2 last:border-0">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <span className="font-medium">{flight.flightName}</span>
+                                    <div className="inline-flex gap-1 ml-2">
+                                      {flight.flightStates.map((state: string) => (
+                                        <span key={state} className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
+                                          {state}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-gray-500">{formatTime(flight.timeUntilDeparture)}</span>
+                                </div>
+                                <div className="text-xs text-gray-600 mt-0.5">
+                                  Gate {flight.currentGate} → {flight.destination}
+                                  {flight.isDelayed && <span className="ml-2 text-orange-600">Delayed {flight.delayMinutes}m</span>}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  )}
+                </Popover>
               </div>
               
               <div>
@@ -262,7 +367,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
           <DialogHeader>
             <DialogTitle>Flight Gate Changes - Full Report</DialogTitle>
             <DialogDescription>
-              All flights with GCH status sorted by {viewMode === 'priority' ? 'priority' : viewMode === 'delayed' ? 'delay status' : 'departure time'}
+              All flights with GCH status sorted by {viewMode === 'priority' ? 'priority' : viewMode === 'delayed' ? 'complexity' : 'departure time'}
             </DialogDescription>
           </DialogHeader>
           
@@ -283,8 +388,8 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
                 <div className="text-xs text-gray-600">Delayed</div>
               </div>
               <div className="p-3 bg-purple-50 rounded-lg">
-                <div className="text-xl font-bold text-purple-600">{stats.delayedAndChanged}</div>
-                <div className="text-xs text-gray-600">Delayed + GCH</div>
+                <div className="text-xl font-bold text-purple-600">{stats.multipleIssues}</div>
+                <div className="text-xs text-gray-600">Multiple Issues</div>
               </div>
             </div>
 

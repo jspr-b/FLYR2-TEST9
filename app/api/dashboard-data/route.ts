@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
 import { ensureCacheWarmed } from '@/lib/cache-manager'
+import { getMostSignificantState } from '@/lib/flight-state-priority'
 
 /**
  * Combined endpoint that fetches flight data once and provides all dashboard information
@@ -169,6 +170,7 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
   })
 
   // Analyze gate status
+  console.log(`📊 Processing ${gateMap.size} gates with flights`)
   const gates = Array.from(gateMap.entries()).map(([gateID, gateFlights]) => {
     // Sort flights by schedule time
     gateFlights.sort((a, b) => 
@@ -223,8 +225,8 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         flightNumber: flight.flightNumber.toString(),
         aircraftType: flight.aircraftType?.iataMain || flight.aircraftType?.iataSub || 'Unknown',
         destination: flight.route?.destinations?.[0] || 'Unknown',
-        primaryState: flight.publicFlightState?.flightStates?.[0] || 'SCH',
-        primaryStateReadable: getFlightStateReadable(flight.publicFlightState?.flightStates?.[0] || 'SCH'),
+        primaryState: getMostSignificantState(flight.publicFlightState?.flightStates || []),
+        primaryStateReadable: getFlightStateReadable(getMostSignificantState(flight.publicFlightState?.flightStates || [])),
         flightStates: flight.publicFlightState?.flightStates || [],
         flightStatesReadable: (flight.publicFlightState?.flightStates || []).map(getFlightStateReadable),
         delayMinutes: calculateDelay(flight),
@@ -258,6 +260,10 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
     return delay > calculateDelay(max) ? f : max
   }, delayedFlights[0] || null)
 
+  // Count total scheduled flights
+  const totalScheduledFlights = gates.reduce((sum, gate) => sum + gate.scheduledFlights.length, 0)
+  console.log(`📊 Total scheduled flights across all gates: ${totalScheduledFlights}`)
+  
   return {
     summary: {
       totalGates: gates.length,
@@ -279,9 +285,19 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
           formatted: '',
           flight: null
         }
+      },
+      schipholContext: {
+        totalSchipholGates: 223,
+        totalSchipholPiers: 8,
+        klmOperationalFootprint: Math.round((gates.length / 223) * 100),
+        klmGatesUsedToday: gates.length,
+        unusedSchipholGates: 223 - gates.length,
+        pierUtilization: [],
+        busiestPier: gates.length > 0 ? gates[0].pier : 'N/A',
+        totalFlightsHandled: flights.length
       }
     },
-    gates: gates.slice(0, 100) // Limit to 100 gates for performance
+    gates: gates // Return all gates
   }
 }
 

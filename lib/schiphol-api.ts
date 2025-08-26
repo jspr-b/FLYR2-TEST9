@@ -248,7 +248,7 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
   const allFlights: any[] = []
   let page = 0
   // Use custom max pages if provided (for background refresh), otherwise default
-  const maxPages = config.maxPagesToFetch || 20
+  const maxPages = config.maxPagesToFetch || 25
   let consecutiveEmptyPages = 0
   const maxEmptyPages = 2 // Stop after 2 consecutive empty pages
   

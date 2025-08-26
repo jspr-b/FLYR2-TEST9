@@ -5,6 +5,7 @@
 
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from './schiphol-api'
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from './amsterdam-time'
+import { getMostSignificantState } from './flight-state-priority'
 
 // In-memory cache for pre-computed metrics
 interface CachedGateMetrics {
@@ -130,7 +131,7 @@ export async function processGateMetrics(): Promise<any> {
           gate: gateID,
           pier: flight.pier || 'UNKNOWN',
           flightStates: flightStates,
-          primaryState: flightStates[0] || 'UNKNOWN',
+          primaryState: getMostSignificantState(flightStates),
           isDelayed: flightStates.includes('DEL') || hasSignificantDelay(flight),
           delayMinutes: calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime)
         }

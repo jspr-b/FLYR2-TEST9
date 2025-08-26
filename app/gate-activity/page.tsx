@@ -178,22 +178,35 @@ export default function GateActivityPage() {
   })).filter(gate => gate.flights.length > 0) : []
 
   // Process data for different chart/card possibilities - only if we have actual gate data
+  // Calculate total flights for debugging
+  const totalFlightsInGates = data?.gates.reduce((sum, gate) => sum + (gate.scheduledFlights?.length || 0), 0) || 0
+  console.log(`🔍 Gate Activity - Total flights in gates: ${totalFlightsInGates}`)
+  console.log(`🔍 Gate Activity - Number of gates: ${data?.gates.length || 0}`)
+
   const processedData = (data && data.gates.length > 0) ? {
     // Gate Status Distribution
     statusBreakdown: data.summary.statusBreakdown,
     
     // Flight States Distribution
-    flightStates: data.gates.flatMap(gate => 
-      gate.scheduledFlights.map(flight => ({
-        state: flight.primaryState,
-        readable: flight.primaryStateReadable,
-        gate: gate.gateID,
-        pier: gate.pier
-      }))
-    ).reduce((acc, flight) => {
-      acc[flight.state] = (acc[flight.state] || 0) + 1
-      return acc
-    }, {} as Record<string, number>),
+    flightStates: (() => {
+      const allFlightStates = data.gates.flatMap(gate => 
+        gate.scheduledFlights.map(flight => ({
+          state: flight.primaryState,
+          readable: flight.primaryStateReadable,
+          gate: gate.gateID,
+          pier: gate.pier
+        }))
+      )
+      console.log(`🔍 Total flight states before filtering: ${allFlightStates.length}`)
+      
+      const validStates = allFlightStates.filter(flight => flight.state && flight.state !== 'UNKNOWN')
+      console.log(`🔍 Valid flight states after filtering: ${validStates.length}`)
+      
+      return validStates.reduce((acc, flight) => {
+        acc[flight.state] = (acc[flight.state] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+    })(),
     
     // Gate Changes Analysis - enhanced with time-based analysis
     gateChanges: data.gates
@@ -398,8 +411,8 @@ export default function GateActivityPage() {
                   {/* Flight State Distribution */}
                   <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                     {(() => {
-                      // Define all possible flight states
-                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL'];
+                      // Define all possible flight states including GCH
+                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL', 'GCH'];
                       const currentStates = processedData?.flightStates || {};
                       
                       // Create entries for all states, defaulting to 0 if not present
@@ -471,6 +484,14 @@ export default function GateActivityPage() {
                             iconColor: 'text-red-600',
                             Icon: Clock,
                             description: 'Flight delayed'
+                          },
+                          GCH: { 
+                            label: 'Gate Change', 
+                            color: 'bg-yellow-500', 
+                            bgColor: 'bg-yellow-100',
+                            iconColor: 'text-yellow-600',
+                            Icon: ArrowRightLeft,
+                            description: 'Gate has changed'
                           }
                         }
                         

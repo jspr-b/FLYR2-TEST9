@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDuplicateFlights, removeStaleFlights } from '@/lib/schiphol-api'
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
+import { getMostSignificantState } from '@/lib/flight-state-priority'
 
 // Gate occupancy status definitions
 type GateOccupancyStatus = 
@@ -160,7 +161,7 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
     
     // Get all flight states, not just primary
     const flightStates = flight.publicFlightState?.flightStates || []
-    const primaryState = flightStates[0]
+    const primaryState = getMostSignificantState(flightStates)
     if (!primaryState) continue
     
     // Enhanced logic: Check for active gate states regardless of primary state
@@ -214,7 +215,7 @@ function analyzeDelayedFlights(filteredFlights: any[]): any {
     const delayMinutes = calculateDelayMinutes(scheduledTime, estimatedTime)
     
     // Consider flights delayed if they have DEL state or are delayed by more than 15 minutes
-    const primaryState = flight.publicFlightState?.flightStates?.[0]
+    const primaryState = getMostSignificantState(flight.publicFlightState?.flightStates || [])
     const isDelayed = primaryState === 'DEL' || delayMinutes > 15
     
     if (isDelayed && delayMinutes > 0) {
@@ -514,8 +515,8 @@ export async function GET(request: NextRequest) {
         flightStates: flight.publicFlightState?.flightStates || [],
         flightStatesReadable: flight.publicFlightState?.flightStates?.map((state: keyof typeof FLIGHT_STATE_DESCRIPTIONS) => 
           FLIGHT_STATE_DESCRIPTIONS[state] || state) || [],
-        primaryState: flight.publicFlightState?.flightStates?.[0] || 'UNKNOWN',
-        primaryStateReadable: FLIGHT_STATE_DESCRIPTIONS[flight.publicFlightState?.flightStates?.[0] as keyof typeof FLIGHT_STATE_DESCRIPTIONS] || 'Unknown',
+        primaryState: getMostSignificantState(flight.publicFlightState?.flightStates || []),
+        primaryStateReadable: FLIGHT_STATE_DESCRIPTIONS[getMostSignificantState(flight.publicFlightState?.flightStates || []) as keyof typeof FLIGHT_STATE_DESCRIPTIONS] || 'Unknown',
           delayMinutes: calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime),
           delayFormatted: (() => {
             const delay = calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime);
