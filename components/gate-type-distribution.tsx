@@ -350,7 +350,7 @@ export function GateTypeDistribution() {
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-600">Gates TBD:</span>
+                  <span className="text-gray-600">Gates To Be Determined:</span>
                   <div className={`font-semibold ${
                     gateStatusMetrics?.tbdPercentage > 20 ? 'text-amber-700' : 
                     gateStatusMetrics?.tbdPercentage > 10 ? 'text-yellow-700' : 'text-green-700'
