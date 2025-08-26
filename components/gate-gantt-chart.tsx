@@ -379,8 +379,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       case 'DEP': return 'bg-gray-500 border-gray-700'      // Departed - GRAY
       case 'SCH': return 'bg-purple-500 border-purple-700'  // Scheduled - PURPLE
       case 'DEL': return 'bg-red-400 border-red-600'        // Delayed state - RED
-      case 'CNX': return 'bg-gray-400 border-gray-600'      // Cancelled - GRAY
-      default: return 'bg-gray-400 border-gray-600'         // Unknown - GRAY
+      case 'GCH': return 'bg-[#222E50] border-[#1a2340]'    // Gate Change - DARK BLUE
+      case 'CNX': return 'bg-[#BD2F0F] border-[#8B2209]'    // Cancelled - RED
+      default: return 'bg-[#222E50] border-[#1a2340]'       // Unknown - DARK BLUE
     }
   }
 
@@ -549,23 +550,23 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                             {/* Departure Time Indicators */}
                             {timeline.isTimelineShifted ? (
                               <>
-                                {/* Original scheduled time (dashed) */}
+                                {/* Original scheduled time (dashed gray) */}
                                 <div 
-                                  className="absolute top-1 bottom-1 w-1 bg-amber-500 border-l-2 border-dashed border-amber-600 shadow-sm"
+                                  className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
                                   style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
                                   title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
-                                {/* New estimated time (solid) */}
+                                {/* New estimated time (solid gray) */}
                                 <div 
-                                  className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
+                                  className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
                                   style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                   title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
                               </>
                             ) : (
-                              /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
+                              /* Normal flight - use actual departure time (solid gray) */
                               <div 
-                                className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
+                                className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
                                 style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                 title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                               />
@@ -730,23 +731,23 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                             {/* Departure Time Indicators */}
                             {timeline.isTimelineShifted ? (
                               <>
-                                {/* Original scheduled time (dashed) */}
+                                {/* Original scheduled time (dashed gray) */}
                                 <div 
-                                  className="absolute top-1 bottom-1 w-1 bg-amber-500 border-l-2 border-dashed border-amber-600 shadow-sm"
+                                  className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
                                   style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
                                   title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
-                                {/* New estimated time (solid) */}
+                                {/* New estimated time (solid gray) */}
                                 <div 
-                                  className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
+                                  className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
                                   style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                   title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                                 />
                               </>
                             ) : (
-                              /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
+                              /* Normal flight - use actual departure time (solid gray) */
                               <div 
-                                className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
+                                className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
                                 style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
                                 title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
                               />
@@ -866,52 +867,8 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
         {/* Synchronized Gantt Chart Container */}
         {renderGanttContent(false)}
 
-        {/* Legend - Responsive */}
-        <div className="border-t pt-4 mt-4 px-4">
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Flight Status Legend</h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 border border-green-700 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Boarding</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 border border-blue-700 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Gate Open</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-500 border border-yellow-700 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Gate Closing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-orange-500 border border-orange-700 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Gate Closed</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-purple-500 border border-purple-700 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Scheduled</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-400 border border-red-600 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Delayed</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-500 border border-gray-700 rounded flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Departed</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-0.5 h-3 bg-red-500 flex-shrink-0"></div>
-              <span className="whitespace-nowrap">Current Time</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-3 bg-blue-500 border border-blue-600 flex-shrink-0 shadow-sm"></div>
-              <span className="whitespace-nowrap">Departure</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-3 bg-amber-500 border-l-2 border-dashed border-amber-600 flex-shrink-0 shadow-sm"></div>
-              <span className="whitespace-nowrap">Original Time</span>
-            </div>
-          </div>
-        </div>
+        {/* Legend - Using the Legend component */}
+        <Legend />
       </CardContent>
 
       {/* Hover Tooltip */}
@@ -1078,51 +1035,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
             </div>
             
             {/* Legend in full screen */}
-            <div className="border-t pt-4 pb-4 px-6 bg-gray-50">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Flight Status Legend</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-3 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 border border-green-700 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Boarding</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 border border-blue-700 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Gate Open</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-500 border border-yellow-700 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Gate Closing</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-orange-500 border border-orange-700 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Gate Closed</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-purple-500 border border-purple-700 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Scheduled</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-400 border border-red-600 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Delayed</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-500 border border-gray-700 rounded flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Departed</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-0.5 h-3 bg-red-500 flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Current Time</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-0.5 h-3 bg-white border border-gray-400 flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Departure</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-0.5 h-3 bg-gray-400 border-l border-dashed border-gray-500 flex-shrink-0"></div>
-                  <span className="whitespace-nowrap">Original Time</span>
-                </div>
-              </div>
-            </div>
+            <Legend />
           </div>
         </div>
       )}
@@ -1272,14 +1185,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                         {timeline.isTimelineShifted && (
                           <>
                             <div 
-                              className="absolute top-1 bottom-1 w-1 bg-amber-500 border-l-2 border-dashed border-amber-600 shadow-sm"
+                              className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
                               style={{ 
                                 left: `${((timeline.scheduledTime.getTime() - timeline.startTime.getTime()) / 
                                   (timeline.endTime.getTime() - timeline.startTime.getTime())) * 100}%` 
                               }}
                             />
                             <div 
-                              className="absolute top-0 bottom-0 w-1 bg-blue-500 shadow-lg border-l border-blue-600"
+                              className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
                               style={{ 
                                 left: `${((timeline.actualDepartureTime.getTime() - timeline.startTime.getTime()) / 
                                   (timeline.endTime.getTime() - timeline.startTime.getTime())) * 100}%` 

@@ -41,23 +41,23 @@ export function FlightBar({
       {/* Departure Time Indicators */}
       {timeline.isTimelineShifted ? (
         <>
-          {/* Original scheduled time (dashed) */}
+          {/* Original scheduled time (dashed gray) */}
           <div 
-            className="absolute top-1 bottom-1 w-0.5 bg-gray-300/60 border-l-2 border-dashed border-gray-400"
+            className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
             style={{ left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%` }}
             title={`Original: ${timeline.scheduledTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
           />
-          {/* New estimated time (solid) */}
+          {/* New estimated time (solid gray) */}
           <div 
-            className="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-sm"
+            className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
             style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
             title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
           />
         </>
       ) : (
-        /* Normal flight - use actual departure time (which equals scheduled for non-delayed) */
+        /* Normal flight - use actual departure time (solid gray) */
         <div 
-          className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
+          className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
           style={{ left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%` }}
           title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Amsterdam' })}`}
         />
