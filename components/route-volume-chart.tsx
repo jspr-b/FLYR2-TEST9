@@ -169,10 +169,10 @@ export function RouteVolumeChart() {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Clock className="w-5 h-5 text-red-500" />
-          <h2 className="text-lg font-semibold text-gray-900">Route Delay Bar Chart</h2>
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Route Delay Bar Chart</h2>
           {backgroundLoading && (
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse ml-2" title="Updating data..." />
           )}
@@ -189,70 +189,76 @@ export function RouteVolumeChart() {
             </Tooltip>
           </TooltipProvider>
         </div>
-        <p className="text-sm text-gray-600 mb-4">Top delayed destinations by aggregate delay impact (auto-refreshes every 2.5min)</p>
+        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Top delayed destinations by aggregate delay impact (auto-refreshes every 2.5min)</p>
         
         {/* Metric Toggle Buttons */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
           <button
             onClick={() => setSelectedMetric('totalDelay')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+            className={`px-2 sm:px-3 md:px-4 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-all ${
               selectedMetric === 'totalDelay'
                 ? 'bg-red-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Total Delay Minutes
+            <span className="sm:hidden">Total</span>
+            <span className="hidden sm:inline md:hidden">Total Delay</span>
+            <span className="hidden md:inline">Total Delay Minutes</span>
           </button>
           <button
             onClick={() => setSelectedMetric('avgDelay')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+            className={`px-2 sm:px-3 md:px-4 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-all ${
               selectedMetric === 'avgDelay'
                 ? 'bg-red-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Average Delay
+            <span className="sm:hidden">Average</span>
+            <span className="hidden sm:inline md:hidden">Avg Delay</span>
+            <span className="hidden md:inline">Average Delay</span>
           </button>
           <button
             onClick={() => setSelectedMetric('percentDelayed')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+            className={`px-2 sm:px-3 md:px-4 py-1.5 text-xs md:text-sm font-medium rounded-lg transition-all ${
               selectedMetric === 'percentDelayed'
                 ? 'bg-red-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            % Delayed ≥15min
+            <span className="sm:hidden">% ≥15m</span>
+            <span className="hidden sm:inline md:hidden">% Delayed 15m+</span>
+            <span className="hidden md:inline">% Delayed ≥15min</span>
           </button>
         </div>
       </div>
 
       {/* Horizontal Bar Chart */}
-      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+      <div className="space-y-2 sm:space-y-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto">
         {sortedRoutes.map((route, index) => (
-          <div key={route.destination} className="flex items-center gap-4">
+          <div key={route.destination} className="flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4">
             {/* Rank */}
-            <div className="w-6 text-xs font-medium text-gray-500 text-right">
+            <div className="w-5 xs:w-6 text-[10px] xs:text-xs font-medium text-gray-500 text-right">
               #{index + 1}
             </div>
             
             {/* Destination Code */}
-            <div className="w-12 text-xs font-bold text-gray-900">
+            <div className="w-8 xs:w-10 sm:w-12 text-[10px] xs:text-xs font-bold text-gray-900">
               {route.destination}
             </div>
             
-            {/* Destination Name */}
-            <div className="w-32 text-xs text-gray-700 truncate" title={route.destinationName}>
+            {/* Destination Name - only show on larger screens */}
+            <div className="hidden min-[480px]:block w-16 xs:w-20 sm:w-24 md:w-32 lg:w-40 text-[10px] xs:text-xs text-gray-700 truncate" title={route.destinationName}>
               {route.destinationName}
             </div>
             
             {/* Bar */}
-            <div className="flex-1 relative">
-              <div className="h-8 bg-gray-100 rounded-lg overflow-hidden">
+            <div className="flex-1 relative min-w-0">
+              <div className="h-6 xs:h-7 sm:h-8 bg-gray-100 rounded-md sm:rounded-lg overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-300 ${getDelayColor(route)} flex items-center justify-end pr-2`}
+                  className={`h-full transition-all duration-300 ${getDelayColor(route)} flex items-center justify-end pr-1 sm:pr-2`}
                   style={{ width: `${getBarWidth(route)}%` }}
                 >
-                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: getTextColor(route) }}>
+                  <span className="text-[10px] xs:text-xs font-medium whitespace-nowrap" style={{ color: getTextColor(route) }}>
                     {getMetricLabel(route)}
                   </span>
                 </div>
@@ -260,48 +266,63 @@ export function RouteVolumeChart() {
             </div>
             
             {/* Flight Count */}
-            <div className="w-16 text-xs text-gray-500 text-right">
-              {route.totalFlights} flights
+            <div className="w-8 xs:w-10 sm:w-12 md:w-14 lg:w-16 text-[10px] xs:text-xs text-gray-500 text-right whitespace-nowrap">
+              <span className="min-[480px]:hidden">{route.totalFlights}</span>
+              <span className="hidden min-[480px]:inline sm:hidden">{route.totalFlights}f</span>
+              <span className="hidden sm:inline md:hidden">{route.totalFlights} fl</span>
+              <span className="hidden md:inline">{route.totalFlights} flights</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Legend */}
-      <div className="mt-6 flex flex-wrap gap-4 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded"></div>
+      <div className="mt-4 sm:mt-6 flex flex-wrap gap-2 xs:gap-3 sm:gap-4 text-[10px] xs:text-xs">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <div className="w-2 h-2 xs:w-3 xs:h-3 bg-green-500 rounded"></div>
           <span className="text-gray-600">
-            {selectedMetric === 'avgDelay' ? 'Low (< 5min avg)' : 
-             selectedMetric === 'percentDelayed' ? 'Low (< 10%)' : 
-             'Low (< 50min total)'}
+            <span className="sm:hidden">Low</span>
+            <span className="hidden sm:inline">
+              {selectedMetric === 'avgDelay' ? 'Low (< 5min avg)' : 
+               selectedMetric === 'percentDelayed' ? 'Low (< 10%)' : 
+               'Low (< 50min total)'}
+            </span>
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <div className="w-2 h-2 xs:w-3 xs:h-3 bg-yellow-500 rounded"></div>
           <span className="text-gray-600">
-            {selectedMetric === 'avgDelay' ? 'Medium (5-15min)' : 
-             selectedMetric === 'percentDelayed' ? 'Medium (10-25%)' : 
-             'Medium (50-150min)'}
+            <span className="sm:hidden">Med</span>
+            <span className="hidden sm:inline">
+              {selectedMetric === 'avgDelay' ? 'Medium (5-15min)' : 
+               selectedMetric === 'percentDelayed' ? 'Medium (10-25%)' : 
+               'Medium (50-150min)'}
+            </span>
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded"></div>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <div className="w-2 h-2 xs:w-3 xs:h-3 bg-red-500 rounded"></div>
           <span className="text-gray-600">
-            {selectedMetric === 'avgDelay' ? 'High (> 15min)' : 
-             selectedMetric === 'percentDelayed' ? 'High (> 25%)' : 
-             'High (> 150min)'}
+            <span className="sm:hidden">High</span>
+            <span className="hidden sm:inline">
+              {selectedMetric === 'avgDelay' ? 'High (> 15min)' : 
+               selectedMetric === 'percentDelayed' ? 'High (> 25%)' : 
+               'High (> 150min)'}
+            </span>
           </span>
         </div>
       </div>
       
       {/* Usage Note */}
-      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-xs text-blue-800">
-            <strong>Use Case:</strong> Identifies operationally unstable routes for dispatch planning, 
-            crew prioritization, and delay root cause investigations.
+      <div className="mt-4 p-2 xs:p-3 bg-blue-50 rounded-md sm:rounded-lg">
+        <div className="flex items-start gap-1.5 sm:gap-2">
+          <AlertTriangle className="w-3 h-3 xs:w-4 xs:h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-[10px] xs:text-xs text-blue-800">
+            <strong className="sm:hidden">Use:</strong>
+            <strong className="hidden sm:inline">Use Case:</strong>
+            <span className="sm:hidden"> Route instability tracking</span>
+            <span className="hidden sm:inline"> Identifies operationally unstable routes for dispatch planning, 
+            crew prioritization, and delay root cause investigations.</span>
           </div>
         </div>
       </div>
