@@ -77,6 +77,11 @@ export function RouteVolumeChart() {
     }
   }
 
+  const getTextColor = (route: RouteDelayData) => {
+    // Use a medium-dark grey that works well on all backgrounds
+    return "#374151" // gray-700 equivalent
+  }
+
   const getMetricValue = (route: RouteDelayData) => {
     switch (selectedMetric) {
       case 'avgDelay':
@@ -91,11 +96,11 @@ export function RouteVolumeChart() {
   const getMetricLabel = (route: RouteDelayData) => {
     switch (selectedMetric) {
       case 'avgDelay':
-        return `${route.avgDelay}min avg`
+        return `${route.avgDelay}m`
       case 'percentDelayed':
         return `${route.percentDelayedOver15}%`
       default:
-        return `${route.totalDelayMinutes}min total`
+        return `${route.totalDelayMinutes}m`
     }
   }
 
@@ -247,7 +252,7 @@ export function RouteVolumeChart() {
                   className={`h-full transition-all duration-300 ${getDelayColor(route)} flex items-center justify-end pr-2`}
                   style={{ width: `${getBarWidth(route)}%` }}
                 >
-                  <span className="text-xs font-medium text-white">
+                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: getTextColor(route) }}>
                     {getMetricLabel(route)}
                   </span>
                 </div>
