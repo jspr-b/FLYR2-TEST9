@@ -34,7 +34,8 @@
       "Bash(npm:*)",
       "Bash(cat:*)",
       "Bash(ls:*)",
-      "Bash(printenv)"
+      "Bash(printenv)",
+      "Bash(git remote add:*)"
     ],
     "deny": []
   }

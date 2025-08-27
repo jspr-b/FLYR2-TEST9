@@ -434,7 +434,7 @@ export async function GET(request: NextRequest) {
       isBackgroundRefresh,
       // For background refresh, only fetch first 5 pages to get recent updates
       // This reduces load and prevents timeouts during automatic refresh
-      maxPagesToFetch: isBackgroundRefresh ? 5 : 20
+      maxPagesToFetch: isBackgroundRefresh ? 5 : 25
     }
 
     const schipholData = await fetchSchipholFlights(apiConfig)

@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
       flightDirection: 'D' as const,
       airline: 'KL',
       scheduleDate: today,
-      fetchAllPages: true
+      fetchAllPages: true,
+      maxPagesToFetch: 25 // Match other endpoints to get all flights
     }
 
     // Fetch flights from Schiphol API (same as /api/flights)
