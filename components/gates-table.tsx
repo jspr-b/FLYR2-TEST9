@@ -133,18 +133,18 @@ export function GatesTable() {
     
     return (
       <tr key={`${gate.gate}-${index}`} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-default">
-        <td className="py-3 px-2">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-900">{gate.gate}</span>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
+          <div className="flex items-center gap-1.5 lg:gap-2">
+            <span className="font-medium text-xs lg:text-sm text-gray-900">{gate.gate}</span>
+            <span className="text-[10px] lg:text-xs text-gray-500 bg-gray-100 px-1.5 lg:px-2 py-0.5 lg:py-1 rounded">
               {gate.pier}
             </span>
           </div>
         </td>
-        <td className="py-3 px-2">
-          <span className="font-medium text-gray-900">{formatValue(gate.flights)}</span>
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
+          <span className="font-medium text-xs lg:text-sm text-gray-900">{formatValue(gate.flights)}</span>
         </td>
-        <td className="py-3 px-2">
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
           <div className="flex flex-wrap gap-1">
             {uniqueAircraftTypes.length > 0 ? (
               <>
@@ -167,41 +167,43 @@ export function GatesTable() {
             )}
           </div>
         </td>
-        <td className="py-3 px-2">
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
           {gate.isBusGate ? (
-            <div className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
-              <Bus className="h-3 w-3" />
-              Bus Gate
+            <div className="inline-flex items-center gap-0.5 lg:gap-1 text-amber-700 bg-amber-50 px-1 lg:px-1.5 py-0.5 rounded-full text-[10px] lg:text-xs font-medium whitespace-nowrap">
+              <Bus className="h-2.5 lg:h-3 w-2.5 lg:w-3" />
+              <span className="hidden lg:inline">Bus Gate</span>
+              <span className="lg:hidden">Bus</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
-              <Plane className="h-3 w-3" />
-              Departure Gate
+            <div className="inline-flex items-center gap-0.5 lg:gap-1 text-blue-700 bg-blue-50 px-1 lg:px-1.5 py-0.5 rounded-full text-[10px] lg:text-xs font-medium whitespace-nowrap">
+              <Plane className="h-2.5 lg:h-3 w-2.5 lg:w-3" />
+              <span className="hidden lg:inline">Departure Gate</span>
+              <span className="lg:hidden">Dep.</span>
             </div>
           )}
         </td>
-        <td className="py-3 px-2">
-          <div className="flex items-center gap-2">
-            <div className="w-16 bg-gray-200 rounded-full h-2">
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
+          <div className="flex items-center gap-1 lg:gap-2">
+            <div className="w-12 lg:w-16 bg-gray-200 rounded-full h-1.5 lg:h-2">
               <div
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                className="bg-blue-500 h-1.5 lg:h-2 rounded-full transition-all duration-300"
                 style={{ width: `${Math.min(100, gate.utilization)}%` }}
               />
             </div>
-            <span className="text-sm text-gray-600">{formatUtilization(gate.utilization)}%</span>
+            <span className="text-[10px] lg:text-xs text-gray-600">{formatUtilization(gate.utilization)}%</span>
           </div>
         </td>
-        <td className="py-3 px-2">
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
           <span
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(gate.status)}`}
+            className={`inline-flex items-center gap-0.5 lg:gap-1 px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full text-[10px] lg:text-xs font-medium ${getStatusColor(gate.status)}`}
           >
-            {gate.status === "Maintenance" && <AlertTriangle className="h-3 w-3" />}
-            {gate.status === "Active" && <Clock className="h-3 w-3" />}
+            {gate.status === "Maintenance" && <AlertTriangle className="h-2.5 lg:h-3 w-2.5 lg:w-3" />}
+            {gate.status === "Active" && <Clock className="h-2.5 lg:h-3 w-2.5 lg:w-3" />}
             {gate.status}
           </span>
         </td>
-        <td className="py-3 px-2">
-          <span className="text-sm text-gray-600">{formatTime(gate.lastActivity)}</span>
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
+          <span className="text-[10px] lg:text-xs text-gray-600">{formatTime(gate.lastActivity)}</span>
         </td>
       </tr>
     )

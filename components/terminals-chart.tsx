@@ -343,12 +343,12 @@ export function TerminalsChart() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 min-h-[500px] lg:min-h-[600px] animate-pulse">
-        <div className="h-6 bg-gray-200 rounded mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded mb-6"></div>
-        <div className="flex items-end justify-center gap-4 h-80">
+      <div className="bg-white rounded-lg border border-gray-200 p-3 xs:p-4 sm:p-5 lg:p-6 min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] animate-pulse">
+        <div className="h-5 xs:h-6 bg-gray-200 rounded mb-3 xs:mb-4"></div>
+        <div className="h-3 xs:h-4 bg-gray-200 rounded mb-4 xs:mb-6"></div>
+        <div className="flex items-end justify-center gap-2 xs:gap-3 sm:gap-4 h-60 xs:h-72 sm:h-80">
           {[...Array(8)].map((_, index) => (
-            <div key={index} className="w-16 bg-gray-200 rounded-t" style={{ height: `${Math.random() * 200 + 8}px` }}></div>
+            <div key={index} className="w-10 xs:w-12 sm:w-16 bg-gray-200 rounded-t" style={{ height: `${Math.random() * 200 + 8}px` }}></div>
           ))}
         </div>
       </div>
@@ -356,115 +356,130 @@ export function TerminalsChart() {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 min-h-[500px] lg:min-h-[600px]">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Pier Usage Overview</h2>
+    <div className="bg-white rounded-lg border border-gray-200 p-3 xs:p-4 sm:p-5 lg:p-6 min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] lg:min-h-[600px]">
+      <div className="mb-3 xs:mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-3 xs:mb-4">
+          <div className="flex items-center gap-2 xs:gap-3">
+            <Building2 className="h-4 xs:h-5 w-4 xs:w-5 text-blue-600" />
+            <h2 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-900">
+              <span className="sm:hidden">Pier Usage</span>
+              <span className="hidden sm:inline">Pier Usage Overview</span>
+            </h2>
           </div>
         </div>
 
         {/* Enhanced Control Panel */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-gray-50 rounded-lg p-2 xs:p-3 sm:p-4 mb-3 xs:mb-4 border border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 xs:gap-4">
             
             {/* Data Mode Selection */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <Database className="h-4 w-4" />
-                Data Source
+            <div className="space-y-1.5 xs:space-y-2">
+              <label className="flex items-center gap-1.5 xs:gap-2 text-xs xs:text-sm font-medium text-gray-700">
+                <Database className="h-3 xs:h-4 w-3 xs:w-4" />
+                <span className="2xs:hidden">Source</span>
+                <span className="hidden 2xs:inline">Data Source</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 xs:gap-2">
                 <button
                   onClick={() => setShowCurrentActivity(false)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm font-medium rounded-md xs:rounded-lg transition-all duration-200 ${
                     !showCurrentActivity 
-                      ? 'bg-green-600 text-white shadow-md ring-2 ring-green-200' 
+                      ? 'bg-green-600 text-white shadow-md ring-1 xs:ring-2 ring-green-200' 
                       : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                   }`}
                 >
-                  <Calendar className="h-4 w-4" />
-                  All Scheduled
+                  <Calendar className="h-3 xs:h-3.5 sm:h-4 w-3 xs:w-3.5 sm:w-4" />
+                  <span className="2xs:hidden">All</span>
+                  <span className="hidden 2xs:inline sm:hidden">Scheduled</span>
+                  <span className="hidden sm:inline">All Scheduled</span>
                 </button>
                 <button
                   onClick={() => setShowCurrentActivity(true)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm font-medium rounded-md xs:rounded-lg transition-all duration-200 ${
                     showCurrentActivity 
-                      ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-200' 
+                      ? 'bg-blue-600 text-white shadow-md ring-1 xs:ring-2 ring-blue-200' 
                       : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                   }`}
                 >
-                  <Activity className="h-4 w-4" />
-                  Live Activity
+                  <Activity className="h-3 xs:h-3.5 sm:h-4 w-3 xs:w-3.5 sm:w-4" />
+                  <span className="2xs:hidden">Live</span>
+                  <span className="hidden 2xs:inline sm:hidden">Activity</span>
+                  <span className="hidden sm:inline">Live Activity</span>
                 </button>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-gray-500 hidden xs:block">
                 {showCurrentActivity 
-                  ? 'Shows only flights with active boarding/departure operations' 
-                  : 'Shows all flights assigned to piers (including future scheduled flights)'
+                  ? 'Active operations only' 
+                  : 'All scheduled flights'
                 }
               </p>
             </div>
 
             {/* View Mode Selection */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <TrendingUp className="h-4 w-4" />
-                View Type
+            <div className="space-y-1.5 xs:space-y-2">
+              <label className="flex items-center gap-1.5 xs:gap-2 text-xs xs:text-sm font-medium text-gray-700">
+                <TrendingUp className="h-3 xs:h-4 w-3 xs:w-4" />
+                <span className="2xs:hidden">View</span>
+                <span className="hidden 2xs:inline">View Type</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 xs:gap-2">
                 <button
                   onClick={() => setShowHourlyView(false)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm font-medium rounded-md xs:rounded-lg transition-all duration-200 ${
                     !showHourlyView 
-                      ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-200' 
+                      ? 'bg-purple-600 text-white shadow-md ring-1 xs:ring-2 ring-purple-200' 
                       : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                   }`}
                 >
-                  <BarChart className="h-4 w-4" />
-                  Pier Summary
+                  <BarChart className="h-3 xs:h-3.5 sm:h-4 w-3 xs:w-3.5 sm:w-4" />
+                  <span className="2xs:hidden">Piers</span>
+                  <span className="hidden 2xs:inline sm:hidden">Summary</span>
+                  <span className="hidden sm:inline">Pier Summary</span>
                 </button>
                 <button
                   onClick={() => setShowHourlyView(true)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm font-medium rounded-md xs:rounded-lg transition-all duration-200 ${
                     showHourlyView 
-                      ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-200' 
+                      ? 'bg-purple-600 text-white shadow-md ring-1 xs:ring-2 ring-purple-200' 
                       : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                   }`}
                 >
-                  <Clock className="h-4 w-4" />
-                  Hourly Timeline
+                  <Clock className="h-3 xs:h-3.5 sm:h-4 w-3 xs:w-3.5 sm:w-4" />
+                  <span className="2xs:hidden">Hourly</span>
+                  <span className="hidden 2xs:inline sm:hidden">Timeline</span>
+                  <span className="hidden sm:inline">Hourly Timeline</span>
                 </button>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-[9px] xs:text-[10px] sm:text-xs text-gray-500 hidden xs:block">
                 {showHourlyView 
-                  ? 'Shows flight distribution throughout the day (6AM-11PM)' 
-                  : 'Shows total flights per pier with utilization percentages'
+                  ? 'Hourly distribution' 
+                  : 'Total per pier'
                 }
               </p>
             </div>
           </div>
 
           {/* Current Selection Summary */}
-          <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">
-                  Currently viewing: <span className="font-medium text-gray-900">
-                    {showCurrentActivity ? 'Live Activity' : 'All Scheduled'} • {showHourlyView ? 'Hourly Timeline' : 'Pier Summary'}
+          <div className="mt-2 xs:mt-3 pt-2 xs:pt-3 border-t border-gray-200 hidden sm:block">
+            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4">
+              <div className="flex flex-wrap items-center gap-2 xs:gap-4">
+                <span className="text-xs xs:text-sm text-gray-600">
+                  <span className="sm:hidden">View:</span>
+                  <span className="hidden sm:inline">Currently viewing:</span>
+                  <span className="font-medium text-gray-900 ml-1">
+                    {showCurrentActivity ? 'Live' : 'All'} • {showHourlyView ? 'Hourly' : 'Summary'}
                   </span>
                 </span>
                 {showHourlyView && selectedPier && (
-                  <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded-md">
-                    Focus: Pier {selectedPier}
+                  <span className="text-[10px] xs:text-xs text-gray-500 px-1.5 xs:px-2 py-0.5 xs:py-1 bg-gray-100 rounded-md">
+                    Pier {selectedPier}
                   </span>
                 )}
               </div>
               {!showHourlyView && (
-                <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md border border-blue-200 shrink-0">
-                  <Info className="h-3 w-3 flex-shrink-0" />
-                  <span>Click any pier bar for details</span>
+                <div className="flex items-center gap-1.5 xs:gap-2 text-[10px] xs:text-xs text-blue-600 bg-blue-50 px-2 xs:px-3 py-1 xs:py-1.5 rounded-md border border-blue-200 shrink-0">
+                  <Info className="h-2.5 xs:h-3 w-2.5 xs:w-3 flex-shrink-0" />
+                  <span>Tap bars</span>
                 </div>
               )}
             </div>
@@ -473,10 +488,10 @@ export function TerminalsChart() {
       </div>
 
       {!showHourlyView ? (
-        <div className="relative mb-8">
+        <div className="relative mb-4 xs:mb-6 sm:mb-8">
           {/* Chart Area - Responsive for all screen sizes */}
-          <div className="relative overflow-x-auto">
-            <div className="flex items-end justify-center min-w-[600px] sm:min-w-0 gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-80 lg:h-96 mb-8 px-2">
+          <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0">
+            <div className="flex items-end justify-center min-w-[400px] xs:min-w-[500px] sm:min-w-0 gap-2 xs:gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-48 xs:h-64 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8">
               {pierData.map((data, index) => {
                 const isSelected = selectedPier === data.pier
                 const height = getBarHeight(data.flights)
@@ -484,24 +499,24 @@ export function TerminalsChart() {
 
                 return (
                   <div key={index} className="flex flex-col items-center group cursor-pointer">
-                    <div className="text-center mb-2">
-                      <span className="text-xs sm:text-sm font-medium text-gray-900">{formatValue(data.flights)}</span>
-                      <span className="text-xs text-gray-500 block">flights</span>
+                    <div className="text-center mb-1 xs:mb-2">
+                      <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900">{formatValue(data.flights)}</span>
+                      <span className="text-[9px] xs:text-[10px] sm:text-xs text-gray-500 hidden xs:block">flights</span>
                     </div>
                     <div
-                      className={`w-12 sm:w-16 md:w-20 rounded-t transition-all duration-200 ${colorClass} ${
-                        isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""
+                      className={`w-8 xs:w-10 sm:w-12 md:w-16 lg:w-20 rounded-t transition-all duration-200 ${colorClass} ${
+                        isSelected ? "ring-1 xs:ring-2 ring-blue-500 ring-offset-1 xs:ring-offset-2" : ""
                       }`}
                       style={{ height: `${height}px` }}
                       onClick={() => setSelectedPier(isSelected ? null : data.pier)}
                       title={`${data.pier}: ${formatValue(data.flights)} flights (${formatUtilization(data.utilization)}% utilization)`}
                     />
-                    <div className="mt-3 text-center">
-                      <span className="text-xs sm:text-sm font-medium text-gray-900 block">
+                    <div className="mt-2 xs:mt-3 text-center">
+                      <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 block">
                         {data.pier}
                       </span>
                       <span
-                        className={`inline-block px-1.5 sm:px-2 py-1 rounded-full text-xs font-medium mt-1 ${getStatusColor(data.status)}`}
+                        className={`inline-block px-1 xs:px-1.5 sm:px-2 py-0.5 xs:py-1 rounded-full text-[9px] xs:text-[10px] sm:text-xs font-medium mt-0.5 xs:mt-1 ${getStatusColor(data.status)}`}
                       >
                         {formatUtilization(data.utilization)}%
                       </span>
@@ -516,10 +531,10 @@ export function TerminalsChart() {
           <div className="absolute left-2 top-0 h-64 flex flex-col justify-between text-xs text-gray-500"></div>
         </div>
       ) : (
-        <div className="mb-8">
+        <div className="mb-4 xs:mb-6 sm:mb-8">
           {/* Hourly Density Bar Chart */}
-          <div className="relative overflow-x-auto">
-            <div className="flex items-end justify-center min-w-[800px] sm:min-w-0 gap-1 sm:gap-2 md:gap-3 lg:gap-4 h-80 lg:h-96 mb-8 px-2">
+          <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0">
+            <div className="flex items-end justify-center min-w-[600px] xs:min-w-[700px] sm:min-w-0 gap-0.5 xs:gap-1 sm:gap-2 md:gap-3 lg:gap-4 h-48 xs:h-64 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8">
               {Array.from({ length: 18 }, (_, i) => i + 6).map(hour => {
                 const hourStr = hour.toString().padStart(2, '0')
                 // Always show only the selected pier's data
@@ -536,23 +551,19 @@ export function TerminalsChart() {
                 const height = maxFlightsInHour > 0 ? Math.max((flights / maxFlightsInHour) * 200, 8) : 8
                 return (
                   <div key={hour} className="flex flex-col items-center group cursor-pointer">
-                    <div className="text-center mb-2">
-                      <span className="text-xs sm:text-sm font-medium text-gray-900">{flights}</span>
-                      <span className="text-xs text-gray-500 block">flights</span>
+                    <div className="text-center mb-1 xs:mb-2">
+                      <span className="text-[9px] xs:text-[10px] sm:text-xs lg:text-sm font-medium text-gray-900">{flights || ''}</span>
                     </div>
                     <div
-                      className={`w-8 sm:w-10 md:w-12 lg:w-14 rounded-t transition-all duration-200 ${getBlueBarColor(intensity)} ${
-                        selectedPier ? "ring-2 ring-blue-300 ring-offset-2" : ""
+                      className={`w-4 xs:w-6 sm:w-8 md:w-10 lg:w-14 rounded-t transition-all duration-200 ${getBlueBarColor(intensity)} ${
+                        selectedPier ? "ring-1 xs:ring-2 ring-blue-300 ring-offset-1 xs:ring-offset-2" : ""
                       }`}
                       style={{ height: `${height}px` }}
                       title={`${hourStr}:00 - ${flights} flights${selectedPier ? ` at ${selectedPier}` : ''}`}
                     />
-                    <div className="mt-3 text-center">
-                      <span className="text-xs sm:text-sm font-medium text-gray-900 block">
+                    <div className="mt-1.5 xs:mt-2 sm:mt-3 text-center">
+                      <span className="text-[9px] xs:text-[10px] sm:text-xs lg:text-sm font-medium text-gray-900 block">
                         {hourStr}
-                      </span>
-                      <span className="text-xs text-gray-500 block">
-                        {hourStr}:00
                       </span>
                     </div>
                   </div>
@@ -562,11 +573,16 @@ export function TerminalsChart() {
           </div>
           
           {/* Hourly Summary */}
-          <div className="text-center mb-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">
-              {selectedPier && `Hourly Flight Distribution - Pier ${selectedPier}`}
+          <div className="text-center mb-3 xs:mb-4">
+            <h3 className="text-xs xs:text-sm font-medium text-gray-900 mb-1 xs:mb-2">
+              {selectedPier && (
+                <>
+                  <span className="sm:hidden">Pier {selectedPier} Hourly</span>
+                  <span className="hidden sm:inline">Hourly Flight Distribution - Pier {selectedPier}</span>
+                </>
+              )}
             </h3>
-            <div className="flex justify-center gap-4 text-xs text-gray-600">
+            <div className="flex justify-center gap-3 xs:gap-4 text-[10px] xs:text-xs text-gray-600">
               <span>Peak Hour: {(() => {
                 const pierData = selectedPier ? hourlyDensity[selectedPier] || [] : []
                 const peakHour = pierData.reduce((max, current) => 
@@ -586,28 +602,35 @@ export function TerminalsChart() {
 
       {/* Selected Terminal Details */}
       {selectedPier && (
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="font-medium text-blue-900 mb-2">Pier {selectedPier} Details</h3>
+        <div className="mt-3 xs:mt-4 sm:mt-6 p-2 xs:p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-start gap-2 xs:gap-3">
+            <Info className="h-4 xs:h-5 w-4 xs:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium text-blue-900 text-xs xs:text-sm sm:text-base mb-1 xs:mb-2">Pier {selectedPier} Details</h3>
               {(() => {
                 const data = pierData.find((d) => d.pier === selectedPier)
                 if (!data) return null
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-2 xs:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 text-[10px] xs:text-xs sm:text-sm">
                     <div>
-                      <span className="text-blue-700 font-medium">
-                        {showCurrentActivity ? 'Current Flights:' : 'Total Flights:'}
+                      <span className="text-blue-700 font-medium block">
+                        <span className="sm:hidden">{showCurrentActivity ? 'Current:' : 'Total:'}</span>
+                        <span className="hidden sm:inline">{showCurrentActivity ? 'Current Flights:' : 'Total Flights:'}</span>
                       </span>
                       <p className="text-blue-900">{formatValue(data.flights)}</p>
                     </div>
                     <div>
-                      <span className="text-blue-700 font-medium">Departures:</span>
+                      <span className="text-blue-700 font-medium block">
+                        <span className="xs:hidden">Dep:</span>
+                        <span className="hidden xs:inline">Departures:</span>
+                      </span>
                       <p className="text-blue-900">{formatValue(data.departures)}</p>
                     </div>
-                    <div>
-                      <span className="text-blue-700 font-medium">Utilization:</span>
+                    <div className="col-span-2 xs:col-span-1">
+                      <span className="text-blue-700 font-medium block">
+                        <span className="xs:hidden">Util:</span>
+                        <span className="hidden xs:inline">Utilization:</span>
+                      </span>
                       <p className="text-blue-900">{formatUtilization(data.utilization)}%</p>
                     </div>
                   </div>
@@ -619,35 +642,50 @@ export function TerminalsChart() {
       )}
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-4 text-xs">
+      <div className="mt-3 xs:mt-4 flex flex-wrap gap-2 xs:gap-3 sm:gap-4 text-[9px] xs:text-[10px] sm:text-xs">
         {!showHourlyView ? (
           <>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span className="text-gray-600">Low Utilization (&lt;10%)</span>
+            <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+              <div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 bg-green-500 rounded-sm xs:rounded"></div>
+              <span className="text-gray-600">
+                <span className="sm:hidden">Low</span>
+                <span className="hidden sm:inline">Low Utilization (&lt;10%)</span>
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-              <span className="text-gray-600">Medium Utilization (10-20%)</span>
+            <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+              <div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 bg-yellow-500 rounded-sm xs:rounded"></div>
+              <span className="text-gray-600">
+                <span className="sm:hidden">Med</span>
+                <span className="hidden sm:inline">Medium Utilization (10-20%)</span>
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded"></div>
-              <span className="text-gray-600">High Utilization (&gt;20%)</span>
+            <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+              <div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 bg-red-500 rounded-sm xs:rounded"></div>
+              <span className="text-gray-600">
+                <span className="sm:hidden">High</span>
+                <span className="hidden sm:inline">High Utilization (&gt;20%)</span>
+              </span>
             </div>
           </>
         ) : (
           <>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span className="text-gray-600">Hourly flight count</span>
+            <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+              <div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 bg-blue-500 rounded-sm xs:rounded"></div>
+              <span className="text-gray-600">
+                <span className="xs:hidden">Count</span>
+                <span className="hidden xs:inline">Hourly flight count</span>
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-600 rounded"></div>
+            <div className="hidden xs:flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 sm:w-3 h-2.5 sm:h-3 bg-blue-600 rounded"></div>
               <span className="text-gray-600">Hover state</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-300 rounded ring-2 ring-blue-300 ring-offset-2"></div>
-              <span className="text-gray-600">Selected pier</span>
+            <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+              <div className="w-2 xs:w-2.5 sm:w-3 h-2 xs:h-2.5 sm:h-3 bg-blue-300 rounded-sm xs:rounded ring-1 xs:ring-2 ring-blue-300 ring-offset-1 xs:ring-offset-2"></div>
+              <span className="text-gray-600">
+                <span className="xs:hidden">Selected</span>
+                <span className="hidden xs:inline">Selected pier</span>
+              </span>
             </div>
           </>
         )}
