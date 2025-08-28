@@ -35,7 +35,10 @@
       "Bash(cat:*)",
       "Bash(ls:*)",
       "Bash(printenv)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(mkdir:*)",
+      "Bash(git clone:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
