@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Info, BarChart3, TrendingUp } from "lucide-react"
-import { fetchFlights } from "@/lib/api"
-import { FlightResponse } from "@/types/flight"
-import { calculateDelayMinutes } from "@/lib/timezone-utils"
 
 interface AircraftData {
   type: string
@@ -49,18 +46,16 @@ export function AircraftPerformanceChart() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        // Fetch real flight data with KLM filter
-        const flightsResponse = await fetchFlights({
-          flightDirection: "D",
-          scheduleDate: new Date().toISOString().split('T')[0],
-          isOperationalFlight: true,
-          prefixicao: "KL"
-        })
+        // Fetch aircraft performance data from the dedicated API endpoint
+        const response = await fetch('/api/aircraft/performance')
+        const data = await response.json()
         
-        const flights = flightsResponse.flights
+        if (!response.ok) {
+          throw new Error('Failed to fetch aircraft performance data')
+        }
         
         // Handle empty data gracefully
-        if (!flights || flights.length === 0) {
+        if (!data.chartData || data.chartData.length === 0) {
           const initialAircraftData: AircraftData[] = [
             {
               type: "No flights",
@@ -76,45 +71,27 @@ export function AircraftPerformanceChart() {
           return
         }
         
-        // Calculate aircraft performance from flight data
-        const aircraftCounts = flights.reduce((acc, flight) => {
-          const type = flight.aircraftType.iataSub
-          
-          // Safety check: ensure type is a string
-          const safeType = typeof type === 'string' ? type : 'Unknown'
-          acc[safeType] = (acc[safeType] || 0) + 1
-          return acc
-        }, {} as Record<string, number>)
-        
-        // Calculate performance metrics for each aircraft type
-        const aircraftPerformance = Object.entries(aircraftCounts).map(([type, count]) => {
-          const typeFlights = flights.filter(f => {
-            const flightType = f.aircraftType.iataSub
-            const safeFlightType = typeof flightType === 'string' ? flightType : 'Unknown'
-            return safeFlightType === type
-          })
-          const typeDelays = typeFlights.map(flight => 
-            calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-          )
-          const avgDelay = typeDelays.length > 0 ? typeDelays.reduce((a, b) => a + b, 0) / typeDelays.length : 0
-          
-          // Get unique routes for this aircraft type
-          const routes = [...new Set(typeFlights.map(f => f.route.destinations.join(', ')))].slice(0, 3).join('; ')
-          
-          // Determine aircraft properties
-          const manufacturer = getAircraftManufacturer(type)
-          const capacity = getAircraftCapacity(type)
-          
-          return {
-            type,
-            avgDelay,
-            flights: count,
-            departures: count, // All flights are departures in our filter
-            manufacturer,
-            capacity,
-            routes
-          }
-        }).sort((a, b) => (a.avgDelay || 0) - (b.avgDelay || 0)) // Sort by delay ascending
+        // Transform API data to component format
+        const aircraftPerformance = data.chartData.map((item: any) => ({
+          type: item.type,
+          avgDelay: item.avgDelay,
+          flights: item.flights,
+          departures: item.departures,
+          manufacturer: item.manufacturer,
+          capacity: typeof item.capacity === 'number' ? `${item.capacity} seats` : item.capacity,
+          routes: item.routes,
+          // Enhanced metrics
+          minDelay: item.minDelay,
+          maxDelay: item.maxDelay,
+          onTimePercentage: item.onTimePercentage,
+          onTimeFlights: item.onTimeFlights,
+          delayedFlights: item.delayedFlights,
+          delayDistribution: item.delayDistribution,
+          gates: item.gates,
+          piers: item.piers,
+          flightStates: item.flightStates,
+          lastUpdated: item.lastUpdated
+        })).sort((a: AircraftData, b: AircraftData) => (a.avgDelay || 0) - (b.avgDelay || 0)) // Sort by delay ascending
         
         setAircraftData(aircraftPerformance)
       } catch (error) {
