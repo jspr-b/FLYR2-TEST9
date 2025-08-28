@@ -290,17 +290,21 @@ export default function GateActivityPage() {
       <div className="flex">
         <Sidebar />
         <div className="lg:ml-64 flex-1 bg-gray-50 min-h-screen">
-          <div className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
-            <div className="mb-6 lg:mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <Activity className="h-6 w-6 text-blue-600" />
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gate Activity Analysis</h1>
+          <div className="p-3 xs:p-4 sm:p-6 lg:p-8 pt-14 xs:pt-16 lg:pt-8">
+            <div className="mb-3 xs:mb-4 sm:mb-6 lg:mb-8">
+              <div className="flex items-center gap-2 xs:gap-3 mb-1 xs:mb-2">
+                <Activity className="h-4 xs:h-5 sm:h-6 w-4 xs:w-5 sm:w-6 text-blue-600" />
+                <h1 className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                  <span className="sm:hidden">Gate Activity</span>
+                  <span className="hidden sm:inline">Gate Activity Analysis</span>
+                </h1>
               </div>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Real-Time Gate Status • Flight Operations • Activity Monitoring
+              <p className="text-gray-600 text-[10px] xs:text-xs sm:text-sm lg:text-base">
+                <span className="xs:hidden">Real-Time Status</span>
+                <span className="hidden xs:inline">Real-Time Gate Status • Flight Operations • Activity Monitoring</span>
               </p>
             </div>
-            <div className="text-center p-8">Loading gate activity data...</div>
+            <div className="text-center p-6 xs:p-8 text-xs xs:text-sm">Loading gate activity data...</div>
           </div>
         </div>
       </div>
@@ -355,17 +359,21 @@ export default function GateActivityPage() {
     <div className="flex">
       <Sidebar />
       <div className="lg:ml-64 flex-1 bg-gray-50 min-h-screen">
-        <div className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">
-          <div className="mb-6 lg:mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="h-6 w-6 text-blue-600" />
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gate Activity Analysis</h1>
+        <div className="p-3 xs:p-4 sm:p-6 lg:p-8 pt-14 xs:pt-16 lg:pt-8">
+          <div className="mb-3 xs:mb-4 sm:mb-6 lg:mb-8">
+            <div className="flex items-center gap-2 xs:gap-3 mb-1 xs:mb-2">
+              <Activity className="h-4 xs:h-5 sm:h-6 w-4 xs:w-5 sm:w-6 text-blue-600" />
+              <h1 className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                <span className="sm:hidden">Gate Activity</span>
+                <span className="hidden sm:inline">Gate Activity Analysis</span>
+              </h1>
               {backgroundLoading && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse ml-2" title="Auto-refreshing data..." />
+                <div className="w-1.5 xs:w-2 h-1.5 xs:h-2 bg-blue-500 rounded-full animate-pulse ml-1.5 xs:ml-2" title="Auto-refreshing data..." />
               )}
             </div>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Real-Time Gate Status • Flight Operations • Activity Monitoring
+            <p className="text-gray-600 text-[10px] xs:text-xs sm:text-sm lg:text-base">
+              <span className="xs:hidden">Real-Time Status</span>
+              <span className="hidden xs:inline">Real-Time Gate Status • Flight Operations • Activity Monitoring</span>
             </p>
             {backgroundError && (
               <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
@@ -390,19 +398,19 @@ export default function GateActivityPage() {
             )}
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid gap-3 xs:gap-4 sm:gap-6">
             {/* Gate Schedule Timeline (Gantt Chart) */}
             <GateGanttChart gateData={ganttData} />
 
             {/* Status Overview Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 sm:gap-4">
               {/* Gate Type Distribution - Enhanced with merged metrics */}
               <div className="lg:col-span-1">
                 <GateTypeDistribution />
               </div>
 
               {/* Flight States */}
-              <Card className="h-[600px] flex flex-col">
+              <Card className="h-[400px] xs:h-[500px] sm:h-[600px] flex flex-col">
                 <CardHeader className="pb-3 flex-shrink-0">
                   <CardTitle className="text-base">Flight States</CardTitle>
                   <p className="text-xs text-gray-600">Current flight phases</p>

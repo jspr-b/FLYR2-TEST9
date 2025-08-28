@@ -46,6 +46,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   const [selectedFlight, setSelectedFlight] = useState<any>(null) // For dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isFullScreenOpen, setIsFullScreenOpen] = useState(false)
+  const [expandedGates, setExpandedGates] = useState<Set<string>>(new Set())
   
   // Synchronized scrolling refs
   const headerScrollRef = useRef<HTMLDivElement>(null)
@@ -446,6 +447,18 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     setIsDialogOpen(true)
   }
 
+  const toggleGateExpansion = (gateId: string) => {
+    setExpandedGates(prev => {
+      const newExpanded = new Set(prev)
+      if (newExpanded.has(gateId)) {
+        newExpanded.delete(gateId)
+      } else {
+        newExpanded.add(gateId)
+      }
+      return newExpanded
+    })
+  }
+
   // Render Gantt chart content - reusable for both normal and full screen views
   const renderGanttContent = (isFullScreen = false) => {
     if (isFullScreen) {
@@ -455,25 +468,19 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           <div className="min-w-fit">
             {/* Time Header - Part of scrollable content */}
             <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
-              <div className="flex min-w-fit">
+              <div className="flex min-w-fit h-8 relative">
                 {timeSlots.map((slot, index) => (
                   <div 
                     key={index} 
-                    className="flex flex-col items-center justify-center border-l border-gray-200 py-3 bg-gray-50 flex-shrink-0"
-                    style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                    className="relative border-l border-gray-200 bg-gray-50 flex-shrink-0 w-[60px] xs:w-[80px] sm:w-[100px] min-w-[60px] xs:min-w-[80px] sm:min-w-[100px] h-full"
                   >
-                    <span className="font-medium text-xs whitespace-nowrap">
+                    {/* Position time at the left edge of each cell */}
+                    <span className="absolute top-1/2 -translate-y-1/2 left-1 font-medium text-[10px] xs:text-xs text-gray-700 whitespace-nowrap">
                       {slot.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
                         minute: '2-digit',
                         hour12: false,
                         timeZone: 'Europe/Amsterdam'
-                      })}
-                    </span>
-                    <span className="text-xs text-gray-400 whitespace-nowrap">
-                      AMS {slot.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric' 
                       })}
                     </span>
                   </div>
@@ -505,8 +512,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   {timeSlots.map((_, index) => (
                     <div 
                       key={index} 
-                      className="border-l border-gray-200 flex-shrink-0 relative" 
-                      style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                      className="border-l border-gray-200 flex-shrink-0 relative w-[60px] xs:w-[80px] sm:w-[100px] min-w-[60px] xs:min-w-[80px] sm:min-w-[100px]"
                     />
                   ))}
                   
@@ -628,27 +634,21 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
         <div className={headerClass}>
           <div 
             ref={headerScrollRef}
-            className="overflow-x-auto scrollbar-hide"
+            className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 sm:scrollbar-hide"
           >
-            <div className="flex min-w-fit">
+            <div className="flex min-w-fit h-8 relative">
               {timeSlots.map((slot, index) => (
                 <div 
                   key={index} 
-                  className="flex flex-col items-center justify-center border-l border-gray-200 py-3 bg-gray-50 flex-shrink-0"
-                  style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                  className="relative border-l border-gray-200 bg-gray-50 flex-shrink-0 w-[60px] xs:w-[80px] sm:w-[100px] min-w-[60px] xs:min-w-[80px] sm:min-w-[100px] h-full"
                 >
-                  <span className="font-medium text-xs whitespace-nowrap">
+                  {/* Position time at the left edge of each cell */}
+                  <span className="absolute top-1/2 -translate-y-1/2 left-1 font-medium text-[10px] xs:text-xs text-gray-700 whitespace-nowrap">
                     {slot.toLocaleTimeString('en-US', { 
                       hour: '2-digit', 
                       minute: '2-digit',
                       hour12: false,
                       timeZone: 'Europe/Amsterdam'
-                    })}
-                  </span>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">
-                    AMS {slot.toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
                     })}
                   </span>
                 </div>
@@ -686,8 +686,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   {timeSlots.map((_, index) => (
                     <div 
                       key={index} 
-                      className="border-l border-gray-200 flex-shrink-0 relative" 
-                      style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }}
+                      className="border-l border-gray-200 flex-shrink-0 relative w-[60px] xs:w-[80px] sm:w-[100px] min-w-[60px] xs:min-w-[80px] sm:min-w-[100px]"
                     />
                   ))}
                   
@@ -864,8 +863,114 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       </CardHeader>
       
       <CardContent className="p-0">
-        {/* Synchronized Gantt Chart Container */}
-        {renderGanttContent(false)}
+        {/* Mobile Card View - Monday.com style */}
+        <div className="block sm:hidden">
+          <div className="max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            {processedGateData.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Plane className="w-6 h-6 mx-auto mb-2 opacity-50" />
+                <p className="text-xs">No active gates</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {processedGateData.map((gate) => {
+                  const isExpanded = expandedGates.has(gate.gateID)
+                  return (
+                  <div key={gate.gateID} className="p-2 xs:p-3">
+                    <div 
+                      className="flex items-center justify-between mb-2 cursor-pointer select-none"
+                      onClick={() => toggleGateExpansion(gate.gateID)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <svg 
+                          className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span className="font-semibold text-xs xs:text-sm">{gate.gateID}</span>
+                        <span className="text-[10px] xs:text-xs text-gray-500">Pier {gate.pier}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] xs:text-xs text-gray-600">{gate.flights.length} flights</span>
+                        {gate.flights.some((f: any) => f.publicFlightState === 'DEL') && (
+                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Delays</span>
+                        )}
+                      </div>
+                    </div>
+                    {isExpanded ? (
+                    <div className="space-y-1.5 xs:space-y-2 ml-5 animate-in fade-in-0 slide-in-from-top-1 duration-200">
+                      {gate.flights.map((flight, idx) => {
+                        const timeline = getFlightTimeline(flight)
+                        return (
+                          <div 
+                            key={idx}
+                            className={`rounded-lg p-1.5 xs:p-2 text-white text-[10px] xs:text-xs ${getStatusColor(flight)} cursor-pointer hover:opacity-90 transition-opacity`}
+                            onClick={() => handleFlightClick(flight, gate)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1 xs:gap-2">
+                                <span className="font-medium">{flight.flightName}</span>
+                                <span className="opacity-90 truncate max-w-[80px]">{flight.destination}</span>
+                              </div>
+                              {flight.isDelayed && (
+                                <span className="text-[9px] xs:text-[10px] bg-red-600 bg-opacity-30 px-1 xs:px-1.5 py-0.5 rounded">
+                                  +{flight.delayMinutes}m
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between mt-0.5 xs:mt-1 text-[9px] xs:text-[10px] opacity-80">
+                              <span>{timeline.startTime.toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                hour12: false
+                              })} - {timeline.endTime.toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                hour12: false
+                              })}</span>
+                              <span>{flight.publicFlightState}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    ) : gate.flights.length > 0 ? (
+                      <div className="ml-5 mt-1 flex items-center gap-2 text-[10px] xs:text-xs text-gray-500">
+                        <span>Next: {gate.flights[0].flightName} → {gate.flights[0].destination}</span>
+                        <span className="text-gray-400">
+                          {getFlightTimeline(gate.flights[0]).startTime.toLocaleTimeString('en-US', {
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: false
+                          })}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop/Tablet Gantt Chart */}
+        <div className="hidden sm:block relative">
+          {/* Horizontal Scroll Indicator - Only on touch devices */}
+          <div className="absolute bottom-2 right-2 sm:hidden z-20 bg-gray-800/80 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+            </svg>
+            Scroll
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+          {renderGanttContent(false)}
+        </div>
 
         {/* Legend - Using the Legend component */}
         <Legend />
@@ -1042,12 +1147,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
 
       {/* Flight Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
+        <DialogContent className="sm:max-w-2xl max-w-[calc(100vw-2rem)] sm:max-h-[90vh] max-h-[85vh] overflow-y-auto rounded-2xl sm:rounded-lg mx-2 sm:mx-auto">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-base sm:text-xl font-bold">
               Flight {selectedFlight?.flightName} Details
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {selectedFlight?.destination} • {selectedFlight?.aircraftType}
             </DialogDescription>
           </DialogHeader>
@@ -1057,12 +1162,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
             const delayMinutes = selectedFlight.delayMinutes || 0
             
             return (
-              <div className="space-y-6">
+              <div className="space-y-3 sm:space-y-6">
                 {/* Flight Information */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <h3 className="font-semibold text-sm text-gray-600 mb-2">Flight Information</h3>
-                    <div className="space-y-2 text-sm">
+                    <h3 className="font-semibold text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">Flight Information</h3>
+                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Flight Number:</span>
                         <span className="font-medium">{selectedFlight.flightName}</span>
@@ -1087,8 +1192,8 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   </div>
                   
                   <div>
-                    <h3 className="font-semibold text-sm text-gray-600 mb-2">Status Information</h3>
-                    <div className="space-y-2 text-sm">
+                    <h3 className="font-semibold text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">Status Information</h3>
+                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Status:</span>
                         <span className={`font-medium ${selectedFlight.isDelayed ? 'text-red-600' : 'text-green-600'}`}>
@@ -1118,9 +1223,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                 
                 {/* Timeline Information */}
                 <div>
-                  <h3 className="font-semibold text-sm text-gray-600 mb-2">Timeline Details</h3>
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                  <h3 className="font-semibold text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">Timeline Details</h3>
+                  <div className="bg-gray-50 rounded-lg p-2 sm:p-4 space-y-2 sm:space-y-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
                       <div>
                         <span className="text-gray-500 block mb-1">Scheduled Departure:</span>
                         <span className="font-medium">
