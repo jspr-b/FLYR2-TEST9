@@ -332,32 +332,32 @@ export default function HomePage() {
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 text-green-600" />
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">25%</div>
-              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Reduction in operational delays</div>
+              <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">370+</div>
+              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Daily flights tracked in real-time</div>
             </div>
 
             <div className="text-center p-4 sm:p-0">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <MapPin className="w-7 h-7 sm:w-8 sm:h-8 text-[#00A1DE]" />
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-[#00A1DE] mb-2">15%</div>
-              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Improved gate utilization</div>
+              <div className="text-2xl sm:text-3xl font-bold text-[#00A1DE] mb-2">96</div>
+              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Gates monitored across 6 piers</div>
             </div>
 
             <div className="text-center p-4 sm:p-0">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Clock className="w-7 h-7 sm:w-8 sm:h-8 text-orange-600" />
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-orange-600 mb-2">90%</div>
-              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">On-time performance target</div>
+              <div className="text-2xl sm:text-3xl font-bold text-orange-600 mb-2">10min</div>
+              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Real-time data refresh cycle</div>
             </div>
 
             <div className="text-center p-4 sm:p-0">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Users className="w-7 h-7 sm:w-8 sm:h-8 text-purple-600" />
               </div>
-              <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">100%</div>
-              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Team visibility and coordination</div>
+              <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">13</div>
+              <div className="text-sm sm:text-base text-gray-600 leading-relaxed">Aircraft types performance tracking</div>
             </div>
           </div>
         </div>
