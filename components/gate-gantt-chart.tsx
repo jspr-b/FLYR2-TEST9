@@ -826,10 +826,10 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
               </button>
             </div>
             
-            {/* Full Screen Toggle */}
+            {/* Full Screen Toggle - Hidden on mobile */}
             <button
               onClick={() => setIsFullScreenOpen(true)}
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
             >
               <Eye className="h-4 w-4" />
               View All
