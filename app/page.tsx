@@ -33,17 +33,26 @@ export default function HomePage() {
               </div>
               <span className="text-xl font-bold text-gray-900">KLM Operations</span>
             </div>
-            <div className="hidden md:flex items-center space-x-6">
-              <Link href="/dashboard" className="text-gray-600 hover:text-[#00A1DE] transition-colors">
+            <div className="hidden md:flex items-center space-x-4">
+              <Link href="/dashboard" className="text-gray-600 hover:text-[#00A1DE] transition-colors text-sm">
                 Dashboard
               </Link>
-              <Link href="/gate-activity" className="text-gray-600 hover:text-[#00A1DE] transition-colors">
-                Gate Activity
+              <Link href="/route-analytics" className="text-gray-600 hover:text-[#00A1DE] transition-colors text-sm">
+                Routes
               </Link>
-              <Link href="/analytics" className="text-gray-600 hover:text-[#00A1DE] transition-colors">
-                Analytics
+              <Link href="/delay-trends-by-hour" className="text-gray-600 hover:text-[#00A1DE] transition-colors text-sm">
+                Delays
               </Link>
-              <Button asChild className="bg-[#00A1DE] hover:bg-blue-600">
+              <Link href="/busiest-gates-and-terminals" className="text-gray-600 hover:text-[#00A1DE] transition-colors text-sm">
+                Terminals
+              </Link>
+              <Link href="/gate-activity" className="text-gray-600 hover:text-[#00A1DE] transition-colors text-sm">
+                Gates
+              </Link>
+              <Link href="/aircraft-type-delay-performance" className="text-gray-600 hover:text-[#00A1DE] transition-colors text-sm">
+                Aircraft
+              </Link>
+              <Button asChild className="bg-[#00A1DE] hover:bg-blue-600 ml-2">
                 <Link href="/dashboard">Access Dashboard</Link>
               </Button>
             </div>

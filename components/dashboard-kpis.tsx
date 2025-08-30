@@ -866,7 +866,7 @@ export function DashboardKPIs() {
       </div>
 
       {/* Bottom Row - Navigation/Quick Access Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
         <Link
           href="/aircraft-type-delay-performance"
           className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-blue-100 hover:to-blue-200 hover:-translate-y-1"
@@ -889,7 +889,7 @@ export function DashboardKPIs() {
         </Link>
 
         <Link
-          href="/busiest-gates-and-terminals"
+          href="/gate-activity"
           className="group bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-green-100 hover:to-green-200 hover:-translate-y-1"
         >
           <div className="flex items-center gap-4 mb-3">
@@ -948,6 +948,27 @@ export function DashboardKPIs() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-orange-600 font-medium">All destinations • Delay & volume trends</span>
             <TrendingUp className="h-4 w-4 text-orange-500 group-hover:translate-x-1 transition-transform duration-200" />
+          </div>
+        </Link>
+
+        <Link
+          href="/busiest-gates-and-terminals"
+          className="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-indigo-100 hover:to-indigo-200 hover:-translate-y-1"
+        >
+          <div className="flex items-center gap-4 mb-3">
+            <div className="bg-indigo-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
+              <Plane className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors duration-200">
+                Analyze Busiest Gates & Terminals
+              </h3>
+              <p className="text-sm text-gray-600">Terminal capacity & utilization analysis</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-indigo-600 font-medium">Pier breakdown • Peak usage patterns</span>
+            <TrendingUp className="h-4 w-4 text-indigo-600 group-hover:translate-x-1 transition-transform duration-200" />
           </div>
         </Link>
       </div>
