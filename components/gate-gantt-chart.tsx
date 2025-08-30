@@ -6,7 +6,7 @@ import { Clock, Plane, Calendar, Maximize2, X, Eye, Info } from "lucide-react"
 import { TimeHeader } from './timeline/TimeHeader'
 import { GateRow } from './timeline/GateRow'
 import { Legend } from './timeline/Legend'
-import { getCurrentAmsterdamTime, toAmsterdamTime } from '@/lib/amsterdam-time'
+import { getCurrentAmsterdamTime, toAmsterdamTime, formatAmsterdamTime } from '@/lib/amsterdam-time'
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,10 @@ interface GateGanttData {
     isDelayed: boolean
     delayMinutes: number
     gate: string
+    actualOffBlockTime?: string
+    estimatedDateTime?: string
+    flightStates?: string[]
+    expectedTimeBoarding?: string
   }>
 }
 
@@ -58,10 +62,10 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   useEffect(() => {
     setMounted(true)
     
-    // Update current time every 30 seconds for better responsiveness
+    // Update current time every second for the clock
     const interval = setInterval(() => {
       setCurrentTime(getCurrentAmsterdamTime())
-    }, 30000) // Update every 30 seconds
+    }, 1000) // Update every second
     
     return () => clearInterval(interval)
   }, [])
@@ -133,21 +137,28 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     
     let gateOpenTime, gateCloseTime
     
-    if (flight.isDelayed && flight.estimatedDateTime) {
-      // Delayed flight logic
-      if (currentTime >= originalGateOpenTime) {
-        // Gate already open - extend the card but keep original start
-        gateOpenTime = originalGateOpenTime
-        gateCloseTime = new Date(actualDepartureTime.getTime() + 10 * 60 * 1000)
-      } else {
-        // Gate not yet open - shift entire timeline to new departure time
-        gateOpenTime = newGateOpenTime
-        gateCloseTime = new Date(actualDepartureTime.getTime() + 10 * 60 * 1000)
-      }
-    } else {
-      // Normal flight - use scheduled time
-      gateOpenTime = originalGateOpenTime
-      gateCloseTime = new Date(actualDepartureTime.getTime() + 10 * 60 * 1000)
+    // Check if flight has departed - use actualOffBlockTime if available
+    const hasDeparted = (flight.flightStates && flight.flightStates.includes('DEP')) || 
+                       (flight.actualOffBlockTime && new Date(flight.actualOffBlockTime) < currentTime)
+    
+    // Simple approach given API limitations
+    gateOpenTime = originalGateOpenTime
+    
+    // For delayed flights, use estimated time if available
+    const departureTime = flight.estimatedDateTime ? new Date(flight.estimatedDateTime) : scheduledTime
+    
+    // Standard gate close time: 10 minutes after scheduled/estimated departure
+    gateCloseTime = new Date(departureTime.getTime() + 10 * 60 * 1000)
+    
+    // If flight has GTD (gate closed) but no DEP status, extend timeline
+    // This indicates the flight is still at the gate
+    if (flight.primaryState === 'GTD' && !hasDeparted && currentTime > departureTime) {
+      // Extend to at least current time + 10 minutes to keep it visible
+      const extendedTime = new Date(Math.max(
+        departureTime.getTime() + 30 * 60 * 1000,  // At least 30 min after scheduled
+        currentTime.getTime() + 10 * 60 * 1000     // Or 10 min into future
+      ))
+      gateCloseTime = extendedTime
     }
     
     return {
@@ -161,7 +172,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       isTimelineShifted: flight.isDelayed && flight.estimatedDateTime,
       isExtended: flight.isDelayed && currentTime >= originalGateOpenTime,
       flightType: isEuropean ? 'European' : 'Intercontinental',
-      gateOpenMinutes: gateOpenMinutes
+      gateOpenMinutes: gateOpenMinutes,
+      hasDeparted: hasDeparted,
+      isStillAtGate: !hasDeparted && currentTime > scheduledTime
     }
   }
 
@@ -204,23 +217,65 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       allFlightTimelines[0].endTime
     )
 
-    // Tighter padding: 15 minutes before first flight, 15 minutes after last flight
-    const startTime = new Date(earliestStart.getTime() - (15 * 60 * 1000))
-    const endTime = new Date(latestEnd.getTime() + (15 * 60 * 1000))
+    // Include current time in the calculation
+    const now = getCurrentAmsterdamTime()
+    const effectiveStart = new Date(Math.min(earliestStart.getTime(), now.getTime()) - (30 * 60 * 1000))
+    const effectiveEnd = new Date(Math.max(latestEnd.getTime(), now.getTime()) + (60 * 60 * 1000))
     
-    // Round to nearest 30 minutes for more compact display
-    const startMinutes = startTime.getMinutes()
-    const roundedStartMinutes = startMinutes < 30 ? 0 : 30
-    startTime.setMinutes(roundedStartMinutes, 0, 0)
-    
-    const endMinutes = endTime.getMinutes()
-    const roundedEndMinutes = endMinutes <= 30 ? 30 : 60
-    if (roundedEndMinutes === 60) {
-      endTime.setTime(endTime.getTime() + (60 * 60 * 1000))
-      endTime.setMinutes(0, 0, 0)
-    } else {
-      endTime.setMinutes(roundedEndMinutes, 0, 0)
+    // Round to 30-minute boundaries
+    const roundDown30 = (date) => {
+      const d = new Date(date)
+      const minutes = d.getMinutes()
+      const seconds = d.getSeconds()
+      const ms = d.getMilliseconds()
+      
+      // Reset seconds and milliseconds
+      d.setSeconds(0, 0)
+      
+      // Round minutes down to 0 or 30
+      if (minutes < 30) {
+        d.setMinutes(0)
+      } else {
+        d.setMinutes(30)
+      }
+      
+      return d
     }
+    
+    const roundUp30 = (date) => {
+      const d = new Date(date)
+      const minutes = d.getMinutes()
+      
+      // Reset seconds and milliseconds
+      d.setSeconds(0, 0)
+      
+      // Round minutes up to 0 or 30
+      if (minutes === 0) {
+        // Already on the hour
+        return d
+      } else if (minutes <= 30) {
+        d.setMinutes(30)
+      } else {
+        // Go to next hour
+        d.setHours(d.getHours() + 1)
+        d.setMinutes(0)
+      }
+      
+      return d
+    }
+    
+    const startTime = roundDown30(effectiveStart)
+    const endTime = roundUp30(effectiveEnd)
+    
+    // Debug log to check rounding
+    console.log('Timeline rounding debug:', {
+      effectiveStart: effectiveStart.toISOString(),
+      effectiveEnd: effectiveEnd.toISOString(),
+      roundedStart: startTime.toISOString(),
+      roundedEnd: endTime.toISOString(),
+      startMinutes: startTime.getMinutes(),
+      endMinutes: endTime.getMinutes()
+    })
 
     return { dynamicStartTime: startTime, dynamicEndTime: endTime }
   }, [mounted, gateData, currentTime])
@@ -231,11 +286,13 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     const slots = []
     const totalMinutes = Math.ceil((dynamicEndTime.getTime() - dynamicStartTime.getTime()) / (60 * 1000))
     const intervalMinutes = 30 // 30-minute intervals
+    const totalIntervals = Math.ceil(totalMinutes / intervalMinutes)
     
-    for (let i = 0; i <= totalMinutes; i += intervalMinutes) {
-      const slotTime = new Date(dynamicStartTime.getTime() + (i * 60 * 1000))
+    for (let i = 0; i <= totalIntervals; i++) {
+      const slotTime = new Date(dynamicStartTime.getTime() + (i * intervalMinutes * 60 * 1000))
       slots.push(slotTime)
     }
+    
     return slots
   }, [mounted, dynamicStartTime, dynamicEndTime])
 
@@ -372,15 +429,24 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     // Use API status directly - no overrides
     const displayStatus = flight.primaryState
     
+    // If flight has departed (DEP), always show as departed regardless of delay
+    if (displayStatus === 'DEP') {
+      return 'bg-gray-500 border-gray-700'  // Departed - GRAY
+    }
+    
+    // Check if flight is delayed (but not departed)
+    if (flight.isDelayed && flight.delayMinutes > 0) {
+      return 'bg-red-600 border-red-800'  // Delayed - DARK RED (highest priority)
+    }
+    
     switch (displayStatus) {
       case 'BRD': return 'bg-green-500 border-green-700'     // Boarding - GREEN
       case 'GTO': return 'bg-blue-500 border-blue-700'      // Gate Open - BLUE
-      case 'GCL': return 'bg-yellow-500 border-yellow-700'  // Gate Closing - YELLOW
-      case 'GTD': return 'bg-orange-500 border-orange-700'  // Gate Closed - ORANGE
-      case 'DEP': return 'bg-gray-500 border-gray-700'      // Departed - GRAY
+      case 'GCL': return 'bg-yellow-500 border-yellow-700'  // Gate Closing - YELLOW (Normal priority)
+      case 'GTD': return 'bg-orange-500 border-orange-700'  // Gate Closed - ORANGE (Normal priority)
       case 'SCH': return 'bg-purple-500 border-purple-700'  // Scheduled - PURPLE
-      case 'DEL': return 'bg-red-400 border-red-600'        // Delayed state - RED
-      case 'GCH': return 'bg-[#222E50] border-[#1a2340]'    // Gate Change - DARK BLUE
+      case 'DEL': return 'bg-red-600 border-red-800'        // Delayed state - DARK RED
+      case 'GCH': return 'bg-amber-500 border-amber-700'    // Gate Change - AMBER (less important than delay)
       case 'CNX': return 'bg-[#BD2F0F] border-[#8B2209]'    // Cancelled - RED
       default: return 'bg-[#222E50] border-[#1a2340]'       // Unknown - DARK BLUE
     }
@@ -411,20 +477,42 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
 
   // Calculate current time position with enhanced precision
   const getCurrentTimePosition = () => {
-    const now = currentTime // Use the state that updates every 30 seconds
-    const startTime = timeSlots[0]
-    const endTime = timeSlots[timeSlots.length - 1]
+    const now = currentTime
     
-    if (!startTime || !endTime) return { position: 0, isVisible: false }
+    if (!timeSlots || timeSlots.length < 2) return { position: 0, isVisible: false }
     
-    const totalDuration = endTime.getTime() - startTime.getTime()
-    const currentOffset = now.getTime() - startTime.getTime()
+    // Find which interval the current time falls into
+    let intervalIndex = -1
+    for (let i = 0; i < timeSlots.length - 1; i++) {
+      if (now >= timeSlots[i] && now < timeSlots[i + 1]) {
+        intervalIndex = i
+        break
+      }
+    }
     
-    // Check if current time is within the visible timeline
-    const isVisible = currentOffset >= 0 && currentOffset <= totalDuration
-    const position = Math.max(0, Math.min(100, (currentOffset / totalDuration) * 100))
+    // Handle edge cases
+    if (now < timeSlots[0]) {
+      return { position: 0, isVisible: true }
+    }
+    if (now >= timeSlots[timeSlots.length - 1]) {
+      intervalIndex = timeSlots.length - 2
+    }
     
-    return { position, isVisible }
+    if (intervalIndex === -1) return { position: 0, isVisible: false }
+    
+    // Calculate position within the current interval
+    const intervalStart = timeSlots[intervalIndex]
+    const intervalEnd = timeSlots[intervalIndex + 1]
+    const intervalDuration = intervalEnd.getTime() - intervalStart.getTime()
+    const offsetInInterval = now.getTime() - intervalStart.getTime()
+    const percentageInInterval = offsetInInterval / intervalDuration
+    
+    // Calculate pixel position
+    // Each interval is one column, so position = intervalIndex + percentageInInterval
+    const totalIntervals = timeSlots.length - 1
+    const position = ((intervalIndex + percentageInInterval) / totalIntervals) * 100
+    
+    return { position, isVisible: true }
   }
 
   const handleFlightHover = (flight: any, event: React.MouseEvent) => {
@@ -474,10 +562,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                     key={index} 
                     className="relative border-l border-gray-200 bg-gray-50 flex-shrink-0 w-[60px] xs:w-[80px] sm:w-[100px] min-w-[60px] xs:min-w-[80px] sm:min-w-[100px] h-full"
                   >
-                    {/* Position time at the left edge of each cell */}
-                    <span className="absolute top-1/2 -translate-y-1/2 left-1 font-medium text-[10px] xs:text-xs text-gray-700 whitespace-nowrap">
-                      {slot.toLocaleTimeString('en-US', { 
-                        hour: '2-digit', 
+                    <span className="absolute top-1 -left-[2px] -translate-x-1/2 text-[10px] xs:text-xs text-gray-600 select-none">
+                      {slot.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
                         minute: '2-digit',
                         hour12: false,
                         timeZone: 'Europe/Amsterdam'
@@ -551,6 +638,18 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                           >
                             <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
                               {flight.flightName}
+                              {/* Show indicator if flight is still at gate past scheduled time */}
+                              {(() => {
+                                const timeline = getFlightTimeline(flight)
+                                if (timeline.isStillAtGate && flight.primaryState === 'GTD') {
+                                  return (
+                                    <span className="ml-1 px-1 py-0.5 bg-white bg-opacity-30 rounded text-[10px] font-bold animate-pulse">
+                                      AT GATE
+                                    </span>
+                                  )
+                                }
+                                return null
+                              })()}
                             </div>
                             
                             {/* Departure Time Indicators */}
@@ -642,10 +741,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   key={index} 
                   className="relative border-l border-gray-200 bg-gray-50 flex-shrink-0 w-[60px] xs:w-[80px] sm:w-[100px] min-w-[60px] xs:min-w-[80px] sm:min-w-[100px] h-full"
                 >
-                  {/* Position time at the left edge of each cell */}
-                  <span className="absolute top-1/2 -translate-y-1/2 left-1 font-medium text-[10px] xs:text-xs text-gray-700 whitespace-nowrap">
-                    {slot.toLocaleTimeString('en-US', { 
-                      hour: '2-digit', 
+                  <span className="absolute top-1 left-1 text-[10px] xs:text-xs text-gray-600 select-none">
+                    {slot.toLocaleTimeString('en-US', {
+                      hour: '2-digit',
                       minute: '2-digit',
                       hour12: false,
                       timeZone: 'Europe/Amsterdam'
@@ -725,6 +823,18 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                           >
                             <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
                               {flight.flightName}
+                              {/* Show indicator if flight is still at gate past scheduled time */}
+                              {(() => {
+                                const timeline = getFlightTimeline(flight)
+                                if (timeline.isStillAtGate && flight.primaryState === 'GTD') {
+                                  return (
+                                    <span className="ml-1 px-1 py-0.5 bg-white bg-opacity-30 rounded text-[10px] font-bold animate-pulse">
+                                      AT GATE
+                                    </span>
+                                  )
+                                }
+                                return null
+                              })()}
                             </div>
                             
                             {/* Departure Time Indicators */}
@@ -806,6 +916,20 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
             <CardTitle className="text-base sm:text-lg">Gate Schedule Timeline</CardTitle>
+            {/* Live Amsterdam Time Clock */}
+            <div className="flex items-center gap-1 ml-3 px-2 py-1 bg-blue-50 rounded-md">
+              <Clock className="w-3 h-3 text-blue-600" />
+              <span className="text-sm font-mono font-medium text-blue-700">
+                {currentTime.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: false,
+                  timeZone: 'Europe/Amsterdam'
+                })}
+              </span>
+              <span className="text-xs text-blue-600 ml-1">AMS</span>
+            </div>
           </div>
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
@@ -837,7 +961,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
             
             {/* Dynamic Time Range Display */}
             <div className="flex items-center gap-2 text-xs text-gray-600">
-              <span>Timeline:</span>
+              <span>Timeline Range:</span>
               <span className="font-medium">
                 {dynamicStartTime.toLocaleTimeString('en-US', { 
                   hour: '2-digit', 
@@ -849,16 +973,17 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   minute: '2-digit',
                   hour12: false,
                   timeZone: 'Europe/Amsterdam'
-                })} (AMS)
+                })}
               </span>
             </div>
           </div>
         </div>
         <p className="text-xs text-gray-600">
           {showAllGates 
-            ? `All gates • ${processedGateData.length} gates displayed • ${processedGateData.filter(g => g.flights.length > 0).length} with flights • Amsterdam Time (UTC+2)`
-            : `Gates with flights only • ${processedGateData.length} active gates • Amsterdam Time (UTC+2)`
+            ? `All gates • ${processedGateData.length} gates displayed • ${processedGateData.filter(g => g.flights.length > 0).length} with flights`
+            : `Gates with flights only • ${processedGateData.length} active gates`
           }
+          {' • Timeline shows 30-minute intervals'}
         </p>
       </CardHeader>
       
@@ -1200,6 +1325,22 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                           {selectedFlight.primaryStateReadable}
                         </span>
                       </div>
+                      {/* Show all flight states */}
+                      {selectedFlight.flightStates && selectedFlight.flightStates.length > 1 && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">All States:</span>
+                          <span className="text-right">
+                            {selectedFlight.flightStatesReadable.join(', ')}
+                          </span>
+                        </div>
+                      )}
+                      {/* Show gate change explicitly if present */}
+                      {selectedFlight.flightStates && selectedFlight.flightStates.includes('GCH') && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Gate Changed:</span>
+                          <span className="font-medium text-amber-600">Yes</span>
+                        </div>
+                      )}
                       {selectedFlight.isDelayed && (
                         <div className="flex justify-between">
                           <span className="text-gray-500">Delay:</span>
