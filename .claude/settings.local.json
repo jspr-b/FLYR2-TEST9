@@ -38,7 +38,10 @@
       "Bash(git remote add:*)",
       "Bash(mkdir:*)",
       "Bash(git clone:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git rm:*)",
+      "Bash(git reset:*)",
+      "Bash(git restore:*)"
     ],
     "deny": []
   }

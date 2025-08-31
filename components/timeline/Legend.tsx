@@ -40,10 +40,27 @@ export function Legend() {
       </h4>
       {isExpanded && (
         <div className="space-y-2 xs:space-y-3 animate-in fade-in-0 slide-in-from-top-1 duration-200">
-        {/* Flight States */}
+        {/* Flight States - Organized by Priority */}
         <div>
-          <h5 className="text-[10px] xs:text-xs font-medium text-gray-700 mb-1 xs:mb-2">Flight States</h5>
+          <h5 className="text-[10px] xs:text-xs font-medium text-gray-700 mb-1 xs:mb-2">Flight States (Ordered by Priority)</h5>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 xs:gap-2 sm:gap-3 text-[10px] xs:text-xs">
+            {/* High Priority - Dark Red */}
+            <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
+              <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-red-600 border border-red-800 rounded"></div>
+              <span className="font-medium">Delayed (DEL)</span>
+            </div>
+            <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
+              <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-[#BD2F0F] border border-[#8B2209] rounded"></div>
+              <span>Cancelled (CNX)</span>
+            </div>
+            
+            {/* Medium Priority - Amber Only */}
+            <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
+              <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-amber-500 border border-amber-700 rounded"></div>
+              <span className="font-medium">Gate Change (GCH)</span>
+            </div>
+            
+            {/* Normal Operations */}
             <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
               <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-green-500 border border-green-700 rounded"></div>
               <span>Boarding (BRD)</span>
@@ -65,21 +82,12 @@ export function Legend() {
               <span>Scheduled (SCH)</span>
             </div>
             <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
-              <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-red-400 border border-red-600 rounded"></div>
-              <span>Delayed (DEL)</span>
-            </div>
-            <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
               <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-gray-500 border border-gray-700 rounded"></div>
               <span>Departed (DEP)</span>
             </div>
-            <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
-              <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-[#222E50] border border-[#1a2340] rounded"></div>
-              <span>Gate Change (GCH)</span>
-            </div>
-            <div className="flex items-center gap-1 xs:gap-2 p-0.5 xs:p-1 rounded hover:bg-gray-200 transition-colors cursor-pointer">
-              <div className="w-2.5 h-2.5 xs:w-3 xs:h-3 bg-[#BD2F0F] border border-[#8B2209] rounded"></div>
-              <span>Cancelled (CNX)</span>
-            </div>
+          </div>
+          <div className="mt-2 text-[9px] xs:text-[10px] text-gray-600">
+            <span className="font-medium">Note:</span> Delayed flights always show in red regardless of other states
           </div>
         </div>
         
