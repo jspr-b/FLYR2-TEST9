@@ -1015,7 +1015,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
         </div>
 
         {/* Desktop Gantt Chart - Only on Large Screens */}
-        <div className="hidden lg:block relative">
+        <div className="hidden lg:block h-[500px] overflow-auto relative">
           {renderGanttContent(false)}
         </div>
 
