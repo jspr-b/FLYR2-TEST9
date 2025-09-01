@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip"
 
 export function Legend() {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   return (

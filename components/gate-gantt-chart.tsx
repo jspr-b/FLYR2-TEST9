@@ -62,12 +62,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   const [expandedGates, setExpandedGates] = useState<Set<string>>(new Set());
 
   // New state for dynamic features
-  const [timeRangeHours, setTimeRangeHours] = useState<6 | 12 | 24>(() => {
-    // Default: 6h for mobile, 12h for desktop
+  const [timeRangeHours, setTimeRangeHours] = useState<6 | 8 | 24>(() => {
+    // Default: 6h for mobile, 8h for desktop
     if (typeof window !== "undefined") {
-      return window.innerWidth >= 1024 ? 12 : 6;
+      return window.innerWidth >= 1024 ? 8 : 6;
     }
-    return 12;
+    return 8;
   });
   const [viewDensity, setViewDensity] = useState<
     "compact" | "normal" | "expanded"
@@ -245,21 +245,18 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     // Standard gate close time: 10 minutes after scheduled/estimated departure
     gateCloseTime = new Date(departureTime.getTime() + 10 * 60 * 1000);
 
-    // If flight has GTD (gate closed) but no DEP status, extend timeline
-    // This indicates the flight is still at the gate
+    // Dynamic extension logic for GTD flights without off-block time
     if (
       flight.primaryState === "GTD" &&
       !hasDeparted &&
+      !flight.actualOffBlockTime &&
       currentTime > departureTime
     ) {
-      // Extend to at least current time + 10 minutes to keep it visible
-      const extendedTime = new Date(
-        Math.max(
-          departureTime.getTime() + 30 * 60 * 1000, // At least 30 min after scheduled
-          currentTime.getTime() + 10 * 60 * 1000, // Or 10 min into future
-        ),
-      );
-      gateCloseTime = extendedTime;
+      // Dynamically extend to current time (no buffer)
+      gateCloseTime = currentTime;
+    } else if (hasDeparted && flight.actualOffBlockTime) {
+      // Lock end time at actual off-block time
+      gateCloseTime = new Date(flight.actualOffBlockTime);
     }
 
     return {
@@ -331,8 +328,8 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     let intervalMinutes;
     if (timeRangeHours === 6) {
       intervalMinutes = 30; // 30-minute intervals for 6 hours
-    } else if (timeRangeHours === 12) {
-      intervalMinutes = 60; // 1-hour intervals for 12 hours
+    } else if (timeRangeHours === 8) {
+      intervalMinutes = 60; // 1-hour intervals for 8 hours
     } else {
       intervalMinutes = 120; // 2-hour intervals for full day
     }
@@ -489,8 +486,8 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     // Use API status directly - no overrides
     const displayStatus = flight.primaryState;
 
-    // If flight has departed (DEP), always show as departed regardless of delay
-    if (displayStatus === "DEP") {
+    // If flight has departed (DEP or has actualOffBlockTime), always show as departed regardless of delay
+    if (displayStatus === "DEP" || flight.actualOffBlockTime) {
       return "bg-gray-500 border-gray-700"; // Departed - GRAY
     }
 
@@ -775,8 +772,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                         flight.primaryState === "GTD"
                                       ) {
                                         return (
-                                          <span className="ml-1 px-1 py-0.5 bg-white bg-opacity-30 rounded text-[10px] font-bold animate-pulse">
-                                            AT GATE
+                                          <span className="ml-1 px-0.5 sm:px-1 py-0.5 bg-white bg-opacity-30 rounded text-[8px] sm:text-[10px] font-bold animate-pulse">
+                                            <span className="hidden sm:inline">AT GATE</span>
+                                            <span className="sm:hidden">@GATE</span>
                                           </span>
                                         );
                                       }
@@ -1016,8 +1014,9 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                       flight.primaryState === "GTD"
                                     ) {
                                       return (
-                                        <span className="ml-1 px-1 py-0.5 bg-white bg-opacity-30 rounded text-[10px] font-bold animate-pulse">
-                                          AT GATE
+                                        <span className="ml-1 px-0.5 sm:px-1 py-0.5 bg-white bg-opacity-30 rounded text-[8px] sm:text-[10px] font-bold animate-pulse">
+                                          <span className="hidden sm:inline">AT GATE</span>
+                                          <span className="sm:hidden">@GATE</span>
                                         </span>
                                       );
                                     }
@@ -1151,7 +1150,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   className="text-xs px-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value={6}>Next 6 hours</option>
-                  <option value={12}>Next 12 hours</option>
+                  <option value={8}>Next 8 hours</option>
                   <option value={24}>Full day (05:00-00:00)</option>
                 </select>
               </div>
@@ -1193,7 +1192,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
             {" • Timeline shows "}
             {timeRangeHours === 6
               ? "30-minute"
-              : timeRangeHours === 12
+              : timeRangeHours === 8
                 ? "1-hour"
                 : "2-hour"}
             {" intervals"}
@@ -1273,6 +1272,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                       <span className="opacity-90 truncate max-w-[80px] sm:max-w-[120px]">
                                         {flight.destination}
                                       </span>
+                                      {/* Show AT GATE indicator */}
+                                      {timeline.isStillAtGate && flight.primaryState === "GTD" && (
+                                        <span className="ml-1 px-0.5 py-0.5 bg-white bg-opacity-30 rounded text-[8px] font-bold animate-pulse">
+                                          @GATE
+                                        </span>
+                                      )}
                                     </div>
                                     {flight.isDelayed && (
                                       <span className="text-[9px] sm:text-[10px] bg-red-600 bg-opacity-30 px-1 sm:px-1.5 py-0.5 rounded">
@@ -1488,7 +1493,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                     className="text-xs px-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
                     <option value={6}>Next 6 hours</option>
-                    <option value={12}>Next 12 hours</option>
+                    <option value={8}>Next 8 hours</option>
                     <option value={24}>Full day (05:00-00:00)</option>
                   </select>
                 </div>
