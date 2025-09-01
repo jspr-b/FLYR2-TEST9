@@ -638,7 +638,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           <div className="w-full">
             {/* Time Header - Part of scrollable content */}
             <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
-              <div className="flex h-8 relative">
+              <div className="flex h-8 relative px-6">
                 {/* Time slot intervals */}
                 {timeSlots.slice(0, -1).map((_, index) => (
                   <div
@@ -696,7 +696,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                     }}
                   >
                     {/* Grid Background - Full Width */}
-                    <div className="absolute inset-0 flex">
+                    <div className="absolute inset-0 flex px-6">
                       {timeSlots.slice(0, -1).map((_, index) => (
                         <div
                           key={index}
@@ -706,7 +706,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                     </div>
 
                     {/* Flight Stacks - Positioned Absolutely */}
-                    <div className="absolute inset-0">
+                    <div className="absolute inset-0 px-6">
                       {((gate as any).flightStacks || []).map(
                         (stack: any[], stackIndex: number) => (
                           <React.Fragment key={stackIndex}>
@@ -879,7 +879,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       <div className={containerClass}>
         {/* Time Header */}
         <div className={headerClass}>
-          <div className="flex h-8 relative">
+          <div className="flex h-8 relative px-6">
             {/* Time slot intervals */}
             {timeSlots.slice(0, -1).map((_, index) => (
               <div
@@ -938,7 +938,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   }}
                 >
                   {/* Grid Background - Full Width */}
-                  <div className="absolute inset-0 flex">
+                  <div className="absolute inset-0 flex px-6">
                     {timeSlots.slice(0, -1).map((_, index) => (
                       <div
                         key={index}
@@ -948,7 +948,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   </div>
 
                   {/* Flight Stacks - Positioned Absolutely */}
-                  <div className="absolute inset-0">
+                  <div className="absolute inset-0 px-6">
                     {((gate as any).flightStacks || []).map(
                       (stack: any[], stackIndex: number) => (
                         <React.Fragment key={stackIndex}>
