@@ -71,11 +71,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
   });
   const [viewDensity, setViewDensity] = useState<
     "compact" | "normal" | "expanded"
-  >("normal");
-
-  // Synchronized scrolling refs
-  const headerScrollRef = useRef<HTMLDivElement>(null);
-  const contentScrollRef = useRef<HTMLDivElement>(null);
+  >("compact");
 
   // Modal-specific ref for full-screen unified scrolling
   const modalContentScrollRef = useRef<HTMLDivElement>(null);
@@ -91,30 +87,6 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Synchronized scrolling effect for main view
-  useEffect(() => {
-    const headerEl = headerScrollRef.current;
-    const contentEl = contentScrollRef.current;
-
-    if (!headerEl || !contentEl) return;
-
-    const syncScroll = (source: HTMLDivElement, target: HTMLDivElement) => {
-      return () => {
-        target.scrollLeft = source.scrollLeft;
-      };
-    };
-
-    const headerToContent = syncScroll(headerEl, contentEl);
-    const contentToHeader = syncScroll(contentEl, headerEl);
-
-    headerEl.addEventListener("scroll", headerToContent);
-    contentEl.addEventListener("scroll", contentToHeader);
-
-    return () => {
-      headerEl.removeEventListener("scroll", headerToContent);
-      contentEl.removeEventListener("scroll", contentToHeader);
-    };
-  }, [mounted]);
 
   // Modal uses unified scrolling - no separate synchronization needed
 
@@ -660,7 +632,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       // Modal version - unified scrolling
       return (
         <div
-          className="w-full h-full overflow-auto"
+          className="w-full h-full overflow-y-auto overflow-x-hidden"
           ref={modalContentScrollRef}
         >
           <div className="w-full">
@@ -898,10 +870,10 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       );
     }
 
-    // Main component version - synchronized scrolling
+    // Main component version - no horizontal scrolling
     const containerClass = "w-full";
     const headerClass = "sticky top-0 bg-white z-10 border-b border-gray-200";
-    const contentClass = "max-h-96 overflow-auto border-t-0";
+    const contentClass = "overflow-x-hidden";
 
     return (
       <div className={containerClass}>
@@ -1180,47 +1152,6 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                 </select>
               </div>
 
-              {/* View Density Selector */}
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-medium text-gray-700">
-                  View:
-                </label>
-                <div className="flex rounded-md shadow-sm" role="group">
-                  <button
-                    type="button"
-                    onClick={() => setViewDensity("compact")}
-                    className={`px-2 py-1 text-xs font-medium border ${
-                      viewDensity === "compact"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                    } rounded-l-md`}
-                  >
-                    Compact
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewDensity("normal")}
-                    className={`px-2 py-1 text-xs font-medium border-t border-b ${
-                      viewDensity === "normal"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                    }`}
-                  >
-                    Normal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewDensity("expanded")}
-                    className={`px-2 py-1 text-xs font-medium border ${
-                      viewDensity === "expanded"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                    } rounded-r-md`}
-                  >
-                    Expanded
-                  </button>
-                </div>
-              </div>
 
               {/* All Gates Toggle */}
               <div className="flex items-center gap-2">
@@ -1397,7 +1328,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           </div>
 
           {/* Desktop Gantt Chart - Only on Large Screens */}
-          <div className="hidden lg:block h-[500px] lg:h-[600px] xl:h-[700px] 2xl:h-[800px] overflow-auto relative">
+          <div className="hidden lg:block h-[500px] lg:h-[600px] xl:h-[700px] 2xl:h-[800px] overflow-y-auto overflow-x-hidden relative">
             {renderGanttContent(false)}
           </div>
 
@@ -1558,47 +1489,6 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   </select>
                 </div>
 
-                {/* View Density Selector */}
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-700">
-                    View:
-                  </label>
-                  <div className="flex rounded-md shadow-sm" role="group">
-                    <button
-                      type="button"
-                      onClick={() => setViewDensity("compact")}
-                      className={`px-2 py-1 text-xs font-medium border ${
-                        viewDensity === "compact"
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                      } rounded-l-md`}
-                    >
-                      Compact
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewDensity("normal")}
-                      className={`px-2 py-1 text-xs font-medium border-t border-b ${
-                        viewDensity === "normal"
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      Normal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewDensity("expanded")}
-                      className={`px-2 py-1 text-xs font-medium border ${
-                        viewDensity === "expanded"
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                      } rounded-r-md`}
-                    >
-                      Expanded
-                    </button>
-                  </div>
-                </div>
 
                 {/* Controls in full screen */}
                 <div className="flex items-center gap-2">
