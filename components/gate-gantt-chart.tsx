@@ -638,35 +638,37 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           <div className="w-full">
             {/* Time Header - Part of scrollable content */}
             <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
-              <div className="flex h-8 relative px-6">
-                {/* Time slot intervals */}
-                {timeSlots.slice(0, -1).map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 bg-gray-50 border-l border-gray-200"
-                  />
-                ))}
-                {/* Time labels positioned at exact times */}
-                {timeSlots.map((slot, index) => {
-                  const position = index === 0 ? 0 : (index / (timeSlots.length - 1)) * 100;
-                  return (
-                    <span
+              <div className="h-8 relative bg-gray-50">
+                {/* Grey vertical lines with integrated time labels */}
+                <div className="absolute inset-0 flex px-6">
+                  {timeSlots.slice(0, -1).map((_, index) => (
+                    <div
                       key={index}
-                      className="absolute top-1 text-[10px] xs:text-xs text-gray-600 select-none"
-                      style={{
-                        left: `${position}%`,
-                        transform: index === 0 ? "translateX(0%)" : "translateX(-50%)",
-                      }}
+                      className="border-l border-gray-200 flex-1 relative"
                     >
-                      {slot.toLocaleTimeString("en-US", {
+                      {/* Time label at the start of each interval */}
+                      <span className="absolute -left-6 top-1 text-[10px] xs:text-xs text-gray-700 font-medium bg-gray-50 px-1">
+                        {timeSlots[index].toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                          timeZone: "Europe/Amsterdam",
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                  {/* Last time label */}
+                  <div className="relative">
+                    <span className="absolute -right-6 top-1 text-[10px] xs:text-xs text-gray-700 font-medium bg-gray-50 px-1">
+                      {timeSlots[timeSlots.length - 1].toLocaleTimeString("en-US", {
                         hour: "2-digit",
                         minute: "2-digit",
                         hour12: false,
                         timeZone: "Europe/Amsterdam",
                       })}
                     </span>
-                  );
-                })}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -879,35 +881,37 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       <div className={containerClass}>
         {/* Time Header */}
         <div className={headerClass}>
-          <div className="flex h-8 relative px-6">
-            {/* Time slot intervals */}
-            {timeSlots.slice(0, -1).map((_, index) => (
-              <div
-                key={index}
-                className="flex-1 bg-gray-50 border-l border-gray-200"
-              />
-            ))}
-            {/* Time labels positioned at exact times */}
-            {timeSlots.map((slot, index) => {
-              const position = index === 0 ? 0 : (index / (timeSlots.length - 1)) * 100;
-              return (
-                <span
+          <div className="h-8 relative bg-gray-50">
+            {/* Grey vertical lines with integrated time labels */}
+            <div className="absolute inset-0 flex px-6">
+              {timeSlots.slice(0, -1).map((_, index) => (
+                <div
                   key={index}
-                  className="absolute top-1 text-[10px] xs:text-xs text-gray-600 select-none"
-                  style={{
-                    left: `${position}%`,
-                    transform: index === 0 ? "translateX(0%)" : "translateX(-50%)",
-                  }}
+                  className="border-l border-gray-200 flex-1 relative"
                 >
-                  {slot.toLocaleTimeString("en-US", {
+                  {/* Time label at the start of each interval */}
+                  <span className="absolute -left-6 top-1 text-[10px] xs:text-xs text-gray-700 font-medium bg-gray-50 px-1">
+                    {timeSlots[index].toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                      timeZone: "Europe/Amsterdam",
+                    })}
+                  </span>
+                </div>
+              ))}
+              {/* Last time label */}
+              <div className="relative">
+                <span className="absolute -right-6 top-1 text-[10px] xs:text-xs text-gray-700 font-medium bg-gray-50 px-1">
+                  {timeSlots[timeSlots.length - 1].toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: false,
                     timeZone: "Europe/Amsterdam",
                   })}
                 </span>
-              );
-            })}
+              </div>
+            </div>
           </div>
         </div>
 
