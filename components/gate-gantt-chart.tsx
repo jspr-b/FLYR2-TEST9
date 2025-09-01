@@ -648,14 +648,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                 ))}
                 {/* Time labels positioned at exact times */}
                 {timeSlots.map((slot, index) => {
-                  const position = (index / (timeSlots.length - 1)) * 100;
+                  const position = index === 0 ? 0 : (index / (timeSlots.length - 1)) * 100;
                   return (
                     <span
                       key={index}
                       className="absolute top-1 text-[10px] xs:text-xs text-gray-600 select-none"
                       style={{
                         left: `${position}%`,
-                        transform: "translateX(-50%)",
+                        transform: index === 0 ? "translateX(0%)" : "translateX(-50%)",
                       }}
                     >
                       {slot.toLocaleTimeString("en-US", {
@@ -889,14 +889,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
             ))}
             {/* Time labels positioned at exact times */}
             {timeSlots.map((slot, index) => {
-              const position = (index / (timeSlots.length - 1)) * 100;
+              const position = index === 0 ? 0 : (index / (timeSlots.length - 1)) * 100;
               return (
                 <span
                   key={index}
                   className="absolute top-1 text-[10px] xs:text-xs text-gray-600 select-none"
                   style={{
                     left: `${position}%`,
-                    transform: "translateX(-50%)",
+                    transform: index === 0 ? "translateX(0%)" : "translateX(-50%)",
                   }}
                 >
                   {slot.toLocaleTimeString("en-US", {
