@@ -242,8 +242,8 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
       ? new Date(flight.estimatedDateTime)
       : scheduledTime;
 
-    // Standard gate close time: 10 minutes after scheduled/estimated departure
-    gateCloseTime = new Date(departureTime.getTime() + 10 * 60 * 1000);
+    // Standard gate close time: exactly at scheduled/estimated departure
+    gateCloseTime = departureTime;
 
     // Dynamic extension logic for GTD flights without off-block time
     if (
@@ -783,33 +783,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                   </div>
 
                                   {/* Departure Time Indicators */}
-                                  {timeline.isTimelineShifted ? (
-                                    <>
-                                      {/* Original scheduled time (dashed gray) */}
-                                      <div
-                                        className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
-                                        style={{
-                                          left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%`,
-                                        }}
-                                        title={`Original: ${timeline.scheduledTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
-                                      />
-                                      {/* New estimated time (solid gray) */}
-                                      <div
-                                        className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
-                                        style={{
-                                          left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%`,
-                                        }}
-                                        title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
-                                      />
-                                    </>
-                                  ) : (
-                                    /* Normal flight - use actual departure time (solid gray) */
+                                  {timeline.isTimelineShifted && (
+                                    /* Original scheduled time (dashed gray) - only show if delayed */
                                     <div
-                                      className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
+                                      className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
                                       style={{
-                                        left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%`,
+                                        left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%`,
                                       }}
-                                      title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
+                                      title={`Original: ${timeline.scheduledTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
                                     />
                                   )}
                                 </div>
@@ -1025,33 +1006,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                 </div>
 
                                 {/* Departure Time Indicators */}
-                                {timeline.isTimelineShifted ? (
-                                  <>
-                                    {/* Original scheduled time (dashed gray) */}
-                                    <div
-                                      className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
-                                      style={{
-                                        left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%`,
-                                      }}
-                                      title={`Original: ${timeline.scheduledTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
-                                    />
-                                    {/* New estimated time (solid gray) */}
-                                    <div
-                                      className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
-                                      style={{
-                                        left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%`,
-                                      }}
-                                      title={`New Time: ${timeline.actualDepartureTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
-                                    />
-                                  </>
-                                ) : (
-                                  /* Normal flight - use actual departure time (solid gray) */
+                                {timeline.isTimelineShifted && (
+                                  /* Original scheduled time (dashed gray) - only show if delayed */
                                   <div
-                                    className="absolute top-0 bottom-0 w-0.5 bg-gray-400"
+                                    className="absolute top-1 bottom-1 w-0.5 border-l-2 border-dashed border-gray-400"
                                     style={{
-                                      left: `${Math.max(0, Math.min(100, actualDeparturePercent))}%`,
+                                      left: `${Math.max(0, Math.min(100, scheduledDeparturePercent))}%`,
                                     }}
-                                    title={`Departure: ${timeline.actualDepartureTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
+                                    title={`Original: ${timeline.scheduledTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Amsterdam" })}`}
                                   />
                                 )}
                               </div>
