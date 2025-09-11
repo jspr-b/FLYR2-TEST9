@@ -45,7 +45,8 @@
       "Bash(npx prettier:*)",
       "Bash(git rebase:*)",
       "Bash(git pull:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

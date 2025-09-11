@@ -567,7 +567,7 @@ export default function HomePage() {
                 Privacy
               </Link>
               <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                Terms
+                Terms & Conditions
               </Link>
               <Link href="/security" className="text-gray-400 hover:text-white transition-colors">
                 Security

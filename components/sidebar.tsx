@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Plane, Clock, TrendingUp, LayoutDashboard, Menu, X, Route, Building2, Activity, BarChart3 } from "lucide-react"
+import { Plane, Clock, TrendingUp, LayoutDashboard, Menu, X, Route, Building2, Activity, BarChart3, FileText } from "lucide-react"
 import { useState } from "react"
 
 const navigation = [
@@ -71,6 +71,19 @@ export function Sidebar() {
             })}
           </div>
         </nav>
+
+        <div className="absolute bottom-16 left-0 right-0 px-3">
+          <div className="border-t border-gray-200 pt-4">
+            <Link
+              href="/terms"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md mb-1 cursor-pointer transition-colors whitespace-nowrap"
+            >
+              <FileText className="mr-3 h-4 w-4 flex-shrink-0" />
+              Terms & Conditions
+            </Link>
+          </div>
+        </div>
 
         <div className="absolute bottom-4 left-4 text-xs text-gray-400">
           © 2025 FLYR

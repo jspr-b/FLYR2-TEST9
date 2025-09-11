@@ -764,7 +764,7 @@ export default function GateActivityPage() {
                   {/* Total flights indicator */}
                   <div className="mt-3 pt-2 border-t border-gray-200 flex-shrink-0">
                     <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>Total active flights</span>
+                      <span>Total Registered Flights</span>
                       <span className="font-semibold text-gray-900">
                         {Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}
                       </span>
