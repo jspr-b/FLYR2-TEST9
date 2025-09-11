@@ -46,7 +46,7 @@ interface GateData {
 // API functions for specialized endpoints
 async function fetchDashboardKPIs() {
   try {
-    const response = await fetch('/api/dashboard/kpis')
+    const response = await fetch('/api/dashboard/kpis?includeCancelled=true')
     if (!response.ok) throw new Error('Failed to fetch dashboard KPIs')
     return await response.json()
   } catch (error) {

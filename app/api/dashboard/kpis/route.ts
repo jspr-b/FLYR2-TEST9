@@ -5,6 +5,10 @@ import { getAmsterdamDateString } from '@/lib/amsterdam-time'
 
 export async function GET(request: NextRequest) {
   try {
+    // Get query parameters
+    const searchParams = request.nextUrl.searchParams
+    const includeCancelled = searchParams.get('includeCancelled') === 'true'
+    
     // Get today's date in Amsterdam timezone (YYYY-MM-DD)
     const today = getAmsterdamDateString()
 
@@ -25,14 +29,14 @@ export async function GET(request: NextRequest) {
     const filters = {
       flightDirection: 'D' as const,
       scheduleDate: today,
-      isOperationalFlight: true,
+      isOperationalFlight: !includeCancelled, // Include cancelled if requested
       prefixicao: 'KL'
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
     filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
 
-    console.log(`📊 DASHBOARD KPIS: Processing ${filteredFlights.length} flights`)
+    console.log(`📊 DASHBOARD KPIS: Processing ${filteredFlights.length} flights${includeCancelled ? ' (including cancelled)' : ''}`)
 
     // Calculate KPIs from filtered flights
     return await calculateKPIsFromFlights(filteredFlights)

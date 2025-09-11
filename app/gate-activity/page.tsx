@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/sidebar"
 import { GateGanttChart } from "@/components/gate-gantt-chart"
 import { GateChangesDashboard } from "@/components/gate-changes-dashboard"
 import { GateTypeDistribution } from "@/components/gate-type-distribution"
-import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2, Info, TrendingUp, ArrowRightLeft, Maximize2 } from "lucide-react"
+import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2, Info, TrendingUp, ArrowRightLeft, Maximize2, XCircle } from "lucide-react"
 import {
   Popover,
   PopoverContent,
@@ -96,7 +96,7 @@ export default function GateActivityPage() {
   const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
     try {
       console.log(`🔄 Fetching gate activity data (Background: ${isBackgroundRefresh})`)
-      const response = await fetch('/api/dashboard-data?includeGateOccupancy=true&includeGateChanges=true', {
+      const response = await fetch('/api/dashboard-data?includeGateOccupancy=true&includeGateChanges=true&includeCancelled=true', {
         headers: {
           'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
         }
@@ -500,6 +500,14 @@ export default function GateActivityPage() {
                             iconColor: 'text-yellow-600',
                             Icon: ArrowRightLeft,
                             description: 'Gate has changed'
+                          },
+                          CNX: {
+                            label: 'Cancelled',
+                            color: 'bg-red-600',
+                            bgColor: 'bg-red-100', 
+                            iconColor: 'text-red-700',
+                            Icon: XCircle,
+                            description: 'Flight cancelled'
                           }
                         }
                         

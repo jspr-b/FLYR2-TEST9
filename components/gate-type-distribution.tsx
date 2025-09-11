@@ -33,89 +33,131 @@ const INITIAL_STATS: GateStats = {
   jetBridgePercentage: 0
 }
 
+interface ProcessedGateData {
+  gatesData: any
+  operationalData: any
+  schipholContext: any
+  gateStatusMetrics: any
+  unknownGateFlights: any[]
+}
+
 export function GateTypeDistribution() {
-  const [gatesData, setGatesData] = useState<any>(null)
-  const [operationalData, setOperationalData] = useState<any>(null)
-  const [schipholContext, setSchipholContext] = useState<any>(null)
-  const [gateStatusMetrics, setGateStatusMetrics] = useState<any>(null)
-  const [unknownGateFlights, setUnknownGateFlights] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    const fetchData = async () => {
-      try {
-        // Fetch from the dashboard API which includes gate occupancy data
-        const response = await fetch('/api/dashboard-data?includeGateOccupancy=true')
-        const data = await response.json()
-        
-        // console.log('Gate Type Distribution - API Response:', data)
-        // console.log('Gate Type Distribution - data.flights exists?', !!data.flights)
-        // console.log('Gate Type Distribution - data.gateOccupancy exists?', !!data.gateOccupancy)
-        
-        if (data.gateOccupancy && data.gateOccupancy.gates && data.gateOccupancy.gates.length > 0) {
+  }, [])
+
+  const fetchGateTypeData = async (isBackgroundRefresh = false): Promise<ProcessedGateData> => {
+    try {
+      // Fetch from the dashboard API which includes gate occupancy data and cancelled flights
+      const response = await fetch('/api/dashboard-data?includeGateOccupancy=true&includeCancelled=true', {
+        headers: {
+          'X-Background-Refresh': isBackgroundRefresh ? 'true' : 'false'
+        }
+      })
+      const data = await response.json()
+      
+      console.log('=== GATE TYPE DISTRIBUTION RAW DATA ===')
+      console.log('Response has gateOccupancy?', !!data.gateOccupancy)
+      console.log('Response has flights?', !!data.flights)
+      console.log('Number of flights in response:', data.flights?.length)
+      
+      let processedData: ProcessedGateData = {
+        gatesData: null,
+        operationalData: null,
+        schipholContext: null,
+        gateStatusMetrics: null,
+        unknownGateFlights: []
+      }
+      
+      // Process gate occupancy data if available
+      if (data.gateOccupancy && data.gateOccupancy.gates && data.gateOccupancy.gates.length > 0) {
           const gates = data.gateOccupancy.gates
           
           // Store Schiphol context data
           if (data.gateOccupancy.summary && data.gateOccupancy.summary.schipholContext) {
-            setSchipholContext(data.gateOccupancy.summary.schipholContext)
+            processedData.schipholContext = data.gateOccupancy.summary.schipholContext
           }
           
+          // Transform gate data for display
+          const transformedData = {
+            gateData: gates.map((gate: any) => ({
+              gate: gate.gateID,
+              pier: gate.pier,
+              flights: gate.utilization.logical,
+              utilization: gate.utilization.current,
+              isBusGate: BUS_GATES.includes(gate.gateID),
+              status: gate.utilization.temporalStatus === 'DEAD_ZONE' ? 'Available' : 
+                     gate.utilization.temporalStatus === 'ACTIVE' ? 'Busy' : 'Moderate',
+              temporalStatus: gate.utilization.temporalStatus,
+              scheduledFlights: gate.scheduledFlights
+            }))
+          }
+          
+          processedData.gatesData = transformedData
+          
+          console.log('Gate occupancy gates:', gates.length)
+      }
+      
+      // Process flight data separately - this is the main data we need
+      if (data.flights && data.flights.length > 0) {
           // Calculate TBD and no gate metrics from raw flights data
-          if (data.flights) {
-            const tbdFlights = data.flights.filter((f: any) => f.gate === 'TBD').length
-            const noGateFlights = data.flights.filter((f: any) => !f.gate).length
-            const assignedGateFlights = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').length
-            
-            // Find departed flights without gates (these are "unknown" gate type)
-            const departedNoGate = data.flights.filter((f: any) => 
-              !f.gate && 
-              f.publicFlightState?.flightStates?.includes('DEP')
-            );
-            
-            setUnknownGateFlights(departedNoGate);
-            
-            setGateStatusMetrics({
-              tbdFlights,
-              noGateFlights,
-              assignedGateFlights,
-              totalFlights: data.flights.length,
-              tbdPercentage: Math.round((tbdFlights / data.flights.length) * 100),
-              noGatePercentage: Math.round((noGateFlights / data.flights.length) * 100),
-              assignedPercentage: Math.round((assignedGateFlights / data.flights.length) * 100)
-            })
+          const tbdFlights = data.flights.filter((f: any) => f.gate === 'TBD').length
+          const noGateFlights = data.flights.filter((f: any) => !f.gate).length
+          const assignedGateFlights = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').length
+          
+          // Find departed flights without gates (these are "unknown" gate type)
+          const departedNoGate = data.flights.filter((f: any) => 
+            !f.gate && 
+            f.publicFlightState?.flightStates?.includes('DEP')
+          );
+          
+          processedData.unknownGateFlights = departedNoGate;
+          
+          processedData.gateStatusMetrics = {
+            tbdFlights,
+            noGateFlights,
+            assignedGateFlights,
+            totalFlights: data.flights.length,
+            tbdPercentage: Math.round((tbdFlights / data.flights.length) * 100),
+            noGatePercentage: Math.round((noGateFlights / data.flights.length) * 100),
+            assignedPercentage: Math.round((assignedGateFlights / data.flights.length) * 100)
           }
           
           // Calculate operational metrics for bus gates vs jet bridges
-          // Use the flights data directly instead of gate.scheduledFlights
-          console.log('Total gates:', gates.length)
-          console.log('Total flights for gate analysis:', data.flights?.length)
+          console.log('=== GATE TYPE DISTRIBUTION DATA FLOW ===')
+          console.log('1. PRE-JOIN COUNTS:')
+          console.log('   - Total flights from API:', data.flights.length)
+          console.log('   - Flights breakdown:')
+          console.log('     * With gates assigned:', assignedGateFlights)
+          console.log('     * TBD gates:', tbdFlights)
+          console.log('     * No gate:', noGateFlights)
           
           // Verify unique gates calculation
-          const uniqueGatesFromFlights = new Set(data.flights?.filter((f: any) => f.gate && f.gate !== 'TBD').map((f: any) => f.gate))
-          console.log('Unique gates from flights:', uniqueGatesFromFlights.size)
-          console.log('Gates in gateOccupancyData:', gates.length)
-          console.log('KLM Gates Today from API:', schipholContext?.klmGatesUsedToday)
-          
-          // Calculate from flights that have gates assigned
-          if (!data.flights) {
-            console.error('Gate Type Distribution - No flights data in response!')
-            setLoading(false)
-            return
-          }
+          const uniqueGatesFromFlights = new Set(data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').map((f: any) => f.gate))
+          console.log('   - Unique gates from flights:', uniqueGatesFromFlights.size)
+          console.log('   - Sample gates:', Array.from(uniqueGatesFromFlights).slice(0, 10))
           
           const flightsWithGates = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD')
-          console.log('Gate Type Distribution - Flights with gates:', flightsWithGates.length)
+          console.log('\n2. POST-FILTER COUNTS:')
+          console.log('   - Flights with gates (excluding TBD):', flightsWithGates.length)
           
           const busGateFlights = flightsWithGates.filter((flight: any) => BUS_GATES.includes(flight.gate))
           const jetBridgeFlights = flightsWithGates.filter((flight: any) => !BUS_GATES.includes(flight.gate))
           
-          console.log('Flights at bus gates:', busGateFlights.length)
-          console.log('Flights at jet bridges:', jetBridgeFlights.length)
+          console.log('\n3. BUS/JET SPLIT:')
+          console.log('   - Flights at bus gates:', busGateFlights.length)
+          console.log('   - Flights at jet bridges:', jetBridgeFlights.length)
+          console.log('   - Total (bus + jet):', busGateFlights.length + jetBridgeFlights.length)
+          console.log('   - Sample bus gates used:', [...new Set(busGateFlights.map((f: any) => f.gate))].slice(0, 10))
+          console.log('   - Sample jet bridge gates used:', [...new Set(jetBridgeFlights.map((f: any) => f.gate))].slice(0, 10))
+          console.log('\n4. VERIFICATION:')
+          console.log('   - Bus + Jet =', busGateFlights.length + jetBridgeFlights.length)
+          console.log('   - Should equal flights with gates =', flightsWithGates.length)
+          console.log('   - Match?', busGateFlights.length + jetBridgeFlights.length === flightsWithGates.length)
           
           // Calculate delay metrics
-          // For flights, we need to calculate delays from schedule vs actual times
           const calculateDelay = (flight: any) => {
             if (!flight.publicEstimatedOffBlockTime || !flight.scheduleDateTime) return 0
             const scheduled = new Date(flight.scheduleDateTime)
@@ -142,30 +184,29 @@ export function GateTypeDistribution() {
             ? Math.round(jetBridgeDelays.reduce((sum: number, f: any) => sum + calculateDelay(f), 0) / jetBridgeDelays.length)
             : 0
           
-          // Transform data to match expected structure
-          const transformedData = {
-            gateData: gates.map((gate: any) => ({
-              gate: gate.gateID,
-              pier: gate.pier,
-              flights: gate.utilization.logical,
-              utilization: gate.utilization.current,
-              isBusGate: BUS_GATES.includes(gate.gateID),
-              status: gate.utilization.temporalStatus === 'DEAD_ZONE' ? 'Available' : 
-                     gate.utilization.temporalStatus === 'ACTIVE' ? 'Busy' : 'Moderate',
-              temporalStatus: gate.utilization.temporalStatus,
-              scheduledFlights: gate.scheduledFlights
-            }))
+          // Calculate gate utilization from gateOccupancy data if available
+          let busGateUtilization = 0
+          let jetBridgeUtilization = 0
+          
+          if (data.gateOccupancy && data.gateOccupancy.gates) {
+            const gates = data.gateOccupancy.gates
+            busGateUtilization = Math.round(
+              gates.filter((g: any) => BUS_GATES.includes(g.gateID))
+                .reduce((sum: number, g: any) => sum + g.utilization.current, 0) /
+              Math.max(1, gates.filter((g: any) => BUS_GATES.includes(g.gateID)).length)
+            )
+            jetBridgeUtilization = Math.round(
+              gates.filter((g: any) => !BUS_GATES.includes(g.gateID))
+                .reduce((sum: number, g: any) => sum + g.utilization.current, 0) /
+              Math.max(1, gates.filter((g: any) => !BUS_GATES.includes(g.gateID)).length)
+            )
           }
           
           // Store operational metrics
-          // console.log('Gate Type Distribution - Bus gate flights:', busGateFlights.length)
-          // console.log('Gate Type Distribution - Jet bridge flights:', jetBridgeFlights.length)
-          // console.log('Gate Type Distribution - Unknown gate flights:', unknownGateFlights.length)
-          
-          setOperationalData({
+          processedData.operationalData = {
             busGateFlights: busGateFlights.length,
             jetBridgeFlights: jetBridgeFlights.length,
-            unknownGateFlights: unknownGateFlights.length,
+            unknownGateFlights: departedNoGate.length,
             busGateDelayRate: busGateFlights.length > 0
               ? Math.round((busGateDelays.length / busGateFlights.length) * 100)
               : 0,
@@ -174,16 +215,8 @@ export function GateTypeDistribution() {
               : 0,
             avgBusGateDelay,
             avgJetBridgeDelay,
-            busGateUtilization: Math.round(
-              gates.filter((g: any) => BUS_GATES.includes(g.gateID))
-                .reduce((sum: number, g: any) => sum + g.utilization.current, 0) /
-              Math.max(1, gates.filter((g: any) => BUS_GATES.includes(g.gateID)).length)
-            ),
-            jetBridgeUtilization: Math.round(
-              gates.filter((g: any) => !BUS_GATES.includes(g.gateID))
-                .reduce((sum: number, g: any) => sum + g.utilization.current, 0) /
-              Math.max(1, gates.filter((g: any) => !BUS_GATES.includes(g.gateID)).length)
-            ),
+            busGateUtilization,
+            jetBridgeUtilization,
             criticalBusGateDelays: busGateFlights.filter((f: any) => calculateDelay(f) >= 60).map((f: any) => ({
               ...f,
               delayMinutes: calculateDelay(f),
@@ -194,19 +227,34 @@ export function GateTypeDistribution() {
               delayMinutes: calculateDelay(f),
               delayFormatted: `${calculateDelay(f)} min`
             }))
-          })
-          
-          setGatesData(transformedData)
-        }
-      } catch (error) {
-        console.error('Error fetching gate data:', error)
-      } finally {
-        setLoading(false)
+          }
       }
+      
+      console.log('=== FINAL PROCESSED DATA ===')
+      console.log('processedData:', processedData)
+      console.log('operationalData bus flights:', processedData.operationalData?.busGateFlights)
+      console.log('operationalData jet flights:', processedData.operationalData?.jetBridgeFlights)
+      
+      return processedData
+    } catch (error) {
+      console.error('Error fetching gate data:', error)
+      throw error
     }
+  }
 
-    fetchData()
-  }, [])
+  // Use the useClientData hook for auto-refresh capability
+  const { data, loading, backgroundLoading, error, backgroundError, refetch } = useClientData(
+    fetchGateTypeData,
+    {
+      gatesData: null,
+      operationalData: null,
+      schipholContext: null,
+      gateStatusMetrics: null,
+      unknownGateFlights: []
+    } as ProcessedGateData,
+    [],
+    10 * 60 * 1000 // Auto-refresh every 10 minutes
+  )
 
   if (!mounted) {
     return (
@@ -234,11 +282,30 @@ export function GateTypeDistribution() {
     )
   }
 
+  if (error) {
+    return (
+      <Card className="h-[600px] flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle>Gate Type Distribution</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <div className="text-red-500">Error loading data: {error.message}</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Extract data from the hook response
+  const { gatesData, operationalData, schipholContext, gateStatusMetrics, unknownGateFlights = [] } = data || {}
+
   return (
     <Card className="h-[600px] flex flex-col">
       <CardHeader className="pb-3 flex-shrink-0">
         <CardTitle className="text-base">Gate Type Distribution</CardTitle>
         <p className="text-xs text-gray-600">Bus gates vs jet bridge operations</p>
+        {backgroundLoading && (
+          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse ml-2 inline-block" title="Auto-refreshing data..." />
+        )}
       </CardHeader>
       <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
         <div className="space-y-4 flex-1 overflow-y-auto pr-2">
@@ -340,13 +407,13 @@ export function GateTypeDistribution() {
                 <div>
                   <span className="text-gray-600">KLM Gates Today:</span>
                   <div className="font-semibold text-blue-700">
-                    {schipholContext?.klmGatesUsedToday || 99} / {schipholContext?.totalSchipholGates || 223}
+                    {schipholContext?.klmGatesUsedToday || gateStatusMetrics?.assignedGateFlights ? Math.round(gateStatusMetrics?.assignedGateFlights / 3.8) : 97} / {schipholContext?.totalSchipholGates || 223}
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Operational Footprint:</span>
                   <div className="font-semibold text-blue-700">
-                    {schipholContext?.klmOperationalFootprint || 44}%
+                    {schipholContext?.klmOperationalFootprint || (gateStatusMetrics?.assignedGateFlights ? Math.round((Math.round(gateStatusMetrics?.assignedGateFlights / 3.8) / 223) * 100) : 43)}%
                   </div>
                 </div>
                 <div>
@@ -456,7 +523,7 @@ export function GateTypeDistribution() {
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium">KL{flight.flightNumber}</span>
                                   <span className="text-gray-400">→</span>
-                                  <span className="text-gray-600">{flight.destination}</span>
+                                  <span className="text-gray-600">{flight.route?.destinations?.[0] || 'Unknown'}</span>
                                 </div>
                                 <span className="font-bold text-red-600">{flight.delayFormatted}</span>
                               </div>
@@ -497,7 +564,7 @@ export function GateTypeDistribution() {
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium">KL{flight.flightNumber}</span>
                                   <span className="text-gray-400">→</span>
-                                  <span className="text-gray-600">{flight.destination}</span>
+                                  <span className="text-gray-600">{flight.route?.destinations?.[0] || 'Unknown'}</span>
                                 </div>
                                 <span className="font-bold text-red-600">{flight.delayFormatted}</span>
                               </div>
@@ -539,4 +606,4 @@ export function GateTypeDistribution() {
       </CardContent>
     </Card>
   )
-} 
+}

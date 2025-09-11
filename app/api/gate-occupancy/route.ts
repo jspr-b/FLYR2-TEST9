@@ -457,11 +457,29 @@ export async function GET(request: NextRequest) {
     const gateFlightsMap = new Map<string, any[]>()
     
     filteredFlights.forEach(flight => {
-      const gate = flight.gate || 'UNASSIGNED'
-      if (!gateFlightsMap.has(gate)) {
-        gateFlightsMap.set(gate, [])
+      // For cancelled flights, use originalGate if available for Gantt chart display
+      // but still categorize them as UNASSIGNED
+      let gate = flight.gate || 'UNASSIGNED'
+      
+      // If flight is cancelled and has an original gate, create a special entry
+      if (flight.isCancelled && flight.originalGate) {
+        // Add to the original gate for display purposes
+        if (!gateFlightsMap.has(flight.originalGate)) {
+          gateFlightsMap.set(flight.originalGate, [])
+        }
+        // Mark this flight as cancelled but preserve original gate info
+        gateFlightsMap.get(flight.originalGate)!.push({
+          ...flight,
+          gate: flight.originalGate, // Restore gate for display
+          isCancelled: true
+        })
+      } else {
+        // Normal flight processing
+        if (!gateFlightsMap.has(gate)) {
+          gateFlightsMap.set(gate, [])
+        }
+        gateFlightsMap.get(gate)!.push(flight)
       }
-      gateFlightsMap.get(gate)!.push(flight)
     })
 
     // Process each gate

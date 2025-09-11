@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const includeGateOccupancy = searchParams.get('includeGateOccupancy') !== 'false'
     const includeGateChanges = searchParams.get('includeGateChanges') !== 'false'
+    const includeCancelled = searchParams.get('includeCancelled') === 'true'
     
     // Fetch all pages of flight data for today
     const todayDate = getTodayAmsterdam()
@@ -54,13 +55,32 @@ export async function GET(request: NextRequest) {
     const filteredFlights = filterFlights(transformedFlights, {
       flightDirection: 'D',
       scheduleDate: todayDate,
-      isOperationalFlight: true,
+      isOperationalFlight: !includeCancelled, // If includeCancelled is true, don't filter by operational status
       prefixicao: 'KL'
     })
     
+    if (includeCancelled) {
+      console.log('📌 Including cancelled flights in the response')
+    }
+    
     // Remove stale and duplicate flights
     const freshFlights = removeStaleFlights(filteredFlights)
-    const uniqueFlights = removeDuplicateFlights(freshFlights)
+    let uniqueFlights = removeDuplicateFlights(freshFlights)
+
+    // Process cancelled flights - move their gate assignment to originalGate and set gate to null
+    uniqueFlights = uniqueFlights.map(flight => {
+      if (flight.publicFlightState?.flightStates?.includes('CNX')) {
+        console.log(`🚫 Processing cancelled flight: ${flight.flightName} - Moving gate ${flight.gate || 'NO GATE'} to originalGate`)
+        // Store original gate for display purposes
+        return {
+          ...flight,
+          originalGate: flight.gate, // Preserve original gate for Gantt chart
+          gate: null, // Move to "no gate assigned"
+          isCancelled: true
+        }
+      }
+      return flight
+    })
 
     // Count TBD gates
     const tbdGates = uniqueFlights.filter(f => f.gate === 'TBD').length
@@ -161,11 +181,34 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
   const gateMap = new Map<string, any[]>()
   
   flights.forEach(flight => {
-    if (flight.gate) {
+    // Handle cancelled flights with original gates
+    if (flight.isCancelled && flight.originalGate) {
+      console.log(`📍 Adding cancelled flight ${flight.flightName} to gate ${flight.originalGate} for display`)
+      // Add cancelled flights to their original gate for Gantt display
+      const gate = flight.originalGate
+      if (!gateMap.has(gate)) {
+        gateMap.set(gate, [])
+      }
+      // Restore the gate for display purposes
+      gateMap.get(gate)!.push({
+        ...flight,
+        gate: gate,
+        isCancelled: true
+      })
+    } else if (flight.gate) {
+      // Normal flight processing
       if (!gateMap.has(flight.gate)) {
         gateMap.set(flight.gate, [])
       }
       gateMap.get(flight.gate)!.push(flight)
+    } else {
+      // Flights with no gate (including cancelled flights with no original gate)
+      const noGateKey = 'NO_GATE'
+      if (!gateMap.has(noGateKey)) {
+        gateMap.set(noGateKey, [])
+      }
+      gateMap.get(noGateKey)!.push(flight)
+      console.log(`📍 Adding flight ${flight.flightName} to NO_GATE category`)
     }
   })
 

@@ -631,14 +631,28 @@ export function filterFlights(
 
   if (filters.isOperationalFlight !== undefined) {
     const beforeOperationalFilter = filtered.length
+    const removedFlights: SchipholFlight[] = []
+    
     filtered = filtered.filter(flight => {
       if (filters.isOperationalFlight === true) {
-        return isOperationalFlight(flight)
+        const isOp = isOperationalFlight(flight)
+        if (!isOp) {
+          removedFlights.push(flight)
+          return false
+        }
+        return true
       }
       return true
     })
     const afterOperationalFilter = filtered.length
     console.log(`Operational filter: ${beforeOperationalFilter} → ${afterOperationalFilter} flights (removed ${beforeOperationalFilter - afterOperationalFilter} non-operational)`)
+    
+    // Log details of removed non-operational flights
+    if (removedFlights.length > 0) {
+      removedFlights.forEach(flight => {
+        console.log(`🚫 Cancelled/Non-operational flight: ${flight.flightName} to ${flight.route?.destinations?.[0] || 'UNKNOWN'} at gate ${flight.gate || 'NO GATE'} scheduled ${flight.scheduleTime || flight.scheduleDateTime} (states: ${flight.publicFlightState?.flightStates?.join(', ') || 'NO STATES'})`)
+      })
+    }
   }
 
   console.log(`Total filtering: ${initialCount} → ${filtered.length} flights (removed ${initialCount - filtered.length} total)`)
