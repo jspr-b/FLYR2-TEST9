@@ -1427,65 +1427,67 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
 
       {/* Full Screen Modal */}
       {isFullScreenOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full h-full max-w-none max-h-none flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b bg-white">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-6 w-6 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Gate Schedule Timeline - Full View
-                </h2>
-                <span className="text-sm text-gray-500">
-                  ({processedGateData.length} gates •{" "}
-                  {processedGateData.filter((g) => g.flights.length > 0).length}{" "}
-                  with flights)
-                </span>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white sm:rounded-lg shadow-xl w-full h-full sm:w-[calc(100%-2rem)] sm:h-[calc(100%-2rem)] sm:max-h-[calc(100vh-2rem)] flex flex-col">
+            <div className="flex flex-col p-3 sm:p-6 border-b bg-white">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+                  <h2 className="text-base sm:text-xl font-semibold text-gray-900">
+                    Gate Schedule Timeline
+                  </h2>
+                  <span className="hidden sm:inline text-sm text-gray-500">
+                    ({processedGateData.length} gates •{" "}
+                    {processedGateData.filter((g) => g.flights.length > 0).length}{" "}
+                    with flights)
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsFullScreenOpen(false)}
+                  className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+                  aria-label="Close fullscreen"
+                >
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+                </button>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                 {/* Time Range Selector */}
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-700">
-                    Time Range:
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <label className="text-[10px] sm:text-xs font-medium text-gray-700 whitespace-nowrap">
+                    Time:
                   </label>
                   <select
                     value={timeRangeHours}
                     onChange={(e) =>
-                      setTimeRangeHours(Number(e.target.value) as 6 | 12 | 24)
+                      setTimeRangeHours(Number(e.target.value) as 6 | 8 | 24)
                     }
-                    className="text-xs px-2 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    <option value={6}>Next 6 hours</option>
-                    <option value={8}>Next 8 hours</option>
-                    <option value={24}>Full day (05:00-00:00)</option>
+                    <option value={6}>6h</option>
+                    <option value={8}>8h</option>
+                    <option value={24}>24h</option>
                   </select>
                 </div>
 
-
                 {/* Controls in full screen */}
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-700 whitespace-nowrap">
-                    Show all gates
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <label className="text-[10px] sm:text-xs font-medium text-gray-700 whitespace-nowrap">
+                    All gates
                   </label>
                   <button
                     onClick={() => setShowAllGates(!showAllGates)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+                    className={`relative inline-flex h-4 w-7 sm:h-5 sm:w-9 items-center rounded-full transition-colors cursor-pointer ${
                       showAllGates ? "bg-blue-600" : "bg-gray-200"
                     }`}
                   >
                     <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                        showAllGates ? "translate-x-5" : "translate-x-1"
+                      className={`inline-block h-2.5 w-2.5 sm:h-3 sm:w-3 transform rounded-full bg-white transition-transform ${
+                        showAllGates ? "translate-x-4 sm:translate-x-5" : "translate-x-0.5 sm:translate-x-1"
                       }`}
                     />
                   </button>
                 </div>
 
-                <button
-                  onClick={() => setIsFullScreenOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="h-5 w-5 text-gray-500" />
-                </button>
               </div>
             </div>
 
