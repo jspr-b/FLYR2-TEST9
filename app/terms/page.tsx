@@ -55,11 +55,16 @@ export default function TermsPage() {
                 <h2 className="text-2xl font-bold m-0">2. Description of Service</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                This website provides information and data for educational and informational purposes only. All content, including but not limited to text, graphics, images, and data, is provided "as is" without warranty of any kind. The information presented may not be accurate, complete, or current, and should not be relied upon for making any decisions.
+                This website provides flight information obtained from the Schiphol Airport public API for educational and informational purposes only. The flight data is managed by airlines and airline handlers in the Central Information System Schiphol (CISS) and includes passenger flights and cargo flights (both scheduled and charter).
               </p>
               <p className="text-gray-700 leading-relaxed">
-                Users are strongly advised to verify all information through official sources before taking any action based on the content provided on this website. This service is not affiliated with any official organizations unless explicitly stated.
+                All content is provided "as is" without warranty of any kind. Users are strongly advised to verify all flight information through official Schiphol or airline websites before making travel decisions. This service is independent and not affiliated with KLM Royal Dutch Airlines or Amsterdam Airport Schiphol.
               </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-gray-700">
+                  <strong>Important:</strong> This service uses the Schiphol API solely to help actual passengers or people picking up passengers. It may not be used for competitive analysis, EU Regulation 261/2004 claims, or commercial purposes unrelated to actual travel.
+                </p>
+              </div>
             </section>
 
             {/* 3. User Responsibilities */}
@@ -125,22 +130,66 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* 6. Indemnification */}
+            {/* 6. Schiphol API Terms */}
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <Globe className="w-6 h-6 text-blue-600" />
+                <h2 className="text-2xl font-bold m-0">6. Schiphol API Terms and Conditions</h2>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                This service uses the Schiphol Airport public REST API. By using this website, you agree to comply with the following Schiphol API-specific terms:
+              </p>
+              
+              <h3 className="text-xl font-semibold mb-3 mt-4">6.1 Permitted Use</h3>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>The flight information may only be used to help actual passengers or people picking up actual passengers</li>
+                <li>Educational and informational purposes related to actual travel</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold mb-3 mt-4">6.2 Prohibited Use</h3>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-gray-700">The following uses are strictly prohibited:</p>
+                <ul className="list-disc pl-6 mt-2 space-y-1 text-gray-700">
+                  <li>Competitive analysis of airlines or airports</li>
+                  <li>Making claims regarding EU Regulation 261/2004 (passenger rights)</li>
+                  <li>Commercial purposes not related to actual travel</li>
+                  <li>Reselling or redistributing the data to third parties</li>
+                  <li>Creating permanent databases of historical flight information</li>
+                </ul>
+              </div>
+
+              <h3 className="text-xl font-semibold mb-3 mt-4">6.3 Data Storage Limitations</h3>
+              <p className="text-gray-700 leading-relaxed">
+                In compliance with Schiphol API Terms:
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li>Flight data may be cached for a maximum of 24 hours</li>
+                <li>No permanent storage of flight data is permitted</li>
+                <li>All cached data must be automatically purged after 24 hours</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold mb-3 mt-4">6.4 Data Distribution</h3>
+              <p className="text-gray-700 leading-relaxed">
+                Users are not allowed to distribute, sell, or otherwise share data obtained through this service with other parties. The data is provided for your personal use only in accordance with the intended purposes stated above.
+              </p>
+            </section>
+
+            {/* 7. Indemnification */}
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <Shield className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold m-0">6. Indemnification</h2>
+                <h2 className="text-2xl font-bold m-0">7. Indemnification</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 You agree to defend, indemnify, and hold harmless the website operator, its affiliates, licensors, and service providers, and its and their respective officers, directors, employees, contractors, agents, licensors, suppliers, successors, and assigns from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising out of or relating to your violation of these Terms and Conditions or your use of the website.
               </p>
             </section>
 
-            {/* 7. Privacy Considerations */}
+            {/* 8. Privacy Considerations */}
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <Lock className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold m-0">7. Privacy Considerations</h2>
+                <h2 className="text-2xl font-bold m-0">8. Privacy Considerations</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 Your use of our website is subject to our Privacy Policy. By using the website, you consent to all actions taken by us with respect to your information in compliance with the Privacy Policy. We are committed to protecting your privacy and handling any personal information we obtain from you with care and respect.
@@ -153,11 +202,11 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* 8. Termination */}
+            {/* 9. Termination */}
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <AlertCircle className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold m-0">8. Termination</h2>
+                <h2 className="text-2xl font-bold m-0">9. Termination</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 We may terminate or suspend your access to all or part of the website at any time, with or without cause, with or without notice, effective immediately. If you wish to terminate your agreement with us, you may simply discontinue using the website.
@@ -167,11 +216,11 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* 9. Governing Law */}
+            {/* 10. Governing Law */}
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <Scale className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold m-0">9. Governing Law</h2>
+                <h2 className="text-2xl font-bold m-0">10. Governing Law</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 These Terms and Conditions and any dispute or claim arising out of or related to them, their subject matter, or their formation (in each case, including non-contractual disputes or claims) shall be governed by and construed in accordance with the laws of the Netherlands, without giving effect to any choice or conflict of law provision or rule.
@@ -181,11 +230,11 @@ export default function TermsPage() {
               </p>
             </section>
 
-            {/* 10. General Provisions */}
+            {/* 11. General Provisions */}
             <section>
               <div className="flex items-center gap-3 mb-4">
                 <FileText className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold m-0">10. General Provisions</h2>
+                <h2 className="text-2xl font-bold m-0">11. General Provisions</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
                 <strong>Entire Agreement:</strong> These Terms and Conditions constitute the sole and entire agreement between you and the website operator regarding the website and supersede all prior and contemporaneous understandings, agreements, representations, and warranties.
