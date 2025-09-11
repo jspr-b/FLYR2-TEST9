@@ -760,9 +760,19 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                   onClick={() =>
                                     handleFlightClick(flight, gate)
                                   }
+                                  title={(() => {
+                                    const timeline = getFlightTimeline(flight);
+                                    if (
+                                      timeline.isStillAtGate &&
+                                      flight.primaryState === "GTD"
+                                    ) {
+                                      return `${flight.flightName} - Still at gate`;
+                                    }
+                                    return flight.flightName;
+                                  })()}
                                 >
-                                  <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
-                                    {flight.flightName}
+                                  <div className="h-full flex items-center justify-center text-white text-xs font-medium px-1 overflow-hidden">
+                                    <span className="truncate">{flight.flightName}</span>
                                     {/* Show indicator if flight is still at gate past scheduled time */}
                                     {(() => {
                                       const timeline =
@@ -771,10 +781,24 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                         timeline.isStillAtGate &&
                                         flight.primaryState === "GTD"
                                       ) {
+                                        // Calculate approximate width to determine which label to show
+                                        const barStyle = getFlightBarStyle(flight);
+                                        const widthPercent = parseFloat(barStyle.width);
+                                        
+                                        // Adaptive text based on available width
+                                        let labelText = "AT GATE";
+                                        if (widthPercent < 8) {
+                                          labelText = "AG";
+                                        } else if (widthPercent < 12) {
+                                          labelText = "@GATE";
+                                        }
+                                        
                                         return (
-                                          <span className="ml-1 px-0.5 sm:px-1 py-0.5 bg-white bg-opacity-30 rounded text-[8px] sm:text-[10px] font-bold animate-pulse">
-                                            <span className="hidden sm:inline">AT GATE</span>
-                                            <span className="sm:hidden">@GATE</span>
+                                          <span 
+                                            className="ml-1 px-0.5 py-0.5 bg-white bg-opacity-30 rounded text-[8px] font-bold animate-pulse flex-shrink-0"
+                                            title="Still at gate"
+                                          >
+                                            {labelText}
                                           </span>
                                         );
                                       }
@@ -984,9 +1008,19 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                   })
                                 }
                                 onClick={() => handleFlightClick(flight, gate)}
+                                title={(() => {
+                                  const timeline = getFlightTimeline(flight);
+                                  if (
+                                    timeline.isStillAtGate &&
+                                    flight.primaryState === "GTD"
+                                  ) {
+                                    return `${flight.flightName} - Still at gate`;
+                                  }
+                                  return flight.flightName;
+                                })()}
                               >
-                                <div className="h-full flex items-center justify-center text-white text-xs font-medium px-2 truncate">
-                                  {flight.flightName}
+                                <div className="h-full flex items-center justify-center text-white text-xs font-medium px-1 overflow-hidden">
+                                  <span className="truncate">{flight.flightName}</span>
                                   {/* Show indicator if flight is still at gate past scheduled time */}
                                   {(() => {
                                     const timeline = getFlightTimeline(flight);
@@ -994,10 +1028,24 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                                       timeline.isStillAtGate &&
                                       flight.primaryState === "GTD"
                                     ) {
+                                      // Calculate approximate width to determine which label to show
+                                      const barStyle = getFlightBarStyle(flight);
+                                      const widthPercent = parseFloat(barStyle.width);
+                                      
+                                      // Adaptive text based on available width
+                                      let labelText = "AT GATE";
+                                      if (widthPercent < 8) {
+                                        labelText = "AG";
+                                      } else if (widthPercent < 12) {
+                                        labelText = "@GATE";
+                                      }
+                                      
                                       return (
-                                        <span className="ml-1 px-0.5 sm:px-1 py-0.5 bg-white bg-opacity-30 rounded text-[8px] sm:text-[10px] font-bold animate-pulse">
-                                          <span className="hidden sm:inline">AT GATE</span>
-                                          <span className="sm:hidden">@GATE</span>
+                                        <span 
+                                          className="ml-1 px-0.5 py-0.5 bg-white bg-opacity-30 rounded text-[8px] font-bold animate-pulse flex-shrink-0"
+                                          title="Still at gate"
+                                        >
+                                          {labelText}
                                         </span>
                                       );
                                     }
@@ -1321,7 +1369,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                   transform: "translateY(-100%)",
                 }}
               >
-                <div className="font-medium">{hoveredFlight.flightName}</div>
+                <div className="font-medium flex items-center gap-2">
+                  {hoveredFlight.flightName}
+                  {timeline.isStillAtGate && hoveredFlight.primaryState === "GTD" && (
+                    <span className="px-1.5 py-0.5 bg-orange-600 bg-opacity-30 rounded text-[10px] font-bold animate-pulse">
+                      STILL AT GATE
+                    </span>
+                  )}
+                </div>
                 <div className="text-gray-300">
                   {hoveredFlight.destination} • {hoveredFlight.aircraftType}
                 </div>
