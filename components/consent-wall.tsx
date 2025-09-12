@@ -33,16 +33,24 @@ export function ConsentWall({ children }: ConsentWallProps) {
           return
         }
         
-        // Verify with backend
-        const response = await fetch(`/api/consent?sessionId=${sessionId}`)
-        const data = await response.json()
+        // For now, trust localStorage if not expired
+        // This avoids the initial API check that might fail
+        setHasConsent(true)
         
-        if (data.hasConsent) {
-          setHasConsent(true)
-        } else {
-          localStorage.removeItem("flyr-consent-session")
-          setHasConsent(false)
-        }
+        // Optionally verify with backend in background
+        // but don't block the user experience
+        fetch(`/api/consent?sessionId=${sessionId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (!data.hasConsent) {
+              localStorage.removeItem("flyr-consent-session")
+              setHasConsent(false)
+            }
+          })
+          .catch(() => {
+            // Ignore errors for background check
+            // Keep using localStorage state
+          })
       } catch (error) {
         console.error("Error checking consent:", error)
         localStorage.removeItem("flyr-consent-session")

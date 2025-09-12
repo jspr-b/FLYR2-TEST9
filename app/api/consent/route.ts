@@ -102,16 +102,25 @@ export async function POST(request: NextRequest) {
 // GET endpoint to check consent status
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect()
-    
     const searchParams = request.nextUrl.searchParams
     const sessionId = searchParams.get('sessionId')
     
     if (!sessionId) {
       return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
+        { hasConsent: false, message: 'No session ID provided' },
+        { status: 200 }
       )
+    }
+    
+    try {
+      await dbConnect()
+    } catch (dbError) {
+      console.error('DB connection error in consent check:', dbError)
+      // Return false instead of error to avoid blocking users
+      return NextResponse.json({
+        hasConsent: false,
+        message: 'Could not verify consent'
+      })
     }
     
     // Find most recent consent for this session
@@ -137,9 +146,10 @@ export async function GET(request: NextRequest) {
     
   } catch (error) {
     console.error('Error checking consent:', error)
-    return NextResponse.json(
-      { error: 'Failed to check consent' },
-      { status: 500 }
-    )
+    // Return false instead of error to avoid blocking users
+    return NextResponse.json({
+      hasConsent: false,
+      message: 'Error checking consent status'
+    })
   }
 }
