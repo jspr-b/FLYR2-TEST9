@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useClientData, safeGet } from "@/lib/client-utils"
 import { useEffect, useState } from "react"
-import { Info } from "lucide-react"
+// Info icon removed - using arrow SVG instead
 import {
   Popover,
   PopoverContent,
@@ -104,7 +104,8 @@ export function GateTypeDistribution() {
       if (data.flights && data.flights.length > 0) {
           // Calculate TBD and no gate metrics from raw flights data
           const tbdFlights = data.flights.filter((f: any) => f.gate === 'TBD').length
-          const noGateFlights = data.flights.filter((f: any) => !f.gate).length
+          const noGateFlightsList = data.flights.filter((f: any) => !f.gate)
+          const noGateFlights = noGateFlightsList.length
           const assignedGateFlights = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').length
           
           // Find departed flights without gates (these are "unknown" gate type)
@@ -118,6 +119,7 @@ export function GateTypeDistribution() {
           processedData.gateStatusMetrics = {
             tbdFlights,
             noGateFlights,
+            noGateFlightsList, // Add the actual list of flights
             assignedGateFlights,
             totalFlights: data.flights.length,
             tbdPercentage: Math.round((tbdFlights / data.flights.length) * 100),
@@ -355,7 +357,9 @@ export function GateTypeDistribution() {
                   <PopoverTrigger asChild>
                     <button className="flex items-center gap-1 hover:bg-gray-50 px-1 -mx-1 rounded transition-colors cursor-pointer">
                       <span>Gate Type Unknown ({unknownGateFlights.length} flight{unknownGateFlights.length > 1 ? 's' : ''})</span>
-                      <Info className="w-3 h-3 text-gray-400" />
+                      <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-80" align="start">
@@ -430,15 +434,60 @@ export function GateTypeDistribution() {
                 </div>
                 <div>
                   <span className="text-gray-600">No Gate Assigned:</span>
-                  <div className={`font-semibold ${
-                    gateStatusMetrics?.noGatePercentage > 15 ? 'text-red-700' : 
-                    gateStatusMetrics?.noGatePercentage > 5 ? 'text-amber-700' : 'text-green-700'
-                  }`}>
-                    {gateStatusMetrics?.noGateFlights || 0}
-                    <span className="text-xs font-normal text-gray-500 ml-1">
-                      ({gateStatusMetrics?.noGatePercentage || 0}%)
-                    </span>
-                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className={`block w-full text-left ${
+                        gateStatusMetrics?.noGateFlights > 0 ? 'hover:bg-gray-50 px-1 -mx-1 py-0.5 rounded transition-colors cursor-pointer' : ''
+                      }`}>
+                        <div className={`font-semibold inline-flex items-center gap-1 ${
+                          gateStatusMetrics?.noGatePercentage > 15 ? 'text-red-700' : 
+                          gateStatusMetrics?.noGatePercentage > 5 ? 'text-amber-700' : 'text-green-700'
+                        }`}>
+                          {gateStatusMetrics?.noGateFlights || 0}
+                          <span className="text-xs font-normal text-gray-500 ml-1">
+                            ({gateStatusMetrics?.noGatePercentage || 0}%)
+                          </span>
+                          {gateStatusMetrics?.noGateFlights > 0 && (
+                            <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                    </PopoverTrigger>
+                    {gateStatusMetrics?.noGateFlightsList && gateStatusMetrics.noGateFlightsList.length > 0 && (
+                      <PopoverContent className="w-80" align="start">
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-sm font-semibold text-gray-900 mb-1">Flights Without Gate Assignment</div>
+                            <p className="text-xs text-gray-600">These flights are pending gate allocation or have special handling requirements.</p>
+                          </div>
+                          <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {gateStatusMetrics.noGateFlightsList.map((flight: any) => (
+                              <div key={flight.flightNumber} className="text-sm border-b border-gray-100 pb-2 last:border-0">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{flight.flightName}</span>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(flight.scheduleDateTime).toLocaleTimeString('nl-NL', { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit',
+                                      timeZone: 'Europe/Amsterdam'
+                                    })}
+                                  </span>
+                                </div>
+                                <div className="text-xs text-gray-600 mt-0.5">
+                                  To {flight.route?.destinations?.[0] || 'Unknown'} • 
+                                  {flight.publicFlightState?.flightStates?.includes('CNX') ? ' Status: Cancelled' : 
+                                   flight.publicFlightState?.flightStates?.includes('DEP') ? ' Status: Departed' : 
+                                   ' Status: Scheduled'}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    )}
+                  </Popover>
                 </div>
               </div>
             </div>
