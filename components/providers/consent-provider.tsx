@@ -1,6 +1,6 @@
 "use client"
 
-import { ConsentWall } from "@/components/consent-wall"
+import { ConsentWall } from "@/components/consent-wall-alternative"
 
 export function ConsentProvider({ children }: { children: React.ReactNode }) {
   // Temporarily disable consent wall for debugging

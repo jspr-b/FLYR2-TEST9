@@ -82,9 +82,31 @@ export default function DebugConsentPage() {
         <CardContent className="space-y-4">
           <Button 
             onClick={() => {
-              localStorage.removeItem('flyr-consent-session')
-              setLocalStorage('Cleared!')
-              alert('Consent cleared! Now refresh the page.')
+              try {
+                // Try multiple ways to clear localStorage
+                if (typeof window !== 'undefined' && window.localStorage) {
+                  window.localStorage.removeItem('flyr-consent-session')
+                  console.log('Cleared using window.localStorage.removeItem')
+                } else if (typeof localStorage !== 'undefined') {
+                  // Try setting to empty
+                  localStorage.setItem('flyr-consent-session', '')
+                  console.log('Cleared by setting to empty string')
+                }
+                
+                // Also try deleting the property
+                try {
+                  delete window.localStorage['flyr-consent-session']
+                  console.log('Cleared using delete')
+                } catch (e) {
+                  console.error('Delete failed:', e)
+                }
+                
+                setLocalStorage('Cleared!')
+                alert('Consent cleared! Now refresh the page.')
+              } catch (error: any) {
+                console.error('Error clearing localStorage:', error)
+                alert(`Error: ${error.message}\n\nTry opening browser console (F12) and running:\nlocalStorage.clear()`)
+              }
             }}
             variant="destructive"
           >
@@ -96,6 +118,16 @@ export default function DebugConsentPage() {
           >
             Go to Home Page
           </Button>
+          <div className="mt-4 p-4 bg-gray-100 rounded">
+            <p className="text-sm mb-2">If the button doesn't work, open browser console (F12) and run:</p>
+            <code className="block bg-gray-200 p-2 rounded">
+              localStorage.clear()
+            </code>
+            <p className="text-sm mt-2">or:</p>
+            <code className="block bg-gray-200 p-2 rounded">
+              localStorage.removeItem('flyr-consent-session')
+            </code>
+          </div>
         </CardContent>
       </Card>
 
