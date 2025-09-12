@@ -273,7 +273,7 @@ export function DashboardKPIs() {
               status: parseFloat(dashboardKPIs.averageDelay) > 15 ? "critical" : parseFloat(dashboardKPIs.averageDelay) > 5 ? "warning" : "good",
             },
             {
-              label: "Total Flights Today",
+              label: "Total Registered Flights Today",
               value: dashboardKPIs.totalFlights?.toString() || "0",
               change: `${dashboardKPIs.totalFlights || 0} KLM departures`,
               changeType: "neutral",
@@ -547,7 +547,7 @@ export function DashboardKPIs() {
               status: "warning",
             },
             {
-              label: "Total Flights Today",
+              label: "Total Registered Flights Today",
               value: "Loading...",
               change: "Please wait",
               changeType: "neutral",

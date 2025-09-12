@@ -38,10 +38,13 @@ function generateSessionId(): string {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Consent API called - attempting to connect to database...')
     await dbConnect()
+    console.log('Database connected successfully')
     
     const body = await request.json()
     const { action, sessionId: clientSessionId } = body
+    console.log('Consent action:', action)
     
     if (!action || !['agreed', 'declined'].includes(action)) {
       return NextResponse.json(
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const headersList = headers()
+    const headersList = await headers()
     const userAgent = headersList.get('user-agent') || 'Unknown'
     const forwardedFor = headersList.get('x-forwarded-for')
     const realIp = headersList.get('x-real-ip')
@@ -99,10 +102,12 @@ export async function POST(request: NextRequest) {
       message: `Consent ${action} recorded successfully`
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error recording consent:', error)
+    console.error('Error details:', error.message)
+    console.error('Stack trace:', error.stack)
     return NextResponse.json(
-      { error: 'Failed to record consent' },
+      { error: 'Failed to record consent', details: error.message },
       { status: 500 }
     )
   }

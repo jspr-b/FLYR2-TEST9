@@ -19,10 +19,12 @@ import {
   Timer,
 } from "lucide-react"
 import Link from "next/link"
+import { ConsentWall } from "@/components/consent-wall"
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <ConsentWall>
+      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -577,5 +579,6 @@ export default function HomePage() {
         </div>
       </footer>
     </main>
+    </ConsentWall>
   )
 }

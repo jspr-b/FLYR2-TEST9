@@ -73,11 +73,16 @@ export function ConsentWall({ children }: ConsentWallProps) {
         }),
       })
       
+      console.log("Consent response status:", response.status)
+      
       if (!response.ok) {
-        throw new Error("Failed to record consent")
+        const errorText = await response.text()
+        console.error("Response error:", errorText)
+        throw new Error(`Failed to record consent: ${response.status}`)
       }
       
       const data = await response.json()
+      console.log("Consent response data:", data)
       
       // Store session info locally for quick checks
       localStorage.setItem("flyr-consent-session", JSON.stringify({
@@ -87,9 +92,10 @@ export function ConsentWall({ children }: ConsentWallProps) {
       }))
       
       setHasConsent(true)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error recording consent:", error)
-      alert("Failed to record consent. Please try again.")
+      console.error("Error details:", error.message)
+      alert(`Failed to record consent: ${error.message}. Please check the console for details.`)
     } finally {
       setIsLoading(false)
     }

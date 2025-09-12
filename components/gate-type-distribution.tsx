@@ -636,7 +636,7 @@ export function GateTypeDistribution() {
         <div className="pt-4 border-t flex-shrink-0">
           <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <div className="text-gray-600 text-xs">Total Flights</div>
+                <div className="text-gray-600 text-xs">Total Active Flights</div>
                 <div className="text-2xl font-bold">
                   {(operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length}
                 </div>

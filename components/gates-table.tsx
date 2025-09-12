@@ -254,7 +254,7 @@ export function GatesTable() {
                     className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
                   >
                     <Eye className="h-4 w-4" />
-                    View All ({sortedData.filter(gate => gate.gate !== 'Not Assigned Yet').length} gates)
+                    View All ({sortedData.length} gates)
                   </button>
                 )}
               </div>
@@ -337,7 +337,7 @@ export function GatesTable() {
                              <div className="flex items-center gap-3">
                  <Plane className="h-5 w-5 text-blue-600" />
                  <h2 className="text-xl font-semibold text-gray-900">All Gate Activity</h2>
-                 <span className="text-sm text-gray-500">({sortedData.filter(gate => gate.gate !== 'Not Assigned Yet').length} gates)</span>
+                 <span className="text-sm text-gray-500">({sortedData.length} gates)</span>
                </div>
               <button
                 onClick={() => setShowAllGates(false)}
