@@ -37,11 +37,15 @@ function generateSessionId(): string {
 }
 
 export async function POST(request: NextRequest) {
+  console.log("Consent API called")
+  console.log("Headers:", request.headers)
+  
   try {
     await dbConnect()
     
     const body = await request.json()
     const { action, sessionId: clientSessionId } = body
+    console.log("Request body:", { action, sessionId: clientSessionId })
     
     if (!action || !['agreed', 'declined'].includes(action)) {
       return NextResponse.json(
