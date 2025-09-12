@@ -34,7 +34,7 @@ export function ConsentWall({ children }: ConsentWallProps) {
         }
         
         // Verify with backend
-        const response = await fetch(`/api/consent?sessionId=${sessionId}`)
+        const response = await fetch(`/api/consent-v2?sessionId=${sessionId}`)
         const data = await response.json()
         
         if (data.hasConsent) {
@@ -62,7 +62,7 @@ export function ConsentWall({ children }: ConsentWallProps) {
       const sessionId = storedData ? JSON.parse(storedData).sessionId : undefined
       
       // Record consent in database
-      const response = await fetch("/api/consent", {
+      const response = await fetch("/api/consent-v2", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,7 +106,7 @@ export function ConsentWall({ children }: ConsentWallProps) {
     
     try {
       // Record decline in database for audit purposes
-      await fetch("/api/consent", {
+      await fetch("/api/consent-v2", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
