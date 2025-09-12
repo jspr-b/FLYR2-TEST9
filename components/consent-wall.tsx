@@ -61,7 +61,19 @@ export function ConsentWall({ children }: ConsentWallProps) {
       const storedData = localStorage.getItem("flyr-consent-session")
       const sessionId = storedData ? JSON.parse(storedData).sessionId : undefined
       
+      // First test with simple endpoint
+      console.log("Testing with simple endpoint first...")
+      const testResponse = await fetch("/api/consent-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ test: true })
+      })
+      console.log("Test response:", await testResponse.json())
+      
       // Record consent in database
+      console.log("Now calling actual consent endpoint...")
       const response = await fetch("/api/consent-v2", {
         method: "POST",
         headers: {
@@ -81,8 +93,16 @@ export function ConsentWall({ children }: ConsentWallProps) {
         throw new Error(`Failed to record consent: ${response.status}`)
       }
       
-      const data = await response.json()
-      console.log("Consent response data:", data)
+      let data;
+      try {
+        const responseText = await response.text()
+        console.log("Raw response text:", responseText)
+        data = JSON.parse(responseText)
+        console.log("Parsed response data:", data)
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError)
+        throw new Error("Invalid response from server")
+      }
       
       // Store session info locally for quick checks
       localStorage.setItem("flyr-consent-session", JSON.stringify({
@@ -95,6 +115,8 @@ export function ConsentWall({ children }: ConsentWallProps) {
     } catch (error: any) {
       console.error("Error recording consent:", error)
       console.error("Error details:", error.message)
+      console.error("Error type:", error.constructor.name)
+      console.error("Full error object:", error)
       alert(`Failed to record consent: ${error.message}. Please check the console for details.`)
     } finally {
       setIsLoading(false)
