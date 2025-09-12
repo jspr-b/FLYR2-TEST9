@@ -10,6 +10,7 @@ import Flight from '../models/Flight'
 import HourlyDelay from '../models/HourlyDelay'
 import AircraftPerformance from '../models/AircraftPerformance'
 import GateTerminal from '../models/GateTerminal'
+import Consent from '../models/Consent'
 
 async function seedDatabase() {
   try {
@@ -21,6 +22,7 @@ async function seedDatabase() {
     await HourlyDelay.deleteMany({})
     await AircraftPerformance.deleteMany({})
     await GateTerminal.deleteMany({})
+    await Consent.deleteMany({})
     console.log('Cleared existing data')
 
     // Always use today (local time, midnight) for all seeded data

@@ -12,44 +12,108 @@ interface ConsentWallProps {
 
 export function ConsentWall({ children }: ConsentWallProps) {
   const [hasConsent, setHasConsent] = useState<boolean | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const consentData = localStorage.getItem("flyr-consent-data")
+    checkConsentStatus()
+  }, [])
+
+  const checkConsentStatus = async () => {
+    // First check localStorage for session ID and basic info
+    const storedData = localStorage.getItem("flyr-consent-session")
     
-    if (consentData) {
+    if (storedData) {
       try {
-        const { agreed, timestamp } = JSON.parse(consentData)
-        const twentyFourHours = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
-        const now = Date.now()
+        const { sessionId, expiresAt } = JSON.parse(storedData)
         
-        // Check if consent is still valid (less than 24 hours old)
-        if (agreed && timestamp && (now - timestamp) < twentyFourHours) {
+        // Quick check if expired locally
+        if (new Date(expiresAt) < new Date()) {
+          localStorage.removeItem("flyr-consent-session")
+          setHasConsent(false)
+          return
+        }
+        
+        // Verify with backend
+        const response = await fetch(`/api/consent?sessionId=${sessionId}`)
+        const data = await response.json()
+        
+        if (data.hasConsent) {
           setHasConsent(true)
         } else {
-          // Consent has expired
-          localStorage.removeItem("flyr-consent-data")
+          localStorage.removeItem("flyr-consent-session")
           setHasConsent(false)
         }
-      } catch {
-        // Invalid data, reset
-        localStorage.removeItem("flyr-consent-data")
+      } catch (error) {
+        console.error("Error checking consent:", error)
+        localStorage.removeItem("flyr-consent-session")
         setHasConsent(false)
       }
     } else {
       setHasConsent(false)
     }
-  }, [])
-
-  const handleAgree = () => {
-    const consentData = {
-      agreed: true,
-      timestamp: Date.now()
-    }
-    localStorage.setItem("flyr-consent-data", JSON.stringify(consentData))
-    setHasConsent(true)
   }
 
-  const handleDisagree = () => {
+  const handleAgree = async () => {
+    setIsLoading(true)
+    
+    try {
+      // Get existing session ID if available
+      const storedData = localStorage.getItem("flyr-consent-session")
+      const sessionId = storedData ? JSON.parse(storedData).sessionId : undefined
+      
+      // Record consent in database
+      const response = await fetch("/api/consent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "agreed",
+          sessionId
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error("Failed to record consent")
+      }
+      
+      const data = await response.json()
+      
+      // Store session info locally for quick checks
+      localStorage.setItem("flyr-consent-session", JSON.stringify({
+        sessionId: data.sessionId,
+        expiresAt: data.expiresAt,
+        timestamp: new Date().toISOString()
+      }))
+      
+      setHasConsent(true)
+    } catch (error) {
+      console.error("Error recording consent:", error)
+      alert("Failed to record consent. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDisagree = async () => {
+    setIsLoading(true)
+    
+    try {
+      // Record decline in database for audit purposes
+      await fetch("/api/consent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "declined"
+        }),
+      })
+    } catch (error) {
+      console.error("Error recording decline:", error)
+    }
+    
+    // Redirect regardless of API success
     window.location.href = "https://www.schiphol.nl/en/departures/"
   }
 
@@ -100,14 +164,16 @@ export function ConsentWall({ children }: ConsentWallProps) {
               onClick={handleAgree}
               className="flex-1 bg-blue-600 hover:bg-blue-700"
               size="lg"
+              disabled={isLoading}
             >
-              I Understand & Agree
+              {isLoading ? "Processing..." : "I Understand & Agree"}
             </Button>
             <Button
               onClick={handleDisagree}
               variant="outline"
               className="flex-1"
               size="lg"
+              disabled={isLoading}
             >
               Go to Official Schiphol Site
               <ExternalLink className="ml-2 h-4 w-4" />
