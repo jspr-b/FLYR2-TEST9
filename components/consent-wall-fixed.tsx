@@ -15,60 +15,63 @@ export function ConsentWall({ children }: ConsentWallProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    checkConsentStatus()
-  }, [])
-
-  const checkConsentStatus = () => {
-    console.log("[ConsentWall] Checking consent status...")
-    
-    try {
-      const storedData = localStorage.getItem("flyr-consent-session")
-      console.log("[ConsentWall] localStorage data:", storedData)
-      
-      if (!storedData) {
-        console.log("[ConsentWall] No consent data found")
-        setHasConsent(false)
-        return
-      }
-      
-      const parsed = JSON.parse(storedData)
-      const { sessionId, expiresAt } = parsed
-      
-      if (!sessionId || !expiresAt) {
-        console.error("[ConsentWall] Invalid consent data structure:", parsed)
+    // Check consent status on mount
+    const checkStatus = () => {
+      try {
+        const storedData = localStorage.getItem("flyr-consent-session")
+        
+        if (!storedData) {
+          setHasConsent(false)
+          return
+        }
+        
+        const parsed = JSON.parse(storedData)
+        
+        // Validate the data structure
+        if (!parsed.sessionId || !parsed.expiresAt) {
+          console.warn("Invalid consent data structure")
+          localStorage.removeItem("flyr-consent-session")
+          setHasConsent(false)
+          return
+        }
+        
+        // Check if expired
+        const expiryDate = new Date(parsed.expiresAt)
+        const now = new Date()
+        
+        if (expiryDate <= now) {
+          console.log("Consent expired", { expiryDate, now })
+          localStorage.removeItem("flyr-consent-session")
+          setHasConsent(false)
+        } else {
+          console.log("Valid consent found", { expiresAt: expiryDate })
+          setHasConsent(true)
+        }
+      } catch (error) {
+        console.error("Error checking consent status:", error)
         localStorage.removeItem("flyr-consent-session")
         setHasConsent(false)
-        return
       }
-      
-      // Check if expired
-      const expiryDate = new Date(expiresAt)
-      const now = new Date()
-      
-      if (expiryDate <= now) {
-        console.log("[ConsentWall] Consent expired", { expiryDate, now })
-        localStorage.removeItem("flyr-consent-session")
-        setHasConsent(false)
-        return
-      }
-      
-      console.log("[ConsentWall] Valid consent found", { sessionId, expiresAt })
-      setHasConsent(true)
-      
-    } catch (error) {
-      console.error("[ConsentWall] Error checking consent:", error)
-      localStorage.removeItem("flyr-consent-session")
-      setHasConsent(false)
     }
-  }
+    
+    checkStatus()
+  }, [])
 
   const handleAgree = async () => {
     setIsLoading(true)
     
     try {
       // Get existing session ID if available
-      const storedData = localStorage.getItem("flyr-consent-session")
-      const sessionId = storedData ? JSON.parse(storedData).sessionId : undefined
+      let existingSessionId = null
+      try {
+        const storedData = localStorage.getItem("flyr-consent-session")
+        if (storedData) {
+          const parsed = JSON.parse(storedData)
+          existingSessionId = parsed.sessionId
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
       
       // Record consent in database
       const response = await fetch("/api/consent", {
@@ -78,27 +81,36 @@ export function ConsentWall({ children }: ConsentWallProps) {
         },
         body: JSON.stringify({
           action: "agreed",
-          sessionId
+          sessionId: existingSessionId
         }),
       })
       
       if (!response.ok) {
+        const errorData = await response.text()
+        console.error("Consent API error:", response.status, errorData)
         throw new Error(`Failed to record consent: ${response.status}`)
       }
       
       const data = await response.json()
       
-      // Store session info locally for quick checks
-      localStorage.setItem("flyr-consent-session", JSON.stringify({
+      if (!data.sessionId || !data.expiresAt) {
+        throw new Error("Invalid response from consent API")
+      }
+      
+      // Store session info locally
+      const consentData = {
         sessionId: data.sessionId,
         expiresAt: data.expiresAt,
         timestamp: new Date().toISOString()
-      }))
+      }
+      
+      localStorage.setItem("flyr-consent-session", JSON.stringify(consentData))
+      console.log("Consent saved:", consentData)
       
       setHasConsent(true)
     } catch (error: any) {
       console.error("Error recording consent:", error)
-      alert("Failed to record consent. Please try again.")
+      alert(`Failed to record consent: ${error.message}`)
     } finally {
       setIsLoading(false)
     }
@@ -126,12 +138,13 @@ export function ConsentWall({ children }: ConsentWallProps) {
     window.location.href = "https://www.schiphol.nl/en/departures/"
   }
 
+  // Show loading state while checking consent
   if (hasConsent === null) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">Checking consent status...</p>
         </div>
       </div>
     )
