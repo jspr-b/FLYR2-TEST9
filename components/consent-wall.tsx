@@ -33,26 +33,12 @@ export function ConsentWall({ children }: ConsentWallProps) {
           return
         }
         
-        // For now, trust localStorage if not expired
-        // This avoids the initial API check that might fail
+        // If we have valid localStorage data, consider user consented
+        // This is the source of truth for the 24-hour period
         setHasConsent(true)
         
-        // Optionally verify with backend in background
-        // but don't block the user experience
-        fetch(`/api/consent?sessionId=${sessionId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (!data.hasConsent) {
-              localStorage.removeItem("flyr-consent-session")
-              setHasConsent(false)
-            }
-          })
-          .catch(() => {
-            // Ignore errors for background check
-            // Keep using localStorage state
-          })
       } catch (error) {
-        console.error("Error checking consent:", error)
+        console.error("Error parsing consent data:", error)
         localStorage.removeItem("flyr-consent-session")
         setHasConsent(false)
       }

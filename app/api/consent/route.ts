@@ -101,9 +101,12 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to check consent status
 export async function GET(request: NextRequest) {
+  console.log('Consent check called')
+  
   try {
     const searchParams = request.nextUrl.searchParams
     const sessionId = searchParams.get('sessionId')
+    console.log('Checking consent for session:', sessionId)
     
     if (!sessionId) {
       return NextResponse.json(
@@ -114,8 +117,9 @@ export async function GET(request: NextRequest) {
     
     try {
       await dbConnect()
-    } catch (dbError) {
-      console.error('DB connection error in consent check:', dbError)
+      console.log('DB connected for consent check')
+    } catch (dbError: any) {
+      console.error('DB connection error in consent check:', dbError.message)
       // Return false instead of error to avoid blocking users
       return NextResponse.json({
         hasConsent: false,
