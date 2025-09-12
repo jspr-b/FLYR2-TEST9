@@ -38,13 +38,10 @@ function generateSessionId(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Consent API called - attempting to connect to database...')
     await dbConnect()
-    console.log('Database connected successfully')
     
     const body = await request.json()
     const { action, sessionId: clientSessionId } = body
-    console.log('Consent action:', action)
     
     if (!action || !['agreed', 'declined'].includes(action)) {
       return NextResponse.json(
@@ -86,14 +83,6 @@ export async function POST(request: NextRequest) {
     })
     
     await consent.save()
-    
-    // Log consent for audit purposes
-    console.log(`Consent ${action} recorded:`, {
-      sessionId,
-      ipAddress,
-      timestamp: consent.timestamp,
-      termsVersion: consent.termsVersion
-    })
     
     return NextResponse.json({
       success: true,

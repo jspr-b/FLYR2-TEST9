@@ -49,8 +49,7 @@ const ConsentSchema = new Schema<IConsent>({
   },
   expiresAt: {
     type: Date,
-    required: true,
-    index: true
+    required: true
   },
   metadata: {
     browser: String,
