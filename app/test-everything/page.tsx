@@ -52,6 +52,26 @@ export default function TestEverythingPage() {
         body: JSON.stringify({ action: 'agreed' })
       })
       const data = await response.json()
+      
+      // Save the consent data to storage (like the consent wall should)
+      if (data.success && data.sessionId) {
+        const consentData = JSON.stringify({
+          sessionId: data.sessionId,
+          expiresAt: data.expiresAt,
+          timestamp: new Date().toISOString()
+        })
+        
+        try {
+          localStorage.setItem('flyr-consent-session', consentData)
+        } catch (e) {
+          try {
+            sessionStorage.setItem('flyr-consent-session', consentData)
+          } catch (e2) {
+            document.cookie = `flyr-consent-session=${encodeURIComponent(consentData)}; path=/`
+          }
+        }
+      }
+      
       testResults.consentPost = { 
         status: response.ok && data.success ? 'pass' : 'fail', 
         message: `Status: ${response.status}, SessionId: ${data.sessionId?.substring(0, 10)}...`,
@@ -225,6 +245,37 @@ export default function TestEverythingPage() {
                 }}
               >
                 Clear Consent
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={async () => {
+                  try {
+                    // Create consent via API
+                    const response = await fetch('/api/consent', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'agreed' })
+                    })
+                    const data = await response.json()
+                    
+                    if (data.success) {
+                      // Save to storage
+                      const consentData = JSON.stringify({
+                        sessionId: data.sessionId,
+                        expiresAt: data.expiresAt,
+                        timestamp: new Date().toISOString()
+                      })
+                      localStorage.setItem('flyr-consent-session', consentData)
+                      alert('Consent created and saved!')
+                      window.location.href = '/'
+                    }
+                  } catch (e) {
+                    alert('Error creating consent')
+                  }
+                }}
+              >
+                Quick Consent & Go Home
               </Button>
             </div>
           </div>
