@@ -34,7 +34,7 @@ export function ConsentWall({ children }: ConsentWallProps) {
         }
         
         // Verify with backend
-        const response = await fetch(`/api/consent-v2?sessionId=${sessionId}`)
+        const response = await fetch(`/api/consent?sessionId=${sessionId}`)
         const data = await response.json()
         
         if (data.hasConsent) {
@@ -61,20 +61,8 @@ export function ConsentWall({ children }: ConsentWallProps) {
       const storedData = localStorage.getItem("flyr-consent-session")
       const sessionId = storedData ? JSON.parse(storedData).sessionId : undefined
       
-      // First test with simple endpoint
-      console.log("Testing with simple endpoint first...")
-      const testResponse = await fetch("/api/consent-test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ test: true })
-      })
-      console.log("Test response:", await testResponse.json())
-      
       // Record consent in database
-      console.log("Now calling actual consent endpoint...")
-      const response = await fetch("/api/consent-v2", {
+      const response = await fetch("/api/consent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,24 +73,11 @@ export function ConsentWall({ children }: ConsentWallProps) {
         }),
       })
       
-      console.log("Consent response status:", response.status)
-      
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Response error:", errorText)
         throw new Error(`Failed to record consent: ${response.status}`)
       }
       
-      let data;
-      try {
-        const responseText = await response.text()
-        console.log("Raw response text:", responseText)
-        data = JSON.parse(responseText)
-        console.log("Parsed response data:", data)
-      } catch (parseError) {
-        console.error("Failed to parse response:", parseError)
-        throw new Error("Invalid response from server")
-      }
+      const data = await response.json()
       
       // Store session info locally for quick checks
       localStorage.setItem("flyr-consent-session", JSON.stringify({
@@ -114,10 +89,7 @@ export function ConsentWall({ children }: ConsentWallProps) {
       setHasConsent(true)
     } catch (error: any) {
       console.error("Error recording consent:", error)
-      console.error("Error details:", error.message)
-      console.error("Error type:", error.constructor.name)
-      console.error("Full error object:", error)
-      alert(`Failed to record consent: ${error.message}. Please check the console for details.`)
+      alert("Failed to record consent. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -128,7 +100,7 @@ export function ConsentWall({ children }: ConsentWallProps) {
     
     try {
       // Record decline in database for audit purposes
-      await fetch("/api/consent-v2", {
+      await fetch("/api/consent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

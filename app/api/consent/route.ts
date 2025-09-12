@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import Consent from '@/models/Consent'
-import { headers } from 'next/headers'
 import crypto from 'crypto'
 
 // Parse user agent to extract browser, OS, and device info
@@ -37,15 +36,11 @@ function generateSessionId(): string {
 }
 
 export async function POST(request: NextRequest) {
-  console.log("Consent API called")
-  console.log("Headers:", request.headers)
-  
   try {
     await dbConnect()
     
     const body = await request.json()
     const { action, sessionId: clientSessionId } = body
-    console.log("Request body:", { action, sessionId: clientSessionId })
     
     if (!action || !['agreed', 'declined'].includes(action)) {
       return NextResponse.json(
@@ -54,18 +49,18 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const headersList = await headers()
-    const userAgent = headersList.get('user-agent') || 'Unknown'
-    const forwardedFor = headersList.get('x-forwarded-for')
-    const realIp = headersList.get('x-real-ip')
-    const cfConnectingIp = headersList.get('cf-connecting-ip')
+    // Get headers directly from request
+    const userAgent = request.headers.get('user-agent') || 'Unknown'
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    const realIp = request.headers.get('x-real-ip')
+    const cfConnectingIp = request.headers.get('cf-connecting-ip')
     
     // Get IP address (handle various proxy headers)
     const ipAddress = cfConnectingIp || forwardedFor?.split(',')[0] || realIp || 'Unknown'
     
     // Get additional metadata
-    const referer = headersList.get('referer') || undefined
-    const language = headersList.get('accept-language')?.split(',')[0] || undefined
+    const referer = request.headers.get('referer') || undefined
+    const language = request.headers.get('accept-language')?.split(',')[0] || undefined
     
     // Use provided sessionId or generate new one
     const sessionId = clientSessionId || generateSessionId()
@@ -97,8 +92,6 @@ export async function POST(request: NextRequest) {
     
   } catch (error: any) {
     console.error('Error recording consent:', error)
-    console.error('Error details:', error.message)
-    console.error('Stack trace:', error.stack)
     return NextResponse.json(
       { error: 'Failed to record consent', details: error.message },
       { status: 500 }
