@@ -45,8 +45,14 @@ export function ConsentWall({ children }: ConsentWallProps) {
       const expiryDate = new Date(expiresAt)
       const now = new Date()
       
+      console.log("[ConsentWall] Time check:", {
+        expiryDate: expiryDate.toISOString(),
+        now: now.toISOString(),
+        expired: expiryDate <= now
+      })
+      
       if (expiryDate <= now) {
-        console.log("[ConsentWall] Consent expired", { expiryDate, now })
+        console.log("[ConsentWall] Consent expired, clearing localStorage")
         localStorage.removeItem("flyr-consent-session")
         setHasConsent(false)
         return
@@ -57,7 +63,11 @@ export function ConsentWall({ children }: ConsentWallProps) {
       
     } catch (error) {
       console.error("[ConsentWall] Error checking consent:", error)
-      localStorage.removeItem("flyr-consent-session")
+      try {
+        localStorage.removeItem("flyr-consent-session")
+      } catch (e) {
+        console.error("[ConsentWall] Error clearing localStorage:", e)
+      }
       setHasConsent(false)
     }
   }
