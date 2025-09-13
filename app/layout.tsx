@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ConsentProvider } from "@/components/providers/consent-provider"
+import { CookieConsentProvider } from "@/components/cookie-consent-provider"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -23,7 +23,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={inter.className}>
-        <ConsentProvider>{children}</ConsentProvider>
+        <CookieConsentProvider>{children}</CookieConsentProvider>
       </body>
     </html>
   )

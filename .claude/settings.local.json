@@ -47,7 +47,8 @@
       "Bash(git pull:*)",
       "Bash(find:*)",
       "Bash(mv:*)",
-      "Bash(nslookup:*)"
+      "Bash(nslookup:*)",
+      "WebFetch(domain:www.buildwithmatija.com)"
     ],
     "deny": []
   }
