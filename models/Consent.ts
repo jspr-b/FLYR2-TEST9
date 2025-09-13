@@ -62,8 +62,8 @@ const ConsentSchema = new Schema<IConsent>({
   timestamps: true
 })
 
-// Create TTL index to automatically delete expired consents after 30 days
-ConsentSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 2592000 }) // 30 days
+// Create TTL index to automatically delete expired consents after 1 year
+ConsentSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 31536000 }) // 365 days
 
 // Compound index for efficient lookups
 ConsentSchema.index({ sessionId: 1, termsVersion: 1, timestamp: -1 })

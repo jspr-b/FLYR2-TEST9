@@ -119,12 +119,25 @@ export async function GET() {
 export async function DELETE() {
   try {
     // Clear the consent cookie
-    await clearConsent()
-    
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'Consent cleared'
     })
+    
+    // Force clear the cookie with multiple methods
+    response.cookies.set('flyr-consent', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: -1,
+      expires: new Date(0),
+      path: '/'
+    })
+    
+    // Also try to delete it
+    response.cookies.delete('flyr-consent')
+    
+    return response
   } catch (error) {
     console.error('Clear consent error:', error)
     return NextResponse.json(

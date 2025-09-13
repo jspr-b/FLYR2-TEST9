@@ -129,7 +129,7 @@ export function ConsentRequired({ children }: ConsentRequiredProps) {
                 </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-blue-500" />
-                  <span>Accept our cookie policy for 24 hours</span>
+                  <span>Accept our cookie and privacy policy</span>
                 </li>
               </ul>
             </div>
