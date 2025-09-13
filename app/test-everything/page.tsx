@@ -46,35 +46,16 @@ export default function TestEverythingPage() {
 
     // Test 4: Check consent API - POST
     try {
-      const response = await fetch('/api/consent', {
+      const response = await fetch('/api/consent-cookie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'agreed' })
+        body: JSON.stringify({ action: 'accept', essential: true, analytics: true })
       })
       const data = await response.json()
       
-      // Save the consent data to storage (like the consent wall should)
-      if (data.success && data.sessionId) {
-        const consentData = JSON.stringify({
-          sessionId: data.sessionId,
-          expiresAt: data.expiresAt,
-          timestamp: new Date().toISOString()
-        })
-        
-        try {
-          localStorage.setItem('flyr-consent-session', consentData)
-        } catch (e) {
-          try {
-            sessionStorage.setItem('flyr-consent-session', consentData)
-          } catch (e2) {
-            document.cookie = `flyr-consent-session=${encodeURIComponent(consentData)}; path=/`
-          }
-        }
-      }
-      
       testResults.consentPost = { 
         status: response.ok && data.success ? 'pass' : 'fail', 
-        message: `Status: ${response.status}, SessionId: ${data.sessionId?.substring(0, 10)}...`,
+        message: `Status: ${response.status}`,
         data
       }
     } catch (e: any) {
@@ -83,8 +64,7 @@ export default function TestEverythingPage() {
 
     // Test 5: Check consent API - GET
     try {
-      const sessionId = testResults.consentPost?.data?.sessionId || 'test'
-      const response = await fetch(`/api/consent?sessionId=${sessionId}`)
+      const response = await fetch('/api/consent-cookie')
       const data = await response.json()
       testResults.consentGet = { 
         status: response.ok ? 'pass' : 'fail', 
@@ -108,36 +88,22 @@ export default function TestEverythingPage() {
       testResults.mongodb = { status: 'fail', message: `MongoDB error: ${e.message}` }
     }
 
-    // Test 7: Check current consent status
+    // Test 7: Check current consent cookie
     try {
-      let consentData = null
-      // Try localStorage
-      try {
-        consentData = localStorage.getItem('flyr-consent-session')
-      } catch (e) {
-        // Try sessionStorage
-        try {
-          consentData = sessionStorage.getItem('flyr-consent-session')
-        } catch (e2) {
-          // Try cookies
-          const match = document.cookie.match(/flyr-consent-session=([^;]+)/)
-          consentData = match ? decodeURIComponent(match[1]) : null
-        }
-      }
-      
-      if (consentData) {
-        const parsed = JSON.parse(consentData)
-        const expiresAt = new Date(parsed.expiresAt)
-        const now = new Date()
+      const match = document.cookie.match(/flyr-consent=([^;]+)/)
+      if (match) {
+        const consentData = JSON.parse(decodeURIComponent(match[1]))
+        const now = Date.now()
+        const expiryTime = consentData.timestamp + (24 * 60 * 60 * 1000)
         testResults.currentConsent = { 
-          status: expiresAt > now ? 'pass' : 'warn', 
-          message: expiresAt > now ? `Valid until ${expiresAt.toLocaleString()}` : 'Expired consent found',
-          data: parsed
+          status: now < expiryTime ? 'pass' : 'warn', 
+          message: now < expiryTime ? `Valid until ${new Date(expiryTime).toLocaleString()}` : 'Expired consent found',
+          data: consentData
         }
       } else {
         testResults.currentConsent = { 
           status: 'info', 
-          message: 'No consent data found' 
+          message: 'No consent cookie found' 
         }
       }
     } catch (e: any) {
