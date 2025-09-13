@@ -1,0 +1,231 @@
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.2.4
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.2.19:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1206ms
+ ○ Compiling /api/consent-cookie ...
+ ✓ Compiled /api/consent-cookie in 994ms (372 modules)
+ DELETE /api/consent-cookie 200 in 1322ms
+ GET /api/consent-cookie 200 in 3ms
+ ✓ Compiled /middleware in 169ms (101 modules)
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1643ms (849 modules)
+SelectiveConsentProvider - Server side consent check: {
+  consent: null,
+  hasValidConsent: false,
+  timestamp: '2025-09-13T00:45:40.739Z'
+}
+ GET /dashboard 200 in 1867ms
+ ✓ Compiled in 222ms (361 modules)
+SelectiveConsentProvider - Server side consent check: {
+  consent: null,
+  hasValidConsent: false,
+  timestamp: '2025-09-13T00:45:57.791Z'
+}
+ GET /dashboard 200 in 57ms
+ ✓ Compiled in 398ms (927 modules)
+ ✓ Compiled /test-consent in 151ms (833 modules)
+SelectiveConsentProvider - Server side consent check: {
+  consent: null,
+  hasValidConsent: false,
+  timestamp: '2025-09-13T00:46:15.100Z'
+}
+ GET /test-consent 200 in 263ms
+ ✓ Compiled in 465ms (847 modules)
+ DELETE /api/consent-cookie 200 in 53ms
+SelectiveConsentProvider - Server side consent check: {
+  consent: null,
+  hasValidConsent: false,
+  timestamp: '2025-09-13T00:46:33.021Z'
+}
+ GET /dashboard 200 in 177ms
+ ✓ Compiled in 439ms (934 modules)
+ ✓ Compiled /api/gate-occupancy in 451ms (845 modules)
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Fetching all pages of Schiphol API data (max: 25)...
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-09-13
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-09-13
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-09-13
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=16
+ ○ Compiling /test-consent-static ...
+Page 16: 20 flights
+ ✓ Compiled /test-consent-static in 651ms (851 modules)
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=17
+SelectiveConsentProvider - Server side consent check: {
+  consent: null,
+  hasValidConsent: false,
+  timestamp: '2025-09-13T00:46:57.684Z'
+}
+Page 17: 20 flights
+ GET /test-consent-static 200 in 764ms
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=19
+Page 19: 20 flights
+Fetching page 20: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=20
+Page 20: 20 flights
+Fetching page 21: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=21
+Page 21: 13 flights
+Fetching page 22: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=22
+Empty response on page 22, ending pagination
+Total flights fetched: 433 from 22 pages
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 359 flights (removed 2 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+Total filtering: 433 → 359 flights (removed 74 total)
+📊 DELAY TRENDS: After filtering: 359 flights
+Deduplication: 359 → 359 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 359 flights
+Stale data filter: 359 → 359 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 359 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 359 flights (removed 2 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+Total filtering: 433 → 359 flights (removed 74 total)
+Deduplication: 359 → 359 flights (removed 0 duplicates)
+Stale data filter: 359 → 359 flights (removed 0 stale)
+📊 Processing 359 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 97
+  • Total Piers: 6
+  • Active Piers: 0 ()
+  • Status Breakdown: { SCHEDULED: 97 }
+  • Average Utilization: 0%
+  • Delayed Flights: 0
+  • Average Delay: 0 minutes
+  • Max Delay: 0m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 359 flights (removed 2 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+Total filtering: 433 → 359 flights (removed 74 total)
+Deduplication: 359 → 359 flights (removed 0 duplicates)
+Stale data filter: 359 → 359 flights (removed 0 stale)
+All aircraft types found: [
+  '295', '332', '333',
+  '772', '781', '789',
+  'E90', '73H', 'E7W',
+  '73J', '32Q', '73W',
+  '77W'
+]
+Total aircraft types before filtering: 13
+Aircraft type 295: 48 flights, 48 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 332: 5 flights, 5 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 333: 4 flights, 4 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 772: 12 flights, 12 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 781: 9 flights, 9 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 789: 9 flights, 9 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type E90: 93 flights, 93 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 73H: 75 flights, 75 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type E7W: 47 flights, 47 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 73J: 14 flights, 14 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 32Q: 17 flights, 17 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 73W: 13 flights, 13 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft type 77W: 13 flights, 13 valid delays, avg delay: 0.0 min, on-time: 100.0%
+  Delay range: 0.0 - 0.0 min
+Aircraft types before delay filter: [
+  '295 (avg delay: 0.0 min)',
+  '332 (avg delay: 0.0 min)',
+  '333 (avg delay: 0.0 min)',
+  '772 (avg delay: 0.0 min)',
+  '781 (avg delay: 0.0 min)',
+  '789 (avg delay: 0.0 min)',
+  'E90 (avg delay: 0.0 min)',
+  '73H (avg delay: 0.0 min)',
+  'E7W (avg delay: 0.0 min)',
+  '73J (avg delay: 0.0 min)',
+  '32Q (avg delay: 0.0 min)',
+  '73W (avg delay: 0.0 min)',
+  '77W (avg delay: 0.0 min)'
+]
+Aircraft types after delay filter: [
+  '295 (avg delay: 0.0 min)',
+  '332 (avg delay: 0.0 min)',
+  '333 (avg delay: 0.0 min)',
+  '772 (avg delay: 0.0 min)',
+  '781 (avg delay: 0.0 min)',
+  '789 (avg delay: 0.0 min)',
+  'E90 (avg delay: 0.0 min)',
+  '73H (avg delay: 0.0 min)',
+  'E7W (avg delay: 0.0 min)',
+  '73J (avg delay: 0.0 min)',
+  '32Q (avg delay: 0.0 min)',
+  '73W (avg delay: 0.0 min)',
+  '77W (avg delay: 0.0 min)'
+]
+Total aircraft types after filtering: 13
+Best performer: 295 (0.0 min)
+Highest delay: 295 (0.0 min)
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 361 flights (removed 0 non-operational)
+Total filtering: 433 → 361 flights (removed 72 total)
+Deduplication: 361 → 361 flights (removed 0 duplicates)
+Stale data filter: 361 → 361 flights (removed 0 stale)
+📊 DASHBOARD KPIS: Processing 361 flights (including cancelled)
+✅ DASHBOARD KPIS: Successfully calculated KPIs
+ GET /api/delay-trends/hourly 200 in 2911ms
+ GET /api/aircraft/performance 200 in 2913ms
+ GET /api/dashboard/kpis?includeCancelled=true 200 in 2918ms
+ GET /api/gate-occupancy 200 in 2915ms

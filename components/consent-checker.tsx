@@ -7,11 +7,11 @@ import { ConsentRequired } from './consent-required'
 // Pages that require consent (contain API data)
 const PROTECTED_PATHS = [
   '/dashboard',
-  '/aircraft-performance', 
-  '/delay-trends',
-  '/gates-terminals',
+  '/aircraft-type-delay-performance',
+  '/delay-trends-by-hour',
+  '/busiest-gates-and-terminals',
   '/route-analytics',
-  '/gate-occupancy'
+  '/gate-activity'
 ]
 
 interface ConsentCheckerProps {

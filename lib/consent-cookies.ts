@@ -46,5 +46,12 @@ export async function setConsent(consentData: ConsentData): Promise<void> {
 
 export async function clearConsent(): Promise<void> {
   const cookieStore = await cookies()
-  cookieStore.delete(CONSENT_CONFIG.cookieName)
+  cookieStore.set(CONSENT_CONFIG.cookieName, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    expires: new Date(0),
+    path: '/'
+  })
 }

@@ -8,7 +8,8 @@ export async function SelectiveConsentProvider({ children }: { children: React.R
   
   console.log('SelectiveConsentProvider - Server side consent check:', {
     consent,
-    hasValidConsent
+    hasValidConsent,
+    timestamp: new Date().toISOString()
   })
   
   return (
