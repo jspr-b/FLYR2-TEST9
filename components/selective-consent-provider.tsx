@@ -1,13 +1,19 @@
-import { headers } from 'next/headers'
-import { PageConsentWrapper } from './page-consent-wrapper'
+import { getConsent } from '@/lib/consent-cookies'
+import { ConsentChecker } from './consent-checker'
 
 export async function SelectiveConsentProvider({ children }: { children: React.ReactNode }) {
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || '/'
+  // Check consent status server-side
+  const consent = await getConsent()
+  const hasValidConsent = consent !== null && consent.consentGiven
+  
+  console.log('SelectiveConsentProvider - Server side consent check:', {
+    consent,
+    hasValidConsent
+  })
   
   return (
-    <PageConsentWrapper pathname={pathname}>
+    <ConsentChecker hasConsent={hasValidConsent}>
       {children}
-    </PageConsentWrapper>
+    </ConsentChecker>
   )
 }

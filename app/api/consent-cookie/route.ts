@@ -115,3 +115,21 @@ export async function GET() {
     )
   }
 }
+
+export async function DELETE() {
+  try {
+    // Clear the consent cookie
+    await clearConsent()
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Consent cleared'
+    })
+  } catch (error) {
+    console.error('Clear consent error:', error)
+    return NextResponse.json(
+      { error: 'Failed to clear consent' },
+      { status: 500 }
+    )
+  }
+}
