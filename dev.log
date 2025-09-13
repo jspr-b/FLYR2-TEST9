@@ -10193,3 +10193,1215 @@ Page 9: 20 flights
 Total flights fetched: 200 from 10 pages
 ⚠️ Reached maximum page limit (10). There might be more flights available.
 ✅ Background refresh completed for: dashboard-combined-data (took 2s)
+ ○ Compiling /api/consent-cookie ...
+ ✓ Compiled /api/consent-cookie in 2.8s (634 modules)
+ GET /api/consent-cookie 200 in 3231ms
+SelectiveConsentProvider - Server side consent check: {
+  consent: null,
+  hasValidConsent: false,
+  timestamp: '2025-09-13T14:39:12.771Z'
+}
+ConsentChecker debug: {
+  pathname: '/dashboard',
+  requiresConsent: true,
+  hasConsent: false,
+  willShowConsent: true
+}
+ GET /dashboard 200 in 573ms
+ ○ Compiling /api/gate-occupancy ...
+ ✓ Compiled /api/gate-occupancy in 1485ms (639 modules)
+ ✓ Compiled (646 modules)
+Fetching all pages of Schiphol API data (max: 25)...
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-09-13
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-09-13
+🔄 Waiting for pending request for: dashboard-shared-all-pages-2025-09-13
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=19
+Page 19: 20 flights
+Fetching page 20: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=20
+Page 20: 20 flights
+Fetching page 21: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=21
+Page 21: 13 flights
+Fetching page 22: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=22
+Empty response on page 22, ending pagination
+Total flights fetched: 433 from 22 pages
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+All aircraft types found: [
+  '295', '332', '333',
+  '772', '781', '789',
+  'E90', '73H', 'E7W',
+  '73J', '32Q', '73W',
+  '77W'
+]
+Total aircraft types before filtering: 13
+Aircraft type 295: 46 flights, 46 valid delays, avg delay: 7.3 min, on-time: 58.7%
+  Delay range: 0.0 - 55.0 min
+Aircraft type 332: 5 flights, 5 valid delays, avg delay: 50.0 min, on-time: 60.0%
+  Delay range: 0.0 - 220.0 min
+Aircraft type 333: 4 flights, 4 valid delays, avg delay: 27.5 min, on-time: 50.0%
+  Delay range: 0.0 - 80.0 min
+Aircraft type 772: 13 flights, 13 valid delays, avg delay: 7.7 min, on-time: 76.9%
+  Delay range: 0.0 - 40.0 min
+Aircraft type 781: 8 flights, 8 valid delays, avg delay: 41.9 min, on-time: 62.5%
+  Delay range: 0.0 - 190.0 min
+Aircraft type 789: 8 flights, 8 valid delays, avg delay: 8.8 min, on-time: 75.0%
+  Delay range: 0.0 - 40.0 min
+Aircraft type E90: 95 flights, 95 valid delays, avg delay: 18.6 min, on-time: 45.3%
+  Delay range: 0.0 - 185.0 min
+Aircraft type 73H: 77 flights, 77 valid delays, avg delay: 4.5 min, on-time: 67.5%
+  Delay range: 0.0 - 48.0 min
+Aircraft type E7W: 44 flights, 44 valid delays, avg delay: 12.9 min, on-time: 54.5%
+  Delay range: 0.0 - 65.0 min
+Aircraft type 73J: 13 flights, 13 valid delays, avg delay: 1.8 min, on-time: 76.9%
+  Delay range: 0.0 - 13.0 min
+Aircraft type 32Q: 17 flights, 17 valid delays, avg delay: 4.4 min, on-time: 76.5%
+  Delay range: 0.0 - 40.0 min
+Aircraft type 73W: 12 flights, 12 valid delays, avg delay: 1.3 min, on-time: 91.7%
+  Delay range: 0.0 - 15.0 min
+Aircraft type 77W: 14 flights, 14 valid delays, avg delay: 12.1 min, on-time: 64.3%
+  Delay range: 0.0 - 100.0 min
+Aircraft types before delay filter: [
+  '295 (avg delay: 7.3 min)',
+  '332 (avg delay: 50.0 min)',
+  '333 (avg delay: 27.5 min)',
+  '772 (avg delay: 7.7 min)',
+  '781 (avg delay: 41.9 min)',
+  '789 (avg delay: 8.8 min)',
+  'E90 (avg delay: 18.6 min)',
+  '73H (avg delay: 4.5 min)',
+  'E7W (avg delay: 12.9 min)',
+  '73J (avg delay: 1.8 min)',
+  '32Q (avg delay: 4.4 min)',
+  '73W (avg delay: 1.3 min)',
+  '77W (avg delay: 12.1 min)'
+]
+Aircraft types after delay filter: [
+  '295 (avg delay: 7.3 min)',
+  '332 (avg delay: 50.0 min)',
+  '333 (avg delay: 27.5 min)',
+  '772 (avg delay: 7.7 min)',
+  '781 (avg delay: 41.9 min)',
+  '789 (avg delay: 8.8 min)',
+  'E90 (avg delay: 18.6 min)',
+  '73H (avg delay: 4.5 min)',
+  'E7W (avg delay: 12.9 min)',
+  '73J (avg delay: 1.8 min)',
+  '32Q (avg delay: 4.4 min)',
+  '73W (avg delay: 1.3 min)',
+  '77W (avg delay: 12.1 min)'
+]
+Total aircraft types after filtering: 13
+Best performer: 73W (1.3 min)
+Highest delay: 332 (50.0 min)
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 361 flights (removed 0 non-operational)
+Total filtering: 433 → 361 flights (removed 72 total)
+Deduplication: 361 → 361 flights (removed 0 duplicates)
+Stale data filter: 361 → 361 flights (removed 0 stale)
+📊 DASHBOARD KPIS: Processing 361 flights (including cancelled)
+✅ DASHBOARD KPIS: Successfully calculated KPIs
+ GET /api/aircraft/performance 200 in 4758ms
+ GET /api/delay-trends/hourly 200 in 4756ms
+ GET /api/dashboard/kpis?includeCancelled=true 200 in 4762ms
+ GET /api/gate-occupancy 200 in 4759ms
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: dashboard-combined-data
+Fetching background refresh pages of Schiphol API data (max: 10)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 3: 20 flights
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: dashboard-combined-data
+Fetching background refresh pages of Schiphol API data (max: 10)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=0
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 0: 20 flights
+Page 4: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=1
+Page 1: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Page 5: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=2
+Page 2: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 4: 20 flights
+Page 8: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 5: 20 flights
+Page 9: 20 flights
+Total flights fetched: 200 from 10 pages
+⚠️ Reached maximum page limit (10). There might be more flights available.
+✅ Background refresh completed for: dashboard-combined-data (took 1s)
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 9: 20 flights
+Total flights fetched: 200 from 10 pages
+⚠️ Reached maximum page limit (10). There might be more flights available.
+✅ Background refresh completed for: dashboard-combined-data (took 1s)
+ POST /api/consent-cookie 200 in 186ms
+SelectiveConsentProvider - Server side consent check: {
+  consent: {
+    essential: true,
+    analytics: true,
+    consentGiven: true,
+    timestamp: 1757774369094,
+    version: '1.0.0',
+    sessionId: '5d6ef99e01581ea5e4b3b3cf6b0fd3ef09fe9832f9322117437e6206da6cca74'
+  },
+  hasValidConsent: true,
+  timestamp: '2025-09-13T14:39:29.338Z'
+}
+ GET /dashboard 200 in 94ms
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 361 flights (removed 0 non-operational)
+Total filtering: 433 → 361 flights (removed 72 total)
+Deduplication: 361 → 361 flights (removed 0 duplicates)
+Stale data filter: 361 → 361 flights (removed 0 stale)
+📊 DASHBOARD KPIS: Processing 361 flights (including cancelled)
+✅ DASHBOARD KPIS: Successfully calculated KPIs
+ GET /api/dashboard/kpis?includeCancelled=true 200 in 37ms
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+All aircraft types found: [
+  '295', '332', '333',
+  '772', '781', '789',
+  'E90', '73H', 'E7W',
+  '73J', '32Q', '73W',
+  '77W'
+]
+Total aircraft types before filtering: 13
+Aircraft type 295: 46 flights, 46 valid delays, avg delay: 7.3 min, on-time: 58.7%
+  Delay range: 0.0 - 55.0 min
+Aircraft type 332: 5 flights, 5 valid delays, avg delay: 50.0 min, on-time: 60.0%
+  Delay range: 0.0 - 220.0 min
+Aircraft type 333: 4 flights, 4 valid delays, avg delay: 27.5 min, on-time: 50.0%
+  Delay range: 0.0 - 80.0 min
+Aircraft type 772: 13 flights, 13 valid delays, avg delay: 7.7 min, on-time: 76.9%
+  Delay range: 0.0 - 40.0 min
+Aircraft type 781: 8 flights, 8 valid delays, avg delay: 41.9 min, on-time: 62.5%
+  Delay range: 0.0 - 190.0 min
+Aircraft type 789: 8 flights, 8 valid delays, avg delay: 8.8 min, on-time: 75.0%
+  Delay range: 0.0 - 40.0 min
+Aircraft type E90: 95 flights, 95 valid delays, avg delay: 18.6 min, on-time: 45.3%
+  Delay range: 0.0 - 185.0 min
+Aircraft type 73H: 77 flights, 77 valid delays, avg delay: 4.5 min, on-time: 67.5%
+  Delay range: 0.0 - 48.0 min
+Aircraft type E7W: 44 flights, 44 valid delays, avg delay: 12.9 min, on-time: 54.5%
+  Delay range: 0.0 - 65.0 min
+Aircraft type 73J: 13 flights, 13 valid delays, avg delay: 1.8 min, on-time: 76.9%
+  Delay range: 0.0 - 13.0 min
+Aircraft type 32Q: 17 flights, 17 valid delays, avg delay: 4.4 min, on-time: 76.5%
+  Delay range: 0.0 - 40.0 min
+Aircraft type 73W: 12 flights, 12 valid delays, avg delay: 1.3 min, on-time: 91.7%
+  Delay range: 0.0 - 15.0 min
+Aircraft type 77W: 14 flights, 14 valid delays, avg delay: 12.1 min, on-time: 64.3%
+  Delay range: 0.0 - 100.0 min
+Aircraft types before delay filter: [
+  '295 (avg delay: 7.3 min)',
+  '332 (avg delay: 50.0 min)',
+  '333 (avg delay: 27.5 min)',
+  '772 (avg delay: 7.7 min)',
+  '781 (avg delay: 41.9 min)',
+  '789 (avg delay: 8.8 min)',
+  'E90 (avg delay: 18.6 min)',
+  '73H (avg delay: 4.5 min)',
+  'E7W (avg delay: 12.9 min)',
+  '73J (avg delay: 1.8 min)',
+  '32Q (avg delay: 4.4 min)',
+  '73W (avg delay: 1.3 min)',
+  '77W (avg delay: 12.1 min)'
+]
+Aircraft types after delay filter: [
+  '295 (avg delay: 7.3 min)',
+  '332 (avg delay: 50.0 min)',
+  '333 (avg delay: 27.5 min)',
+  '772 (avg delay: 7.7 min)',
+  '781 (avg delay: 41.9 min)',
+  '789 (avg delay: 8.8 min)',
+  'E90 (avg delay: 18.6 min)',
+  '73H (avg delay: 4.5 min)',
+  'E7W (avg delay: 12.9 min)',
+  '73J (avg delay: 1.8 min)',
+  '32Q (avg delay: 4.4 min)',
+  '73W (avg delay: 1.3 min)',
+  '77W (avg delay: 12.1 min)'
+]
+Total aircraft types after filtering: 13
+Best performer: 73W (1.3 min)
+Highest delay: 332 (50.0 min)
+ GET /api/aircraft/performance 200 in 48ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 64ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 90ms
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 361 flights (removed 0 non-operational)
+Total filtering: 433 → 361 flights (removed 72 total)
+Deduplication: 361 → 361 flights (removed 0 duplicates)
+Stale data filter: 361 → 361 flights (removed 0 stale)
+📊 DASHBOARD KPIS: Processing 361 flights (including cancelled)
+✅ DASHBOARD KPIS: Successfully calculated KPIs
+ GET /api/dashboard/kpis?includeCancelled=true 200 in 75ms
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+All aircraft types found: [
+  '295', '332', '333',
+  '772', '781', '789',
+  'E90', '73H', 'E7W',
+  '73J', '32Q', '73W',
+  '77W'
+]
+Total aircraft types before filtering: 13
+Aircraft type 295: 46 flights, 46 valid delays, avg delay: 7.3 min, on-time: 58.7%
+  Delay range: 0.0 - 55.0 min
+Aircraft type 332: 5 flights, 5 valid delays, avg delay: 50.0 min, on-time: 60.0%
+  Delay range: 0.0 - 220.0 min
+Aircraft type 333: 4 flights, 4 valid delays, avg delay: 27.5 min, on-time: 50.0%
+  Delay range: 0.0 - 80.0 min
+Aircraft type 772: 13 flights, 13 valid delays, avg delay: 7.7 min, on-time: 76.9%
+  Delay range: 0.0 - 40.0 min
+Aircraft type 781: 8 flights, 8 valid delays, avg delay: 41.9 min, on-time: 62.5%
+  Delay range: 0.0 - 190.0 min
+Aircraft type 789: 8 flights, 8 valid delays, avg delay: 8.8 min, on-time: 75.0%
+  Delay range: 0.0 - 40.0 min
+Aircraft type E90: 95 flights, 95 valid delays, avg delay: 18.6 min, on-time: 45.3%
+  Delay range: 0.0 - 185.0 min
+Aircraft type 73H: 77 flights, 77 valid delays, avg delay: 4.5 min, on-time: 67.5%
+  Delay range: 0.0 - 48.0 min
+Aircraft type E7W: 44 flights, 44 valid delays, avg delay: 12.9 min, on-time: 54.5%
+  Delay range: 0.0 - 65.0 min
+Aircraft type 73J: 13 flights, 13 valid delays, avg delay: 1.8 min, on-time: 76.9%
+  Delay range: 0.0 - 13.0 min
+Aircraft type 32Q: 17 flights, 17 valid delays, avg delay: 4.4 min, on-time: 76.5%
+  Delay range: 0.0 - 40.0 min
+Aircraft type 73W: 12 flights, 12 valid delays, avg delay: 1.3 min, on-time: 91.7%
+  Delay range: 0.0 - 15.0 min
+Aircraft type 77W: 14 flights, 14 valid delays, avg delay: 12.1 min, on-time: 64.3%
+  Delay range: 0.0 - 100.0 min
+Aircraft types before delay filter: [
+  '295 (avg delay: 7.3 min)',
+  '332 (avg delay: 50.0 min)',
+  '333 (avg delay: 27.5 min)',
+  '772 (avg delay: 7.7 min)',
+  '781 (avg delay: 41.9 min)',
+  '789 (avg delay: 8.8 min)',
+  'E90 (avg delay: 18.6 min)',
+  '73H (avg delay: 4.5 min)',
+  'E7W (avg delay: 12.9 min)',
+  '73J (avg delay: 1.8 min)',
+  '32Q (avg delay: 4.4 min)',
+  '73W (avg delay: 1.3 min)',
+  '77W (avg delay: 12.1 min)'
+]
+Aircraft types after delay filter: [
+  '295 (avg delay: 7.3 min)',
+  '332 (avg delay: 50.0 min)',
+  '333 (avg delay: 27.5 min)',
+  '772 (avg delay: 7.7 min)',
+  '781 (avg delay: 41.9 min)',
+  '789 (avg delay: 8.8 min)',
+  'E90 (avg delay: 18.6 min)',
+  '73H (avg delay: 4.5 min)',
+  'E7W (avg delay: 12.9 min)',
+  '73J (avg delay: 1.8 min)',
+  '32Q (avg delay: 4.4 min)',
+  '73W (avg delay: 1.3 min)',
+  '77W (avg delay: 12.1 min)'
+]
+Total aircraft types after filtering: 13
+Best performer: 73W (1.3 min)
+Highest delay: 332 (50.0 min)
+ GET /api/aircraft/performance 200 in 27ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 45ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 76ms
+ ○ Compiling /busiest-gates-and-terminals ...
+ ✓ Compiled /busiest-gates-and-terminals in 892ms (1139 modules)
+ GET /busiest-gates-and-terminals 200 in 950ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Fetching all pages of Schiphol API data (max: 25)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=19
+Page 19: 20 flights
+Fetching page 20: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=20
+Page 20: 20 flights
+Fetching page 21: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=21
+Page 21: 13 flights
+Fetching page 22: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=22
+Empty response on page 22, ending pagination
+Total flights fetched: 433 from 22 pages
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 2431ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 16ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 13ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 12ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 7ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 8ms
+ GET /gate-activity 200 in 26ms
+ ✓ Compiled /api/dashboard-data in 328ms (668 modules)
+📊 Dashboard Data API: Starting combined data fetch
+📅 Fetching dashboard data for date: 2025-09-13
+🔄 Registered cache refresh task: dashboard-combined-data, next refresh in 240s
+📌 Skipping initial cache warm for dashboard-combined-data in development mode
+Fetching all pages of Schiphol API data (max: 25)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=19
+Page 19: 20 flights
+Fetching page 20: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=20
+Page 20: 20 flights
+Fetching page 21: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=21
+Page 21: 13 flights
+Fetching page 22: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=22
+Empty response on page 22, ending pagination
+Total flights fetched: 433 from 22 pages
+✅ Received 433 raw flights from API
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 361 flights (removed 0 non-operational)
+Total filtering: 433 → 361 flights (removed 72 total)
+📌 Including cancelled flights in the response
+Stale data filter: 361 → 361 flights (removed 0 stale)
+Deduplication: 361 → 361 flights (removed 0 duplicates)
+🚫 Processing cancelled flight: KL1917 - Moving gate B5 to originalGate
+🚫 Processing cancelled flight: KL1817 - Moving gate B26 to originalGate
+🚫 Processing cancelled flight: KL1009 - Moving gate D6 to originalGate
+🚫 Processing cancelled flight: KL0973 - Moving gate E21 to originalGate
+🚫 Processing cancelled flight: KL1225 - Moving gate B36 to originalGate
+🔍 Processing 361 unique operational flights
+📊 Gate Status: 355 assigned, 0 TBD, 6 no gate
+📍 Adding cancelled flight KL1917 to gate B5 for display
+📍 Adding flight KL1651 to NO_GATE category
+📍 Adding cancelled flight KL1817 to gate B26 for display
+📍 Adding cancelled flight KL1009 to gate D6 for display
+📍 Adding cancelled flight KL0973 to gate E21 for display
+📍 Adding cancelled flight KL1225 to gate B36 for display
+📊 Processing 101 gates with flights
+📊 Total scheduled flights across all gates: 360
+✅ Dashboard data compiled successfully
+ GET /api/dashboard-data?includeGateOccupancy=true&includeGateChanges=true&includeCancelled=true 200 in 2476ms
+📊 Dashboard Data API: Starting combined data fetch
+📅 Fetching dashboard data for date: 2025-09-13
+🔄 Registered cache refresh task: dashboard-combined-data, next refresh in 240s
+📌 Skipping initial cache warm for dashboard-combined-data in development mode
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+✅ Received 433 raw flights from API
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 361 flights (removed 0 non-operational)
+Total filtering: 433 → 361 flights (removed 72 total)
+📌 Including cancelled flights in the response
+Stale data filter: 361 → 361 flights (removed 0 stale)
+Deduplication: 361 → 361 flights (removed 0 duplicates)
+🚫 Processing cancelled flight: KL1917 - Moving gate B5 to originalGate
+🚫 Processing cancelled flight: KL1817 - Moving gate B26 to originalGate
+🚫 Processing cancelled flight: KL1009 - Moving gate D6 to originalGate
+🚫 Processing cancelled flight: KL0973 - Moving gate E21 to originalGate
+🚫 Processing cancelled flight: KL1225 - Moving gate B36 to originalGate
+🔍 Processing 361 unique operational flights
+📊 Gate Status: 355 assigned, 0 TBD, 6 no gate
+📍 Adding cancelled flight KL1917 to gate B5 for display
+📍 Adding flight KL1651 to NO_GATE category
+📍 Adding cancelled flight KL1817 to gate B26 for display
+📍 Adding cancelled flight KL1009 to gate D6 for display
+📍 Adding cancelled flight KL0973 to gate E21 for display
+📍 Adding cancelled flight KL1225 to gate B36 for display
+📊 Processing 101 gates with flights
+📊 Total scheduled flights across all gates: 360
+✅ Dashboard data compiled successfully
+ GET /api/dashboard-data?includeGateOccupancy=true&includeCancelled=true 200 in 9ms
+🏃 Background cache refresh cycle started
+🔥 Warming cache for dashboard-combined-data...
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+🔥 Warming cache for dashboard-combined-data...
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+ GET /busiest-gates-and-terminals 200 in 32ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 24ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 8ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 7ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 6ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 7ms
+🔍 GATE OCCUPANCY ANALYSIS for 2025-09-13 (Background: false)
+============================================================
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 Processing 356 flights for gate occupancy analysis
+
+📊 GATE OCCUPANCY SUMMARY:
+  • Total Gates Analyzed: 100
+  • Total Piers: 6
+  • Active Piers: 5 (B, C, D, E, F)
+  • Status Breakdown: { SCHEDULED: 67, OCCUPIED: 24, DEPARTED: 9 }
+  • Average Utilization: 19%
+  • Delayed Flights: 81
+  • Average Delay: 45 minutes
+  • Max Delay: 3h 40m
+  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked
+ GET /api/gate-occupancy 200 in 7ms
+ ✓ Compiled /delay-trends-by-hour in 422ms (1156 modules)
+ GET /delay-trends-by-hour 200 in 468ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Fetching all pages of Schiphol API data (max: 25)...
+✈️ Concurrent fetch complete: 60 flights from first 3 pages
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=9
+Page 9: 20 flights
+Fetching page 10: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=10
+Page 10: 20 flights
+Fetching page 11: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=11
+Page 11: 20 flights
+Fetching page 12: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=12
+Page 12: 20 flights
+Fetching page 13: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=13
+Page 13: 20 flights
+Fetching page 14: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=14
+Page 14: 20 flights
+Fetching page 15: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=15
+Page 15: 20 flights
+Fetching page 16: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=16
+Page 16: 20 flights
+Fetching page 17: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=17
+Page 17: 20 flights
+Fetching page 18: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=18
+Page 18: 20 flights
+Fetching page 19: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=19
+Page 19: 20 flights
+Fetching page 20: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=20
+Page 20: 20 flights
+Fetching page 21: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=21
+Page 21: 13 flights
+Fetching page 22: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-13&page=22
+Empty response on page 22, ending pagination
+Total flights fetched: 433 from 22 pages
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 2173ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 25ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 24ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 46ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 19ms
+📊 DELAY TRENDS: Querying flights for date: 2025-09-13
+Using cached Schiphol API data for: dashboard-shared-all-pages-2025-09-13
+📊 DELAY TRENDS: Fetched 433 total flights for date 2025-09-13
+KLM filter: 433 → 361 flights (removed 72 codeshares)
+Filtering by date: 2025-09-13
+Date filter: 361 → 361 flights (removed 0 date mismatches)
+Operational filter: 361 → 356 flights (removed 5 non-operational)
+🚫 Cancelled/Non-operational flight: KL1917 to ZRH at gate B5 scheduled 2025-09-13T07:10:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1817 to FRA at gate B26 scheduled 2025-09-13T09:50:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1009 to LHR at gate D6 scheduled 2025-09-13T13:25:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL0973 to HUY at gate E21 scheduled 2025-09-13T17:00:00.000+02:00 (states: CNX)
+🚫 Cancelled/Non-operational flight: KL1225 to ARN at gate B36 scheduled 2025-09-13T17:40:00.000+02:00 (states: CNX)
+Total filtering: 433 → 356 flights (removed 77 total)
+📊 DELAY TRENDS: After filtering: 356 flights
+Deduplication: 356 → 356 flights (removed 0 duplicates)
+📊 DELAY TRENDS: After deduplication: 356 flights
+Stale data filter: 356 → 356 flights (removed 0 stale)
+📊 DELAY TRENDS: After removing stale: 356 flights
+📊 DELAY TRENDS: Calculated 16 hours with flights
+✅ DELAY TRENDS: Successfully processed data
+ GET /api/delay-trends/hourly 200 in 19ms
