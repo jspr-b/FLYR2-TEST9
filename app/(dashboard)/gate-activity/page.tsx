@@ -412,15 +412,29 @@ export default function GateActivityPage() {
               {/* Flight States */}
               <Card className="h-[400px] xs:h-[500px] sm:h-[600px] flex flex-col">
                 <CardHeader className="pb-3 flex-shrink-0">
-                  <CardTitle className="text-base">Flight States</CardTitle>
-                  <p className="text-xs text-gray-600">Current flight phases</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-base">Flight States</CardTitle>
+                      <p className="text-xs text-gray-600">Current flight phases</p>
+                    </div>
+                    <button
+                      onClick={() => refetch(false)}
+                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      title="Refresh data"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Refresh
+                    </button>
+                  </div>
                 </CardHeader>
                 <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
                   {/* Flight State Distribution */}
                   <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                     {(() => {
-                      // Define all possible flight states including GCH
-                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL', 'GCH'];
+                      // Define all possible flight states including GCH and CNX
+                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL', 'GCH', 'CNX'];
                       const currentStates = processedData?.flightStates || {};
                       
                       // Create entries for all states, defaulting to 0 if not present
@@ -766,9 +780,14 @@ export default function GateActivityPage() {
                     <div className="flex items-center justify-between text-sm text-gray-600">
                       <span>Total Registered Flights</span>
                       <span className="font-semibold text-gray-900">
-                        372
+                        {Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}
                       </span>
                     </div>
+                    {lastSuccessfulUpdate && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Last updated: {lastSuccessfulUpdate.toLocaleTimeString()}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

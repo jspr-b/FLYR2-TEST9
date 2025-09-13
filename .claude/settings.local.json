@@ -48,7 +48,8 @@
       "Bash(find:*)",
       "Bash(mv:*)",
       "Bash(nslookup:*)",
-      "WebFetch(domain:www.buildwithmatija.com)"
+      "WebFetch(domain:www.buildwithmatija.com)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }
