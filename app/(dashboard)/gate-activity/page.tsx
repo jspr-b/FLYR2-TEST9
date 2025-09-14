@@ -405,9 +405,9 @@ export default function GateActivityPage() {
             <GateGanttChart gateData={ganttData} />
 
             {/* Status Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 xs:gap-3 sm:gap-4">
               {/* Gate Type Distribution - Enhanced with merged metrics */}
-              <div className="lg:col-span-1">
+              <div className="xl:col-span-1">
                 <GateTypeDistribution />
               </div>
 
@@ -806,7 +806,7 @@ export default function GateActivityPage() {
               </Card>
 
               {/* Real Gate Changes (GCH) */}
-              <div className="lg:col-span-1">
+              <div className="xl:col-span-1">
                 <GateChangesDashboard 
                   data={gateChangesData}
                   loading={loading}
