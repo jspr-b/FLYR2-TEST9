@@ -433,7 +433,7 @@ export default function GateActivityPage() {
                 </CardHeader>
                 <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
                   {/* Flight State Distribution */}
-                  <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+                  <div className="space-y-2 flex-1 overflow-y-auto pr-1">
                     {(() => {
                       // Define all possible flight states including GCH and CNX
                       const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL', 'GCH', 'CNX'];
@@ -537,15 +537,15 @@ export default function GateActivityPage() {
                         }
                         
                         return (
-                          <div key={state} className="space-y-1.5">
+                          <div key={state} className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
-                                  <config.Icon className={`w-4 h-4 ${config.iconColor}`} />
+                              <div className="flex items-center gap-1.5">
+                                <div className={`w-7 h-7 rounded-md ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
+                                  <config.Icon className={`w-3.5 h-3.5 ${config.iconColor}`} />
                                 </div>
                                 <div>
                                   <div className="font-medium text-sm">{config.label}</div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-[11px] text-gray-500">
                                     {config.description}
                                     {state === 'CNX' && (() => {
                                       // Check if any cancelled flights have gate assignments
@@ -560,13 +560,13 @@ export default function GateActivityPage() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="text-lg font-bold">{count}</div>
-                                <div className="text-xs text-gray-500">{percentage}%</div>
+                                <div className="text-base font-bold">{count}</div>
+                                <div className="text-[10px] text-gray-500">{percentage}%</div>
                               </div>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1">
+                            <div className="w-full bg-gray-200 rounded-full h-0.5">
                               <div 
-                                className={`${config.color} h-1 rounded-full transition-all duration-500`}
+                                className={`${config.color} h-0.5 rounded-full transition-all duration-500`}
                                 style={{ width: `${percentage}%` }}
                               />
                             </div>
@@ -577,13 +577,13 @@ export default function GateActivityPage() {
                   </div>
                   
                   {/* Operational Impact Section */}
-                  <div className="mt-3 pt-2 border-t border-gray-200 flex-shrink-0">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Operational Impact:</div>
+                  <div className="mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
+                    <div className="text-xs font-medium text-gray-700 mb-1.5">Operational Impact:</div>
                     
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-1.5">
                       <div>
-                        <div className="text-xs text-gray-600">Delayed Departures</div>
-                        <div className={`text-lg font-bold ${
+                        <div className="text-[11px] text-gray-600">Delayed Departures</div>
+                        <div className={`text-base font-bold ${
                           (() => {
                             const departedFlights = data?.gates.flatMap(g => 
                               g.scheduledFlights.filter(f => f.flightStates.includes('DEP'))
@@ -614,7 +614,7 @@ export default function GateActivityPage() {
                             return (
                               <>
                                 {percentage}%
-                                <span className="text-xs font-normal text-gray-500 ml-1">
+                                <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                                   ({delayedDepartures.length}/{departedFlights.length})
                                 </span>
                               </>
@@ -624,8 +624,8 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">Median Departure Delay</div>
-                        <div className={`text-lg font-bold ${
+                        <div className="text-[11px] text-gray-600">Median Departure Delay</div>
+                        <div className={`text-base font-bold ${
                           (() => {
                             // Get DEPARTED flights with actual delay time > 0
                             const delayedDepartures = data?.gates.flatMap(g => 
@@ -703,7 +703,7 @@ export default function GateActivityPage() {
                             return (
                               <>
                                 {punctualRate}%
-                                <span className="text-xs font-normal text-gray-500 ml-1">
+                                <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                                   ({punctualDepartures.length}/{departedFlights.length})
                                 </span>
                               </>
@@ -713,10 +713,10 @@ export default function GateActivityPage() {
                       </div>
                       
                       <div>
-                        <div className="text-xs text-gray-600">Critical Delays</div>
+                        <div className="text-[11px] text-gray-600">Critical Delays</div>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-red-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                            <button className={`inline-flex items-center gap-1 text-base font-bold hover:bg-red-50 px-1 -mx-1 py-0.5 rounded transition-colors cursor-pointer ${
                               (() => {
                                 const criticalDelays = data?.gates.flatMap(g => 
                                   g.scheduledFlights.filter(f => f.delayMinutes >= 60)
@@ -739,7 +739,7 @@ export default function GateActivityPage() {
                                 return (
                                   <>
                                     {criticalDelays.length}
-                                    <span className="text-xs font-normal text-gray-500 ml-1">
+                                    <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                                       (≥60min)
                                     </span>
                                     {criticalDelays.length > 0 && (
@@ -783,14 +783,14 @@ export default function GateActivityPage() {
                       </div>
                     </div>
                     
-                    <div className="text-xs text-gray-500 mt-2">
+                    <div className="text-[11px] text-gray-500 mt-1.5">
                       Impact analysis based on combined flight states and operational data
                     </div>
                   </div>
                   
                   {/* Total flights indicator */}
-                  <div className="mt-3 pt-2 border-t border-gray-200 flex-shrink-0">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
+                  <div className="mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
+                    <div className="flex items-center justify-between text-xs text-gray-600">
                       <span>Total Registered Flights</span>
                       <span className="font-semibold text-gray-900">
                         {Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}

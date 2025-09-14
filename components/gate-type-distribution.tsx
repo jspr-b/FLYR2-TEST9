@@ -310,16 +310,16 @@ export function GateTypeDistribution() {
         )}
       </CardHeader>
       <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
-        <div className="space-y-4 flex-1 overflow-y-auto pr-2">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+        <div className="space-y-3 flex-1 overflow-y-auto pr-1">
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
               <span>Bus Gates ({operationalData?.busGateFlights || 0} flights)</span>
               <span>{(() => {
                 const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
                 return total > 0 ? ((operationalData?.busGateFlights || 0) / total * 100).toFixed(1) : '0';
               })()}%</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-amber-500 rounded-full transition-all duration-500" 
                 style={{ width: `${(() => {
@@ -330,15 +330,15 @@ export function GateTypeDistribution() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
               <span>Jet Bridges ({operationalData?.jetBridgeFlights || 0} flights)</span>
               <span>{(() => {
                 const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
                 return total > 0 ? ((operationalData?.jetBridgeFlights || 0) / total * 100).toFixed(1) : '0';
               })()}%</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-blue-500 rounded-full transition-all duration-500" 
                 style={{ width: `${(() => {
@@ -351,8 +351,8 @@ export function GateTypeDistribution() {
 
           {/* Unknown Gate Type - Departed flights without gate data */}
           {unknownGateFlights.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs">
                 <Popover>
                   <PopoverTrigger asChild>
                     <button className="flex items-center gap-1 hover:bg-gray-50 px-1 -mx-1 rounded transition-colors cursor-pointer">
@@ -392,7 +392,7 @@ export function GateTypeDistribution() {
                 </Popover>
                 <span>{((unknownGateFlights.length / (operationalData?.busGateFlights + operationalData?.jetBridgeFlights + unknownGateFlights.length || 1)) * 100).toFixed(1)}%</span>
               </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gray-400 rounded-full transition-all duration-500" 
                   style={{ width: `${((unknownGateFlights.length / (operationalData?.busGateFlights + operationalData?.jetBridgeFlights + unknownGateFlights.length || 1)) * 100)}%` }}
@@ -402,12 +402,12 @@ export function GateTypeDistribution() {
           )}
 
           {/* Operational Impact Section */}
-          <div className="mt-3 pt-2 border-t border-gray-200">
-            <div className="text-sm font-medium text-gray-700 mb-2">Operational Impact:</div>
+          <div className="mt-2 pt-2 border-t border-gray-200">
+            <div className="text-xs font-medium text-gray-700 mb-1.5">Operational Impact:</div>
             
             {/* KLM Operational Context - Always show */}
-            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="mb-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-gray-600">KLM Gates Today:</span>
                   <div className="font-semibold text-blue-700">
@@ -444,7 +444,7 @@ export function GateTypeDistribution() {
                           gateStatusMetrics?.noGatePercentage > 5 ? 'text-amber-700' : 'text-green-700'
                         }`}>
                           {gateStatusMetrics?.noGateFlights || 0}
-                          <span className="text-xs font-normal text-gray-500 ml-1">
+                          <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                             ({gateStatusMetrics?.noGatePercentage || 0}%)
                           </span>
                           {gateStatusMetrics?.noGateFlights > 0 && (
@@ -495,10 +495,10 @@ export function GateTypeDistribution() {
             {operationalData && (
               <>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <div className="text-xs text-gray-600">Bus Gate Delays</div>
-                  <div className={`text-lg font-bold ${
+                  <div className="text-[11px] text-gray-600">Bus Gate Delays</div>
+                  <div className={`text-base font-bold ${
                     operationalData.busGateDelayRate > 30 ? 'text-red-600' : 
                     operationalData.busGateDelayRate > 20 ? 'text-amber-600' : 'text-green-600'
                   }`}>
@@ -510,8 +510,8 @@ export function GateTypeDistribution() {
                 </div>
                 
                 <div>
-                  <div className="text-xs text-gray-600">Jet Bridge Delays</div>
-                  <div className={`text-lg font-bold ${
+                  <div className="text-[11px] text-gray-600">Jet Bridge Delays</div>
+                  <div className={`text-base font-bold ${
                     operationalData.jetBridgeDelayRate > 30 ? 'text-red-600' : 
                     operationalData.jetBridgeDelayRate > 20 ? 'text-amber-600' : 'text-green-600'
                   }`}>
@@ -523,8 +523,8 @@ export function GateTypeDistribution() {
                 </div>
                 
                 <div>
-                  <div className="text-xs text-gray-600">Bus Gate Utilization</div>
-                  <div className={`text-lg font-bold ${
+                  <div className="text-[11px] text-gray-600">Bus Gate Utilization</div>
+                  <div className={`text-base font-bold ${
                     operationalData.busGateUtilization > 80 ? 'text-red-600' : 
                     operationalData.busGateUtilization > 60 ? 'text-amber-600' : 'text-blue-600'
                   }`}>
@@ -533,8 +533,8 @@ export function GateTypeDistribution() {
                 </div>
                 
                 <div>
-                  <div className="text-xs text-gray-600">Jet Bridge Utilization</div>
-                  <div className={`text-lg font-bold ${
+                  <div className="text-[11px] text-gray-600">Jet Bridge Utilization</div>
+                  <div className={`text-base font-bold ${
                     operationalData.jetBridgeUtilization > 80 ? 'text-red-600' : 
                     operationalData.jetBridgeUtilization > 60 ? 'text-amber-600' : 'text-blue-600'
                   }`}>
@@ -543,10 +543,10 @@ export function GateTypeDistribution() {
                 </div>
 
                 <div>
-                  <div className="text-xs text-gray-600">Bus Gate Critical</div>
+                  <div className="text-[11px] text-gray-600">Bus Gate Critical</div>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-red-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                      <button className={`inline-flex items-center gap-1 text-base font-bold hover:bg-red-50 px-1 -mx-1 py-0.5 rounded transition-colors cursor-pointer ${
                         operationalData.criticalBusGateDelays.length > 0 ? 'text-red-600' : 'text-green-600'
                       }`}>
                         {operationalData.criticalBusGateDelays.length}
@@ -584,10 +584,10 @@ export function GateTypeDistribution() {
                 </div>
 
                 <div>
-                  <div className="text-xs text-gray-600">Jet Bridge Critical</div>
+                  <div className="text-[11px] text-gray-600">Jet Bridge Critical</div>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-red-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                      <button className={`inline-flex items-center gap-1 text-base font-bold hover:bg-red-50 px-1 -mx-1 py-0.5 rounded transition-colors cursor-pointer ${
                         operationalData.criticalJetBridgeDelays.length > 0 ? 'text-red-600' : 'text-green-600'
                       }`}>
                         {operationalData.criticalJetBridgeDelays.length}
@@ -625,7 +625,7 @@ export function GateTypeDistribution() {
                 </div>
               </div>
               
-              <div className="text-xs text-gray-500 mt-2">
+              <div className="text-[11px] text-gray-500 mt-1.5">
                 Impact analysis comparing bus gate vs jet bridge operations
               </div>
               </>
@@ -633,17 +633,17 @@ export function GateTypeDistribution() {
           </div>
         </div>
 
-        <div className="pt-4 border-t flex-shrink-0">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="pt-3 border-t flex-shrink-0">
+          <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <div className="text-gray-600 text-xs">Total Active Flights</div>
-                <div className="text-2xl font-bold">
+                <div className="text-gray-600 text-[11px]">Total Active Flights</div>
+                <div className="text-xl font-bold">
                   {(operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length}
                 </div>
               </div>
               <div>
-                <div className="text-gray-600 text-xs">Bus Gate Usage</div>
-                <div className="text-2xl font-bold">
+                <div className="text-gray-600 text-[11px]">Bus Gate Usage</div>
+                <div className="text-xl font-bold">
                   {(() => {
                     const total = (operationalData?.busGateFlights || 0) + (operationalData?.jetBridgeFlights || 0) + unknownGateFlights.length;
                     return total > 0 ? ((operationalData?.busGateFlights || 0) / total * 100).toFixed(1) : '0';
