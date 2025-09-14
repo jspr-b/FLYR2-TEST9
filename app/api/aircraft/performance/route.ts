@@ -71,7 +71,9 @@ export async function GET(request: NextRequest) {
       
       // Calculate delays and filter out invalid data
       const typeDelays = typeFlights.map(flight => {
-        const delay = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
+        // Use actual off-block time if available, otherwise estimated time
+        const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime || flight.scheduleDateTime
+        const delay = calculateDelayMinutes(flight.scheduleDateTime, actualTime)
         return delay
       }).filter(delay => !isNaN(delay) && delay >= 0) // Filter out invalid delays
       
@@ -165,9 +167,10 @@ export async function GET(request: NextRequest) {
     console.log(`Highest delay: ${highestDelay?.type} (${highestDelay?.avgDelay.toFixed(1)} min)`)
     
     // Calculate fleet average delay
-    const allDelays = filteredFlights.map(flight => 
-      calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-    )
+    const allDelays = filteredFlights.map(flight => {
+      const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime || flight.scheduleDateTime
+      return calculateDelayMinutes(flight.scheduleDateTime, actualTime)
+    })
     const fleetAvgDelay = allDelays.length > 0 ? allDelays.reduce((a, b) => a + b, 0) / allDelays.length : 0
 
     const summary = {

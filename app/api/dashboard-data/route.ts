@@ -154,10 +154,14 @@ function getFlightStateReadable(state: string): string {
  * Calculate delay in minutes
  */
 function calculateDelay(flight: any): number {
-  if (flight.publicEstimatedOffBlockTime && flight.scheduleDateTime) {
+  if (flight.scheduleDateTime) {
     const scheduled = new Date(flight.scheduleDateTime)
-    const estimated = new Date(flight.publicEstimatedOffBlockTime)
-    return Math.max(0, Math.round((estimated.getTime() - scheduled.getTime()) / (1000 * 60)))
+    // Use actual off-block time if available (departed flights), otherwise estimated time
+    const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime
+    if (actualTime) {
+      const actual = new Date(actualTime)
+      return Math.max(0, Math.round((actual.getTime() - scheduled.getTime()) / (1000 * 60)))
+    }
   }
   return 0
 }
@@ -280,6 +284,8 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         isDelayed: flight.publicFlightState?.flightStates?.includes('DEL') || calculateDelay(flight) > 15,
         scheduleDateTime: flight.scheduleDateTime,
         estimatedDateTime: flight.publicEstimatedOffBlockTime || null,
+        actualDateTime: flight.actualOffBlockTime || null,
+        actualOffBlockTime: flight.actualOffBlockTime || null,
         expectedTimeBoarding: flight.expectedTimeBoarding || null
       }))
     }

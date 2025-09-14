@@ -162,6 +162,8 @@ export default function GateActivityPage() {
       flightNumber: flight.flightNumber,
       scheduleDateTime: flight.scheduleDateTime,
       estimatedDateTime: flight.estimatedDateTime,
+      actualDateTime: flight.actualDateTime,
+      actualOffBlockTime: flight.actualOffBlockTime || flight.actualDateTime,
       aircraftType: flight.aircraftType,
       destination: flight.destination,
       primaryState: flight.primaryState,

@@ -52,9 +52,10 @@ export async function GET(request: NextRequest) {
 // Calculate KPIs from flights data
 async function calculateKPIsFromFlights(flights: any[]) {
   const totalFlights = flights.length
-  const delays = flights.map(flight =>
-    calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
-  ).filter(delay => delay !== null) as number[]
+  const delays = flights.map(flight => {
+    const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime || flight.scheduleDateTime
+    return calculateDelayMinutes(flight.scheduleDateTime, actualTime)
+  }).filter(delay => delay !== null) as number[]
   
   const delayedFlights = delays.filter(delay => delay > 0).length
   const totalDelayMinutes = delays.reduce((sum, delay) => sum + delay, 0)
@@ -68,7 +69,8 @@ async function calculateKPIsFromFlights(flights: any[]) {
   flights.forEach(flight => {
     // Use extractLocalHour to properly convert UTC+2 API time to local timezone
     const scheduleHour = extractLocalHour(flight.scheduleDateTime)
-    const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, flight.publicEstimatedOffBlockTime)
+    const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime || flight.scheduleDateTime
+    const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, actualTime)
     
     if (delayMinutes !== null) {
       if (!hourGroups[scheduleHour]) {

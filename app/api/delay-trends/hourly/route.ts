@@ -139,10 +139,12 @@ function calculateHourlyDelaysFromFlights(flights: any[]) {
     
     // Calculate delay in minutes (same as gate metrics service)
     let delayMinutes = 0
-    if (flight.publicEstimatedOffBlockTime) {
-      const scheduledTime = new Date(flight.scheduleDateTime)
-      const estimatedTime = new Date(flight.publicEstimatedOffBlockTime)
-      const delayMs = estimatedTime.getTime() - scheduledTime.getTime()
+    const scheduledTime = new Date(flight.scheduleDateTime)
+    // Use actual off-block time if available, otherwise estimated time
+    const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime
+    if (actualTime) {
+      const actualTimeDate = new Date(actualTime)
+      const delayMs = actualTimeDate.getTime() - scheduledTime.getTime()
       delayMinutes = Math.round(delayMs / (1000 * 60))
     }
     

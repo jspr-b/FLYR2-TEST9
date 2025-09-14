@@ -281,9 +281,11 @@ function calculateRouteDelays(flights: any[]) {
 
     // Calculate delays and collect extra info for each flight
     const delays = data.flights.map(flight => {
+      // Use actual off-block time if available, otherwise estimated time
+      const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime || flight.scheduleDateTime
       const delayMinutes = calculateDelayMinutes(
         flight.scheduleDateTime,
-        flight.publicEstimatedOffBlockTime
+        actualTime
       )
       const flightState = flight.publicFlightState?.flightStates?.[0] || 'UNKNOWN'
       return {

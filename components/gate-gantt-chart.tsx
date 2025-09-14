@@ -34,6 +34,7 @@ interface GateGanttData {
     delayMinutes: number;
     gate: string;
     actualOffBlockTime?: string;
+    actualDateTime?: string;
     estimatedDateTime?: string;
     flightStates?: string[];
     expectedTimeBoarding?: string;
@@ -208,9 +209,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     const scheduledTime = new Date(flight.scheduleDateTime);
     const currentTime = getCurrentAmsterdamTime();
 
-    // Use estimated time if delayed, otherwise use scheduled time
+    // Use actual off-block time if available (flight has departed), 
+    // otherwise use estimated time if delayed, otherwise use scheduled time
     // API data is already in Amsterdam timezone, no conversion needed
-    const actualDepartureTime = flight.estimatedDateTime
+    const actualDepartureTime = flight.actualOffBlockTime
+      ? new Date(flight.actualOffBlockTime)
+      : flight.estimatedDateTime
       ? new Date(flight.estimatedDateTime)
       : scheduledTime;
 
@@ -237,8 +241,10 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     // Simple approach given API limitations
     gateOpenTime = originalGateOpenTime;
 
-    // For delayed flights, use estimated time if available
-    const departureTime = flight.estimatedDateTime
+    // For departed flights use actual time, for delayed use estimated, otherwise scheduled
+    const departureTime = flight.actualOffBlockTime
+      ? new Date(flight.actualOffBlockTime)
+      : flight.estimatedDateTime
       ? new Date(flight.estimatedDateTime)
       : scheduledTime;
 
@@ -1571,7 +1577,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           {selectedFlight &&
             (() => {
               const timeline = getFlightTimeline(selectedFlight);
-              const delayMinutes = selectedFlight.delayMinutes || 0;
+              // Calculate actual delay from timeline data
+              const actualDelayMinutes = Math.max(0, 
+                Math.round((timeline.actualDepartureTime.getTime() - timeline.scheduledTime.getTime()) / (1000 * 60))
+              );
+              // Use calculated delay or API delay, whichever is greater
+              const delayMinutes = Math.max(selectedFlight.delayMinutes || 0, actualDelayMinutes);
 
               return (
                 <div className="space-y-3 sm:space-y-6">
@@ -1625,7 +1636,16 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                           <span
                             className={`font-medium ${selectedFlight.isDelayed ? "text-red-600" : "text-green-600"}`}
                           >
-                            {selectedFlight.primaryStateReadable}
+                            {selectedFlight.primaryState === 'DEP' ? 'Departed' : 
+                             selectedFlight.primaryState === 'BRD' ? 'Boarding' :
+                             selectedFlight.primaryState === 'GTO' ? 'Gate Open' :
+                             selectedFlight.primaryState === 'GCL' ? 'Gate Closing' :
+                             selectedFlight.primaryState === 'GTD' ? 'Gate Closed' :
+                             selectedFlight.primaryState === 'SCH' ? 'Scheduled' :
+                             selectedFlight.primaryState === 'DEL' ? 'Delayed' :
+                             selectedFlight.primaryState === 'CNX' ? 'Cancelled' :
+                             selectedFlight.primaryState === 'GCH' ? 'Gate Change' :
+                             selectedFlight.primaryStateReadable}
                           </span>
                         </div>
                         {/* Show all flight states */}
@@ -1650,7 +1670,7 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                               </span>
                             </div>
                           )}
-                        {selectedFlight.isDelayed && (
+                        {delayMinutes > 0 && (
                           <div className="flex justify-between">
                             <span className="text-gray-500">Delay:</span>
                             <span className="font-medium text-red-600">
@@ -1668,6 +1688,62 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
                               : "Intercontinental"}
                           </span>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Departure Times - Added to Status section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <h3 className="font-semibold text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
+                        Departure Times
+                      </h3>
+                      <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Scheduled:</span>
+                          <span className="font-medium">
+                            {timeline.scheduledTime.toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                                timeZone: "Europe/Amsterdam",
+                              },
+                            )}
+                          </span>
+                        </div>
+                        {selectedFlight.actualOffBlockTime ? (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Actual:</span>
+                            <span className={`font-medium ${selectedFlight.isDelayed ? "text-red-600" : ""}`}>
+                              {new Date(selectedFlight.actualOffBlockTime).toLocaleTimeString(
+                                "en-US",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                  timeZone: "Europe/Amsterdam",
+                                },
+                              )}
+                            </span>
+                          </div>
+                        ) : selectedFlight.isDelayed && timeline.actualDepartureTime ? (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Estimated:</span>
+                            <span className="font-medium text-orange-600">
+                              {timeline.actualDepartureTime.toLocaleTimeString(
+                                "en-US",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                  timeZone: "Europe/Amsterdam",
+                                },
+                              )}
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </div>

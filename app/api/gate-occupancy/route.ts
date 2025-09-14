@@ -67,6 +67,9 @@ interface GateOccupancyData {
     flightName: string
     flightNumber: string
     scheduleDateTime: string
+    estimatedDateTime?: string | null
+    actualDateTime?: string | null
+    actualOffBlockTime?: string | null
     aircraftType: string
     destination: string
     gate: string
@@ -518,7 +521,9 @@ export async function GET(request: NextRequest) {
         }
         
         // Calculate actual delay minutes for display purposes
-        const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime)
+        // For departed flights, use actualOffBlockTime; for scheduled delays use estimatedDateTime
+        const actualTime = flight.actualOffBlockTime || estimatedDateTime || flight.scheduleDateTime
+        const delayMinutes = calculateDelayMinutes(flight.scheduleDateTime, actualTime)
         
         return {
           flightName: flight.flightName,
@@ -526,6 +531,7 @@ export async function GET(request: NextRequest) {
           scheduleDateTime: flight.scheduleDateTime,
           estimatedDateTime: estimatedDateTime || null,
           actualDateTime: flight.actualOffBlockTime || null,
+          actualOffBlockTime: flight.actualOffBlockTime || null,
         aircraftType: flight.aircraftType?.iataMain || flight.aircraftType?.iataSub || 'UNKNOWN',
         destination: flight.route?.destinations?.[0] || 'UNKNOWN',
         gate: flight.gate || gateID,
@@ -535,13 +541,12 @@ export async function GET(request: NextRequest) {
           FLIGHT_STATE_DESCRIPTIONS[state] || state) || [],
         primaryState: getMostSignificantState(flight.publicFlightState?.flightStates || []),
         primaryStateReadable: FLIGHT_STATE_DESCRIPTIONS[getMostSignificantState(flight.publicFlightState?.flightStates || []) as keyof typeof FLIGHT_STATE_DESCRIPTIONS] || 'Unknown',
-          delayMinutes: calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime),
+          delayMinutes: delayMinutes,
           delayFormatted: (() => {
-            const delay = calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime);
-            return delay > 0 ? `${Math.floor(delay / 60)}h ${delay % 60}m` : '0m';
+            return delayMinutes > 0 ? `${Math.floor(delayMinutes / 60)}h ${delayMinutes % 60}m` : '0m';
           })(),
           delayReason: flight.publicFlightState?.delayReason || 'Reason not specified',
-          isDelayed: flight.publicFlightState?.flightStates?.[0] === 'DEL' || calculateDelayMinutes(flight.scheduleDateTime, estimatedDateTime || flight.scheduleDateTime) > 15,
+          isDelayed: flight.publicFlightState?.flightStates?.[0] === 'DEL' || delayMinutes > 15,
           lastUpdated: flight.lastUpdatedAt
         }
       })
