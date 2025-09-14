@@ -1,5 +1,5 @@
 import { getConsent } from '@/lib/consent-cookies'
-import { ConsentRequired } from './consent-required'
+import { ConsentRequiredOptimized } from './consent-required-optimized'
 
 // Pages that require consent (contain API data)
 const PROTECTED_PATHS = [
@@ -35,5 +35,6 @@ export async function PageConsentWrapper({ children, pathname }: PageConsentWrap
   }
   
   // User needs to give consent - show blurred page with consent modal
-  return <ConsentRequired>{children}</ConsentRequired>
+  // The optimized version preloads data while showing the consent screen
+  return <ConsentRequiredOptimized>{children}</ConsentRequiredOptimized>
 }
