@@ -99,36 +99,36 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
   }
 
   const renderEventRow = (event: GateChangeEvent, showInModal = false) => (
-    <div key={event.flightNumber} className={showInModal ? "space-y-1.5 p-3 bg-gray-50 rounded-lg" : "space-y-1.5"}>
+    <div key={event.flightNumber} className={showInModal ? "space-y-1 p-2.5 bg-gray-50 rounded-lg" : "space-y-1"}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <ArrowRightLeft className="w-4 h-4 text-blue-600" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-7 h-7 rounded-md bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <ArrowRightLeft className="w-3.5 h-3.5 text-blue-600" />
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <span className="font-medium text-sm">{event.flightName}</span>
               {event.isPriority && (
-                <span className="px-1 py-0.5 text-xs bg-amber-100 text-amber-700 rounded font-medium">SOON</span>
+                <span className="px-1 py-0.5 text-[10px] bg-amber-100 text-amber-700 rounded font-medium">SOON</span>
               )}
               {event.isDelayed && (
-                <span className="px-1 py-0.5 text-xs bg-orange-100 text-orange-700 rounded font-medium">{event.delayMinutes}m</span>
+                <span className="px-1 py-0.5 text-[10px] bg-orange-100 text-orange-700 rounded font-medium">{event.delayMinutes}m</span>
               )}
             </div>
-            <div className="text-xs text-gray-500 truncate">
+            <div className="text-[11px] text-gray-500 truncate">
               Gate {event.currentGate} • Pier {event.pier} • {event.destination}
             </div>
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-base font-bold text-gray-700">{formatTime(event.timeUntilDeparture)}</div>
-          <div className="text-xs text-gray-500">to depart</div>
+          <div className="text-sm font-bold text-gray-700">{formatTime(event.timeUntilDeparture)}</div>
+          <div className="text-[10px] text-gray-500">to depart</div>
         </div>
       </div>
       {!showInModal && (
-        <div className="w-full bg-gray-200 rounded-full h-1">
+        <div className="w-full bg-gray-200 rounded-full h-0.5">
           <div 
-            className={`${event.isPriority ? 'bg-amber-500' : event.isDelayed ? 'bg-orange-500' : 'bg-blue-500'} h-1 rounded-full transition-all duration-500`}
+            className={`${event.isPriority ? 'bg-amber-500' : event.isDelayed ? 'bg-orange-500' : 'bg-blue-500'} h-0.5 rounded-full transition-all duration-500`}
             style={{ width: `${Math.max(100 - (Math.max(event.timeUntilDeparture, 0) / 180 * 100), 5)}%` }}
           />
         </div>
@@ -158,7 +158,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
           </div>
         </CardHeader>
         <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
-          <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+          <div className="space-y-2 flex-1 overflow-y-auto pr-1">
             {displayEvents.length > 0 ? (
               displayEvents.map(event => renderEventRow(event))
             ) : (
@@ -175,7 +175,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
           
           {/* Summary Statistics and View All button */}
           {displayEvents.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-gray-200 flex-shrink-0">
+            <div className="mt-3 pt-2 border-t border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <span>
                   Showing {displayEvents.length} of {filteredEvents.length} gate changes
@@ -194,29 +194,29 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
           )}
           
           {/* Operational Metrics - Always show */}
-          <div className="mt-4 space-y-2 flex-shrink-0">
+          <div className="mt-3 space-y-1.5 flex-shrink-0">
             <div className="text-sm font-medium text-gray-700">Operational Impact:</div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <div className="text-xs text-gray-600">Most Affected Pier</div>
-                <div className="text-lg font-bold">
+                <div className="text-[11px] text-gray-600">Most Affected Pier</div>
+                <div className="text-base font-bold">
                   {stats.mostAffectedPier ? `Pier ${stats.mostAffectedPier[0]}` : 'None'}
-                  <span className="text-xs font-normal text-gray-500 ml-1">
+                  <span className="text-[10px] font-normal text-gray-500 ml-1">
                     ({stats.mostAffectedPier?.[1] || 0} changes)
                   </span>
                 </div>
               </div>
               
               <div>
-                <div className="text-xs text-gray-600">Departing Soon</div>
+                <div className="text-[11px] text-gray-600">Departing Soon</div>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-amber-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                    <button className={`inline-flex items-center gap-1 text-base font-bold hover:bg-amber-50 px-1 -mx-1 py-0.5 rounded transition-colors cursor-pointer ${
                       stats.urgent > 0 ? 'text-amber-600' : 'text-gray-600'
                     }`}>
                       {stats.urgent}
-                      <span className="text-xs font-normal text-gray-500 ml-1">
+                      <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                         ({stats.total > 0 ? Math.round((stats.urgent / stats.total) * 100) : 0}%)
                       </span>
                       {stats.urgent > 0 && (
@@ -262,14 +262,14 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
               </div>
               
               <div>
-                <div className="text-xs text-gray-600">Multiple Issues</div>
+                <div className="text-[11px] text-gray-600">Multiple Issues</div>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className={`inline-flex items-center gap-1 text-lg font-bold hover:bg-purple-50 px-2 -mx-2 py-0.5 rounded transition-colors cursor-pointer ${
+                    <button className={`inline-flex items-center gap-1 text-base font-bold hover:bg-purple-50 px-1 -mx-1 py-0.5 rounded transition-colors cursor-pointer ${
                       stats.multipleIssues > 0 ? 'text-purple-600' : 'text-gray-600'
                     }`}>
                       {stats.multipleIssues}
-                      <span className="text-xs font-normal text-gray-500 ml-1">
+                      <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                         ({stats.total > 0 ? Math.round((stats.multipleIssues / stats.total) * 100) : 0}%)
                       </span>
                       {stats.multipleIssues > 0 && (
@@ -323,38 +323,38 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
               </div>
               
               <div>
-                <div className="text-xs text-gray-600">Total Changes</div>
-                <div className="text-lg font-bold">
+                <div className="text-[11px] text-gray-600">Total Changes</div>
+                <div className="text-base font-bold">
                   {stats.total}
                 </div>
               </div>
             </div>
             
-            <div className="text-xs text-gray-500 mt-2">
+            <div className="text-[11px] text-gray-500 mt-1.5">
               Piers affected: {Object.keys(stats.gatesByPier).length > 0 ? Object.keys(stats.gatesByPier).sort().join(', ') : 'None'}
             </div>
           </div>
           
           {/* Status Legend - Horizontal */}
-          <div className="mt-4 pt-3 border-t flex-shrink-0">
-            <div className="text-sm font-medium text-gray-700 mb-2">Status Indicators:</div>
+          <div className="mt-3 pt-2 border-t flex-shrink-0">
+            <div className="text-xs font-medium text-gray-700 mb-1.5">Status Indicators:</div>
             
-            <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded font-medium">SOON</span>
-                <span className="text-xs text-gray-600">&lt;60min</span>
+            <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1">
+                <span className="px-1 py-0.5 text-[10px] bg-amber-100 text-amber-700 rounded font-medium">SOON</span>
+                <span className="text-[10px] text-gray-600">&lt;60min</span>
               </div>
               
-              <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.5 text-xs bg-orange-100 text-orange-700 rounded font-medium">15m</span>
-                <span className="text-xs text-gray-600">Delayed</span>
+              <div className="flex items-center gap-1">
+                <span className="px-1 py-0.5 text-[10px] bg-orange-100 text-orange-700 rounded font-medium">15m</span>
+                <span className="text-[10px] text-gray-600">Delayed</span>
               </div>
               
-              <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
-                  <ArrowRightLeft className="w-3 h-3 text-blue-600" />
+              <div className="flex items-center gap-1">
+                <div className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center">
+                  <ArrowRightLeft className="w-2.5 h-2.5 text-blue-600" />
                 </div>
-                <span className="text-xs text-gray-600">Gate change</span>
+                <span className="text-[10px] text-gray-600">Gate change</span>
               </div>
             </div>
           </div>
