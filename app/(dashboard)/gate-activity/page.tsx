@@ -545,7 +545,18 @@ export default function GateActivityPage() {
                                 </div>
                                 <div>
                                   <div className="font-medium text-sm">{config.label}</div>
-                                  <div className="text-xs text-gray-500">{config.description}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {config.description}
+                                    {state === 'CNX' && (() => {
+                                      // Check if any cancelled flights have gate assignments
+                                      const cancelledWithGates = data?.gates.flatMap(g => 
+                                        g.scheduledFlights.filter(f => 
+                                          f.flightStates.includes('CNX') && g.gateID && g.gateID !== 'TBD'
+                                        )
+                                      ) || [];
+                                      return cancelledWithGates.length > 0 ? ' (had gate assignments)' : '';
+                                    })()}
+                                  </div>
                                 </div>
                               </div>
                               <div className="text-right">

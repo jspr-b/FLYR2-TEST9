@@ -49,7 +49,8 @@
       "Bash(mv:*)",
       "Bash(nslookup:*)",
       "WebFetch(domain:www.buildwithmatija.com)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": []
   }
