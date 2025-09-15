@@ -210,10 +210,14 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     const currentTime = getCurrentAmsterdamTime();
 
     // Use actual off-block time if available (flight has departed), 
+    // For cancelled flights, always use scheduled time (ignore delays)
     // otherwise use estimated time if delayed, otherwise use scheduled time
     // API data is already in Amsterdam timezone, no conversion needed
+    const isCancelled = flight.primaryState === 'CNX' || flight.flightStates?.includes('CNX');
     const actualDepartureTime = flight.actualOffBlockTime
       ? new Date(flight.actualOffBlockTime)
+      : isCancelled
+      ? scheduledTime  // Cancelled flights stay at original time
       : flight.estimatedDateTime
       ? new Date(flight.estimatedDateTime)
       : scheduledTime;
@@ -241,9 +245,11 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
     // Simple approach given API limitations
     gateOpenTime = originalGateOpenTime;
 
-    // For departed flights use actual time, for delayed use estimated, otherwise scheduled
+    // For departed flights use actual time, for cancelled use scheduled, for delayed use estimated, otherwise scheduled
     const departureTime = flight.actualOffBlockTime
       ? new Date(flight.actualOffBlockTime)
+      : isCancelled
+      ? scheduledTime  // Cancelled flights stay at original time
       : flight.estimatedDateTime
       ? new Date(flight.estimatedDateTime)
       : scheduledTime;
