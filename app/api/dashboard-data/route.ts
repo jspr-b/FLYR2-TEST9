@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
     }, 4 * 60 * 1000) // 4 minutes - more frequent than UI refresh to ensure fresh data
     
     // Fetch the flight data - this will use cache if available
-    const response = await fetchSchipholFlights(apiConfig)
+    const apiResponse = await fetchSchipholFlights(apiConfig)
     
-    if (!response.flights || response.flights.length === 0) {
+    if (!apiResponse.flights || apiResponse.flights.length === 0) {
       console.warn('⚠️ No flights returned from Schiphol API')
       return NextResponse.json({ 
         flights: [],
@@ -63,10 +63,10 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    console.log(`✅ Received ${response.flights.length} raw flights from API`)
+    console.log(`✅ Received ${apiResponse.flights.length} raw flights from API`)
     
     // Apply KLM filtering to remove codeshares
-    let filteredFlights = filterFlights(response.flights, {
+    let filteredFlights = filterFlights(apiResponse.flights, {
       scheduleDate: todayDate,
       prefixicao: 'KL'
     })
