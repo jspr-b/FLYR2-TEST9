@@ -92,6 +92,7 @@ interface GateActivityData {
 export default function GateActivityPage() {
   const [lastSuccessfulUpdate, setLastSuccessfulUpdate] = useState<Date | null>(null)
   const [gateChangesData, setGateChangesData] = useState<any>(null)
+  const [totalFlights, setTotalFlights] = useState<number>(0)
   
   const fetchGateActivity = async (isBackgroundRefresh = false): Promise<GateActivityData> => {
     try {
@@ -130,6 +131,10 @@ export default function GateActivityPage() {
       if (result.gateOccupancy && result.gateChanges) {
         // Store gate changes data for the dashboard component
         setGateChangesData(result.gateChanges)
+        // Store total flights from metadata
+        if (result.metadata?.totalFlights) {
+          setTotalFlights(result.metadata.totalFlights)
+        }
         return result.gateOccupancy
       }
       
@@ -793,7 +798,7 @@ export default function GateActivityPage() {
                     <div className="flex items-center justify-between text-xs text-gray-600">
                       <span>Total Registered Flights</span>
                       <span className="font-semibold text-gray-900">
-                        {Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}
+                        {totalFlights || Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}
                       </span>
                     </div>
                     {lastSuccessfulUpdate && (

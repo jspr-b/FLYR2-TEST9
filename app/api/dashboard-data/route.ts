@@ -16,6 +16,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const includeGateOccupancy = searchParams.get('includeGateOccupancy') !== 'false'
     const includeGateChanges = searchParams.get('includeGateChanges') !== 'false'
+    // When true, includes ALL cancelled flights scheduled for today
+    // This shows the complete operational picture for today, including flights cancelled yesterday
     const includeCancelled = searchParams.get('includeCancelled') === 'true'
     
     // Fetch all pages of flight data for today
@@ -64,7 +66,30 @@ export async function GET(request: NextRequest) {
     }
     
     // Remove stale and duplicate flights
-    const freshFlights = removeStaleFlights(filteredFlights)
+    // When includeCancelled is true, we keep ALL cancelled flights scheduled for today
+    // regardless of when they were cancelled, as they still impact today's operations
+    let freshFlights = filteredFlights
+    if (includeCancelled) {
+      // Separate cancelled and non-cancelled flights
+      const cancelledFlights = filteredFlights.filter(f => 
+        f.publicFlightState?.flightStates?.includes('CNX')
+      )
+      const nonCancelledFlights = filteredFlights.filter(f => 
+        !f.publicFlightState?.flightStates?.includes('CNX')
+      )
+      
+      // Apply stale filter only to non-cancelled flights
+      const freshNonCancelled = removeStaleFlights(nonCancelledFlights)
+      
+      // Combine fresh non-cancelled with ALL cancelled flights
+      freshFlights = [...freshNonCancelled, ...cancelledFlights]
+      
+      console.log(`📊 Keeping ALL ${cancelledFlights.length} cancelled flights scheduled for today (regardless of cancellation date)`)
+    } else {
+      // Normal stale filtering when not including cancelled
+      freshFlights = removeStaleFlights(filteredFlights)
+    }
+    
     let uniqueFlights = removeDuplicateFlights(freshFlights)
 
     // Process cancelled flights - move their gate assignment to originalGate and set gate to null
@@ -82,13 +107,17 @@ export async function GET(request: NextRequest) {
       return flight
     })
 
-    // Count TBD gates
+    // Count gates - only exclude cancelled flights WITH gates from metrics
     const tbdGates = uniqueFlights.filter(f => f.gate === 'TBD').length
     const assignedGates = uniqueFlights.filter(f => f.gate && f.gate !== 'TBD').length
+    // No gates includes operational flights + cancelled flights without gates
     const noGates = uniqueFlights.filter(f => !f.gate).length
+    const cancelledWithGates = uniqueFlights.filter(f => f.isCancelled && f.originalGate).length
+    const cancelledNoGates = uniqueFlights.filter(f => f.isCancelled && !f.originalGate).length
     
-    console.log(`🔍 Processing ${uniqueFlights.length} unique operational flights`)
+    console.log(`🔍 Processing ${uniqueFlights.length} total flights`)
     console.log(`📊 Gate Status: ${assignedGates} assigned, ${tbdGates} TBD, ${noGates} no gate`)
+    console.log(`🚫 Cancelled breakdown: ${cancelledWithGates} with gates (excluded from no-gate), ${cancelledNoGates} without gates (included in no-gate)`)
 
     // Get current Amsterdam time
     const currentTime = getCurrentAmsterdamTime()
@@ -212,7 +241,7 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         gateMap.set(noGateKey, [])
       }
       gateMap.get(noGateKey)!.push(flight)
-      console.log(`📍 Adding flight ${flight.flightName} to NO_GATE category`)
+      console.log(`📍 Adding flight ${flight.flightName} to NO_GATE category${flight.isCancelled ? ' (cancelled)' : ''}`)
     }
   })
 
@@ -346,7 +375,11 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         pierUtilization: [],
         busiestPier: gates.length > 0 ? gates[0].pier : 'N/A',
         totalFlightsHandled: flights.length
-      }
+      },
+      // Add no-gate counts for the UI
+      operationalNoGateCount: flights.filter(f => !f.gate && !f.isCancelled).length,
+      // Total no-gate for display (operational + cancelled without gates)
+      displayNoGateCount: flights.filter(f => !f.gate).length
     },
     gates: gates // Return all gates
   }

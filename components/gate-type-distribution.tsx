@@ -105,7 +105,8 @@ export function GateTypeDistribution() {
           // Calculate TBD and no gate metrics from raw flights data
           const tbdFlights = data.flights.filter((f: any) => f.gate === 'TBD').length
           const noGateFlightsList = data.flights.filter((f: any) => !f.gate)
-          const noGateFlights = noGateFlightsList.length
+          // Count only flights without gates that never had gates (exclude cancelled with originalGate)
+          const noGateFlights = data.flights.filter((f: any) => !f.gate && !f.originalGate).length
           const assignedGateFlights = data.flights.filter((f: any) => f.gate && f.gate !== 'TBD').length
           
           // Find departed flights without gates (these are "unknown" gate type)
@@ -463,7 +464,7 @@ export function GateTypeDistribution() {
                             <p className="text-xs text-gray-600">These flights are pending gate allocation or have special handling requirements.</p>
                           </div>
                           <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {gateStatusMetrics.noGateFlightsList.map((flight: any) => (
+                            {gateStatusMetrics.noGateFlightsList.filter((flight: any) => !flight.originalGate).map((flight: any) => (
                               <div key={flight.flightNumber} className="text-sm border-b border-gray-100 pb-2 last:border-0">
                                 <div className="flex items-center justify-between">
                                   <span className="font-medium">{flight.flightName}</span>
