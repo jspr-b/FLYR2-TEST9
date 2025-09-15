@@ -55,6 +55,17 @@ async function fetchDashboardKPIs() {
   }
 }
 
+async function fetchDashboardData() {
+  try {
+    const response = await fetch('/api/dashboard-data?includeGateOccupancy=false&includeGateChanges=false&includeCancelled=true')
+    if (!response.ok) throw new Error('Failed to fetch dashboard data')
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error)
+    return null
+  }
+}
+
 async function fetchAircraftPerformance() {
   try {
     const response = await fetch('/api/aircraft/performance')
@@ -250,16 +261,26 @@ export function DashboardKPIs() {
           fetchDashboardKPIs(),
           fetchAircraftPerformance(),
           fetchGatesTerminalsSummary(),
-          fetchDelayTrendsHourly()
+          fetchDelayTrendsHourly(),
+          fetchDashboardData()
         ])
         
-        const [dashboardKPIs, aircraftData, gatesData, delayTrends] = await Promise.race([
+        const [dashboardKPIs, aircraftData, gatesData, delayTrends, dashboardData] = await Promise.race([
           dataPromise,
           timeoutPromise
-        ]) as [any, any, any, any]
+        ]) as [any, any, any, any, any]
 
-        // Process dashboard KPIs
-        if (dashboardKPIs) {
+        // Log the data to debug
+        console.log('Dashboard Data received:', {
+          dashboardData: dashboardData?.metadata,
+          dashboardKPIs: { totalFlights: dashboardKPIs?.totalFlights }
+        })
+
+        // Process dashboard KPIs  
+        // Use dashboardData's totalFlights as the source of truth
+        const totalFlightsToday = dashboardData?.metadata?.totalFlights || dashboardKPIs?.totalFlights || 0
+        
+        if (dashboardKPIs || dashboardData) {
           const initialKPIData: KPIData[] = [
             {
               label: "Fleet Avg Delay",
@@ -274,13 +295,13 @@ export function DashboardKPIs() {
             },
             {
               label: "Total Registered Flights Today",
-              value: dashboardKPIs.totalFlights?.toString() || "0",
-              change: `${dashboardKPIs.totalFlights || 0} KLM departures`,
+              value: totalFlightsToday.toString(),
+              change: `${totalFlightsToday} KLM departures`,
               changeType: "neutral",
               icon: Plane,
               color: "text-blue-600",
               bgColor: "bg-blue-50",
-              href: "/delay-trends-by-hour",
+              href: "/gate-activity",
               status: "good",
             },
             {
@@ -456,14 +477,14 @@ export function DashboardKPIs() {
             status: "critical",
           },
           {
-            label: "Total Flights Today",
+            label: "Total Registered Flights Today",
               value: "0",
               change: "No KLM flights",
               changeType: "neutral",
               icon: Plane,
               color: "text-blue-600",
               bgColor: "bg-blue-50",
-              href: "/delay-trends-by-hour",
+              href: "/gate-activity",
               status: "good",
             },
             {
@@ -613,13 +634,14 @@ export function DashboardKPIs() {
           fetchDashboardKPIs(),
           fetchAircraftPerformance(),
           fetchGatesTerminalsSummary(),
-          fetchDelayTrendsHourly()
+          fetchDelayTrendsHourly(),
+          fetchDashboardData()
         ])
         
-        const [dashboardKPIs, aircraftData, gatesData, delayTrends] = await Promise.race([
+        const [dashboardKPIs, aircraftData, gatesData, delayTrends, dashboardData] = await Promise.race([
           dataPromise,
           timeoutPromise
-        ]) as [any, any, any, any]
+        ]) as [any, any, any, any, any]
 
         // Process and update data (same logic as initial fetch but without loading state)
         if (dashboardKPIs) {

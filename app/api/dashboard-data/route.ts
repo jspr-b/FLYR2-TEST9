@@ -248,7 +248,6 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
   // Analyze gate status
   console.log(`📊 Processing ${gateMap.size} gates with flights`)
   const gates = Array.from(gateMap.entries())
-    .filter(([gateID]) => gateID !== 'NO_GATE') // Exclude NO_GATE from gates list
     .map(([gateID, gateFlights]) => {
     // Sort flights by schedule time
     gateFlights.sort((a, b) => 
@@ -287,9 +286,9 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
 
     return {
       gateID,
-      pier: gateID.charAt(0),
-      status,
-      occupiedBy,
+      pier: gateID === 'NO_GATE' ? 'NO_GATE' : gateID.charAt(0),
+      status: gateID === 'NO_GATE' ? 'PENDING' : status,
+      occupiedBy: gateID === 'NO_GATE' ? null : occupiedBy,
       utilization: {
         current: status === 'OCCUPIED' ? 100 : 0,
         daily: Math.round((gateFlights.length / 20) * 100), // Estimate based on typical daily flights

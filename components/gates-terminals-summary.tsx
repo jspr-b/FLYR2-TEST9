@@ -58,14 +58,24 @@ export function GatesTerminalsSummary() {
         // Get unique piers
         const piers = new Set(gates.map(gate => gate.pier).filter(Boolean))
         
+        // Use the total flights from metadata if available, otherwise calculate
+        const totalFlightsFromAPI = (data as any).metadata?.flightsAnalyzed || 0
+        
         // Calculate flights by Schengen/Non-Schengen
         let schengenFlights = 0
         let nonSchengenFlights = 0
-        let totalFlights = 0
+        let totalFlights = totalFlightsFromAPI || 0
+        
+        // Only calculate if not provided by API
+        if (!totalFlightsFromAPI) {
+          gates.forEach(gate => {
+            const flightCount = gate.utilization.logical || 0
+            totalFlights += flightCount
+          })
+        }
         
         gates.forEach(gate => {
           const flightCount = gate.utilization.logical || 0
-          totalFlights += flightCount
           
           // Determine Schengen vs Non-Schengen based on gate classification
           const isSchengenGate = (gateID: string, pier: string) => {

@@ -196,6 +196,7 @@ export default function GateActivityPage() {
     
     // Flight States Distribution
     flightStates: (() => {
+      // First get flights from all gates (including NO_GATE)
       const allFlightStates = data.gates.flatMap(gate => 
         gate.scheduledFlights.map(flight => ({
           state: flight.primaryState === 'GCH' ? 'SCH' : flight.primaryState, // Count GCH as SCH
@@ -204,15 +205,26 @@ export default function GateActivityPage() {
           pier: gate.pier
         }))
       )
+      
       console.log(`🔍 Total flight states before filtering: ${allFlightStates.length}`)
       
       const validStates = allFlightStates.filter(flight => flight.state && flight.state !== 'UNKNOWN')
       console.log(`🔍 Valid flight states after filtering: ${validStates.length}`)
       
-      return validStates.reduce((acc, flight) => {
+      // Check if NO_GATE is included
+      const noGateFlights = validStates.filter(f => f.gate === 'NO_GATE')
+      if (noGateFlights.length > 0) {
+        console.log(`🔍 Found ${noGateFlights.length} flights in NO_GATE (including cancelled)`)
+        const operationalNoGate = noGateFlights.filter(f => f.state !== 'CNX').length
+        console.log(`🔍 Of which ${operationalNoGate} are operational`)
+      }
+      
+      const stateCount = validStates.reduce((acc, flight) => {
         acc[flight.state] = (acc[flight.state] || 0) + 1
         return acc
       }, {} as Record<string, number>)
+      
+      return stateCount
     })(),
     
     // Gate Changes Analysis - enhanced with time-based analysis
@@ -787,11 +799,36 @@ export default function GateActivityPage() {
                   
                   {/* Total flights indicator */}
                   <div className="mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
-                    <div className="flex items-center justify-between text-xs text-gray-600">
-                      <span>Total Registered Flights</span>
-                      <span className="font-semibold text-gray-900">
-                        {totalFlights || Object.values(processedData?.flightStates || {}).reduce((sum, val) => sum + val, 0)}
-                      </span>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-gray-600">
+                        <span>Total Active Flights (Operational)</span>
+                        <span className="font-semibold text-gray-900">
+                          {(() => {
+                            // Use API metadata for canonical counts
+                            const total = totalFlights; // This is 372 from metadata
+                            const cancelled = processedData?.flightStates?.CNX || 0; // This is 25
+                            const activeFlights = total - cancelled; // 372 - 25 = 347
+                            
+                            console.log('Flight calculation (using metadata):', {
+                              totalFlights,
+                              cancelled,
+                              activeFlights
+                            });
+                            
+                            return activeFlights;
+                          })()}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Cancelled Flights</span>
+                        <span className="font-medium">
+                          {processedData?.flightStates?.CNX || 0}
+                        </span>
+                      </div>
+                      {/* Note about operational flights without gates */}
+                      <div className="text-[10px] text-gray-400 mt-1">
+                        * Includes operational flights awaiting gate assignment
+                      </div>
                     </div>
                     {lastSuccessfulUpdate && (
                       <div className="text-xs text-gray-500 mt-1">
