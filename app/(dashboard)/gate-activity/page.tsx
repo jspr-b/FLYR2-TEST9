@@ -129,9 +129,19 @@ export default function GateActivityPage() {
       setLastSuccessfulUpdate(new Date())
       
       // Extract gate occupancy data from combined response
-      if (result.gateOccupancy && result.gateChanges) {
+      console.log('API Response structure:', {
+        hasGateOccupancy: !!result.gateOccupancy,
+        hasGateChanges: !!result.gateChanges,
+        hasMetadata: !!result.metadata,
+        gateOccupancyKeys: result.gateOccupancy ? Object.keys(result.gateOccupancy) : [],
+        metadataKeys: result.metadata ? Object.keys(result.metadata) : []
+      })
+      
+      if (result.gateOccupancy) {
         // Store gate changes data for the dashboard component
-        setGateChangesData(result.gateChanges)
+        if (result.gateChanges) {
+          setGateChangesData(result.gateChanges)
+        }
         // Store total flights and gate statistics from metadata
         if (result.metadata?.totalFlights) {
           setTotalFlights(result.metadata.totalFlights)
@@ -139,11 +149,20 @@ export default function GateActivityPage() {
         if (result.metadata?.gateStatistics) {
           setGateStatistics(result.metadata.gateStatistics)
         }
-        return result.gateOccupancy
+        
+        // Ensure gateOccupancy has the expected structure
+        const gateOccupancy = result.gateOccupancy
+        if (!gateOccupancy.gates) {
+          console.error('Missing gates array in gateOccupancy:', gateOccupancy)
+          return { summary: { totalGates: 0, totalPiers: 0, activePiers: 0, activePiersList: [], statusBreakdown: {}, averageUtilization: 0, delayedFlights: { totalDelayedFlights: 0, averageDelayMinutes: 0, totalDelayMinutes: 0, maxDelay: { minutes: 0, formatted: '', flight: null } } }, gates: [] }
+        }
+        
+        return gateOccupancy
       }
       
       // Fallback for backward compatibility
-      return result
+      console.warn('No gateOccupancy in response, using fallback')
+      return { summary: { totalGates: 0, totalPiers: 0, activePiers: 0, activePiersList: [], statusBreakdown: {}, averageUtilization: 0, delayedFlights: { totalDelayedFlights: 0, averageDelayMinutes: 0, totalDelayMinutes: 0, maxDelay: { minutes: 0, formatted: '', flight: null } } }, gates: [] }
     } catch (error) {
       console.error(`❌ Gate activity fetch error (Background: ${isBackgroundRefresh}):`, error)
       // Add more context to network errors
@@ -171,8 +190,8 @@ export default function GateActivityPage() {
       flightNumber: flight.flightNumber,
       scheduleDateTime: flight.scheduleDateTime,
       estimatedDateTime: flight.estimatedDateTime,
-      actualDateTime: flight.actualDateTime,
-      actualOffBlockTime: flight.actualOffBlockTime || flight.actualDateTime,
+      actualDateTime: flight.actualDateTime || null,
+      actualOffBlockTime: flight.actualOffBlockTime || flight.actualDateTime || null,
       aircraftType: flight.aircraftType,
       destination: flight.destination,
       primaryState: flight.primaryState,

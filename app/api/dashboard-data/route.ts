@@ -372,6 +372,34 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
     .map(g => g.pier))
 
   return {
+    summary: {
+      totalGates: gates.length,
+      totalPiers: new Set(gates.map(g => g.pier).filter(p => p !== 'NO_GATE')).size,
+      activePiers: activePiers.size,
+      activePiersList: Array.from(activePiers),
+      statusBreakdown,
+      averageUtilization,
+      delayedFlights: {
+        totalDelayedFlights: delayedFlights.length,
+        averageDelayMinutes: Math.round(averageDelay),
+        totalDelayMinutes: Math.round(delayedFlights.reduce((sum, f) => sum + calculateDelay(f), 0)),
+        maxDelay: {
+          minutes: maxDelay,
+          formatted: formatDelay(maxDelay),
+          flight: delayedFlights.find(f => calculateDelay(f) === maxDelay) || null
+        }
+      },
+      schipholContext: {
+        totalSchipholGates: 223,
+        totalSchipholPiers: 8,
+        klmOperationalFootprint: Math.round((gates.length / 223) * 100),
+        klmGatesUsedToday: gates.length,
+        unusedSchipholGates: 223 - gates.length,
+        pierUtilization: [],
+        busiestPier: gates.length > 0 ? gates[0].pier : 'N/A',
+        totalFlightsHandled: flights.length
+      }
+    },
     metadata: {
       timestamp: currentTime.toISOString(),
       amsterdamTime: currentTime.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
