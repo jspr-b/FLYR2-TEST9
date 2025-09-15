@@ -801,7 +801,7 @@ export default function GateActivityPage() {
                     </div>
                   </div>
                   
-                  {/* Total flights indicator */}
+                  {/* Total flights and gates indicator */}
                   <div className="mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs text-gray-600">
@@ -829,6 +829,47 @@ export default function GateActivityPage() {
                           {processedData?.flightStates?.CNX || 0}
                         </span>
                       </div>
+                      
+                      {/* Gate metrics section */}
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex items-center justify-between text-xs text-gray-600">
+                          <span>Total Gate Categories</span>
+                          <span className="font-semibold text-gray-900">
+                            {data?.summary?.totalGates || 0}
+                            <span className="text-[10px] font-normal text-gray-500 ml-1">
+                              (incl. NO_GATE)
+                            </span>
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-600 mt-1">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button className="inline-flex items-center gap-1 hover:bg-gray-50 px-1 -mx-1 rounded transition-colors cursor-pointer">
+                                <span>Currently Active Gates</span>
+                                <Info className="w-3 h-3 text-gray-400" />
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-64" align="start">
+                              <div className="space-y-2 text-sm">
+                                <div className="font-semibold text-gray-900">Gate Activity Status</div>
+                                <p className="text-xs text-gray-600">
+                                  Gates with flights in boarding (BRD) or gate open (GTO) states within a 2-hour operational window.
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  This metric shows real-time gate occupancy for operational planning.
+                                </p>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                          <span className="font-semibold text-green-700">
+                            {processedData?.activeGates?.length || 0}
+                            <span className="text-[10px] font-normal text-gray-500 ml-1">
+                              gates
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      
                       {/* Note about operational flights without gates */}
                       <div className="text-[10px] text-gray-400 mt-1">
                         * Includes operational flights awaiting gate assignment

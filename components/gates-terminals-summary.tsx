@@ -1,8 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Building2, DoorOpen, Plane, TrendingUp } from "lucide-react"
+import { Building2, DoorOpen, Plane, TrendingUp, Info } from "lucide-react"
 import { formatUtilization } from "@/lib/client-utils"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface SummaryStat {
   label: string
@@ -115,9 +120,9 @@ export function GatesTerminalsSummary() {
 
         const summaryStats: SummaryStat[] = [
           {
-            label: "Active Gates",
+            label: "Active Physical Gates",
             value: activeGates.toString(),
-            change: `${piers.size} piers operational`,
+            change: `${gates.length} physical gates total`,
             icon: Building2,
             color: "text-blue-600",
             bgColor: "bg-blue-50",
@@ -215,7 +220,35 @@ export function GatesTerminalsSummary() {
         <div key={index} className="bg-white rounded-lg border border-gray-200 p-3 xs:p-4 sm:p-5 lg:p-6 cursor-default">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1 truncate">{stat.label}</p>
+              <div className="flex items-center gap-1">
+                <p className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-600 mb-0.5 sm:mb-1 truncate">{stat.label}</p>
+                {index === 0 && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="inline-flex items-center justify-center">
+                        <Info className="w-3 h-3 text-gray-400 hover:text-gray-600" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72" align="start">
+                      <div className="space-y-2">
+                        <div className="font-semibold text-sm">Physical Gates vs Gate Categories</div>
+                        <p className="text-xs text-gray-600">
+                          This page shows <span className="font-semibold">98 physical gates</span> at Schiphol Airport used by KLM today.
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          The Gate Activity page shows <span className="font-semibold">99 gate categories</span>, which includes a "NO_GATE" category for flights without gate assignments.
+                        </p>
+                        <div className="mt-2 pt-2 border-t">
+                          <p className="text-xs font-semibold text-gray-700">Active Gates Definition:</p>
+                          <p className="text-xs text-gray-600">
+                            Gates currently occupied by aircraft with flights in boarding (BRD), gate open (GTO), gate closing (GCL), or gate closed (GTD) states.
+                          </p>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
               <p className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1">{stat.value}</p>
               <p className="text-[9px] xs:text-[10px] sm:text-xs text-gray-500 truncate">{stat.change}</p>
             </div>
