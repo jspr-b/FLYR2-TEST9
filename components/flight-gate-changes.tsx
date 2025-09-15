@@ -142,7 +142,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
         <CardHeader className="pb-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <CardTitle className="text-base">Flight Gate Changes</CardTitle>
+              <CardTitle className="text-base">Upcoming Gate Changes</CardTitle>
               <p className="text-xs text-gray-600">Flights with GCH status</p>
             </div>
             <Select value={viewMode} onValueChange={(value: ViewMode) => setViewMode(value)}>
@@ -199,7 +199,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
             
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <div className="text-[11px] text-gray-600">Most Affected Pier</div>
+                <div className="text-[11px] text-gray-600">Currently Most Affected Pier</div>
                 <div className="text-base font-bold">
                   {stats.mostAffectedPier ? `Pier ${stats.mostAffectedPier[0]}` : 'None'}
                   <span className="text-[10px] font-normal text-gray-500 ml-1">
@@ -323,7 +323,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
               </div>
               
               <div>
-                <div className="text-[11px] text-gray-600">Total Changes</div>
+                <div className="text-[11px] text-gray-600">Upcoming Changes</div>
                 <div className="text-base font-bold">
                   {stats.total}
                 </div>
@@ -365,7 +365,7 @@ export function FlightGateChanges({ gateChangeEvents }: GateChangesTrackerProps)
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Flight Gate Changes - Full Report</DialogTitle>
+            <DialogTitle>Upcoming Gate Changes - Full Report</DialogTitle>
             <DialogDescription>
               All flights with GCH status sorted by {viewMode === 'priority' ? 'priority' : viewMode === 'delayed' ? 'complexity' : 'departure time'}
             </DialogDescription>
