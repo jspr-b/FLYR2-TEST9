@@ -4,6 +4,9 @@ import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time
 import { ensureCacheWarmed } from '@/lib/cache-manager'
 import { getMostSignificantState } from '@/lib/flight-state-priority'
 
+// Extend Vercel function timeout to 60 seconds
+export const maxDuration = 60
+
 /**
  * Combined endpoint that fetches flight data once and provides all dashboard information
  * This reduces multiple API calls to a single efficient request
@@ -28,36 +31,43 @@ export async function GET(request: NextRequest) {
       flightDirection: 'D' as const, // Departures only
       airline: 'KL',
       scheduleDate: todayDate,
-      fetchAllPages: true
+      fetchAllPages: true,
+      isBackgroundRefresh: false
     }
     
-    // Ensure cache is warmed and register for background refresh
-    await ensureCacheWarmed('dashboard-combined-data', apiConfig)
+    // Register cache warming task BEFORE fetching data
+    // This ensures that even if this request times out, background refresh will maintain fresh data
+    ensureCacheWarmed('dashboard-combined-data', async () => {
+      console.log('🔄 Background cache refresh triggered for dashboard data')
+      const backgroundConfig = {
+        ...apiConfig,
+        isBackgroundRefresh: true,
+        maxPagesToFetch: 25 // Limit pages for background refresh to avoid timeout
+      }
+      return await fetchSchipholFlights(backgroundConfig)
+    }, 4 * 60 * 1000) // 4 minutes - more frequent than UI refresh to ensure fresh data
     
-    // Create a timeout promise that rejects after 25 seconds
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout - data fetch taking too long')), 25000)
-    })
+    // Fetch the flight data - this will use cache if available
+    const response = await fetchSchipholFlights(apiConfig)
     
-    // Race between data fetch and timeout
-    const rawData = await Promise.race([
-      fetchSchipholFlights(apiConfig),
-      timeoutPromise
-    ])
-
-    if (!rawData.flights) {
-      console.error('❌ No flights data received from Schiphol API')
-      return NextResponse.json({ error: 'No data received from API' }, { status: 500 })
+    if (!response.flights || response.flights.length === 0) {
+      console.warn('⚠️ No flights returned from Schiphol API')
+      return NextResponse.json({ 
+        flights: [],
+        metadata: {
+          totalFlights: 0,
+          timestamp: getCurrentAmsterdamTime().toISOString(),
+          amsterdamTime: getCurrentAmsterdamTime().toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
+          todayDate
+        }
+      })
     }
-
-    console.log(`✅ Received ${rawData.flights.length} raw flights from API`)
-
-    // Transform and filter flights
-    const transformedFlights = rawData.flights.map(transformSchipholFlight)
-    const filteredFlights = filterFlights(transformedFlights, {
-      flightDirection: 'D',
+    
+    console.log(`✅ Received ${response.flights.length} raw flights from API`)
+    
+    // Apply KLM filtering to remove codeshares
+    let filteredFlights = filterFlights(response.flights, {
       scheduleDate: todayDate,
-      isOperationalFlight: !includeCancelled, // If includeCancelled is true, don't filter by operational status
       prefixicao: 'KL'
     })
     
@@ -151,102 +161,96 @@ export async function GET(request: NextRequest) {
       response.gateOccupancy = gateOccupancyData
       // Also add raw flights data for gate status metrics
       response.flights = uniqueFlights
+    } else if (includeGateChanges) {
+      // Only return flights for gate changes view
+      response.flights = uniqueFlights
+    } else {
+      // Return all flight data by default
+      response.flights = uniqueFlights
     }
 
-    // Add gate changes data if requested
-    if (includeGateChanges) {
-      const gateChangesData = processGateChanges(uniqueFlights, currentTime)
-      response.gateChanges = gateChangesData
-    }
-
-    console.log('✅ Dashboard data compiled successfully')
-    
     return NextResponse.json(response)
-    
   } catch (error) {
-    console.error('❌ Error in dashboard data endpoint:', error)
+    console.error('❌ Dashboard Data API Error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch dashboard data', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Failed to fetch dashboard data',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
 }
 
 /**
- * Helper function to get readable flight state
+ * Extract flight states readable format
  */
 function getFlightStateReadable(state: string): string {
   const stateMap: Record<string, string> = {
-    'SCH': 'Flight Scheduled',
-    'DEL': 'Delayed',
-    'WIL': 'Wait in Lounge',
-    'GTO': 'Gate Open',
+    'SCH': 'Scheduled',
+    'AIR': 'Airborne',
+    'EXP': 'Expected Landing',
+    'FLB': 'Flight Plan Activated',
+    'LND': 'Landed',
+    'FIR': 'Flight In Dutch Airspace',
+    'ARR': 'Arrived At Gate',
     'BRD': 'Boarding',
+    'GTO': 'Gate Open', 
     'GCL': 'Gate Closing',
     'GTD': 'Gate Closed',
     'DEP': 'Departed',
     'CNX': 'Cancelled',
-    'GCH': 'Gate Change',
-    'TOM': 'Tomorrow'
+    'TOM': 'Tomorrow',
+    'DLY': 'Delayed',
+    'GCH': 'Gate Changed',
+    'WIL': 'Wait In Lounge'
   }
   return stateMap[state] || state
 }
 
 /**
- * Calculate delay in minutes
+ * Calculate flight delay in minutes
  */
 function calculateDelay(flight: any): number {
-  if (flight.scheduleDateTime) {
-    const scheduled = new Date(flight.scheduleDateTime)
-    // Use actual off-block time if available (departed flights), otherwise estimated time
-    const actualTime = flight.actualOffBlockTime || flight.publicEstimatedOffBlockTime
-    if (actualTime) {
-      const actual = new Date(actualTime)
-      return Math.max(0, Math.round((actual.getTime() - scheduled.getTime()) / (1000 * 60)))
-    }
+  if (!flight.publicEstimatedOffBlockTime || !flight.scheduleDateTime) {
+    return 0
   }
-  return 0
+  
+  const scheduled = new Date(flight.scheduleDateTime)
+  const estimated = new Date(flight.publicEstimatedOffBlockTime)
+  const delayMs = estimated.getTime() - scheduled.getTime()
+  
+  return Math.round(delayMs / (1000 * 60)) // Convert to minutes
 }
 
 /**
  * Format delay for display
  */
 function formatDelay(minutes: number): string {
-  if (minutes === 0) return ''
-  if (minutes < 60) return `${minutes}m`
+  if (minutes <= 0) return 'On time'
+  if (minutes < 60) return `${minutes}m delay`
+  
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+  return `${hours}h ${mins}m delay`
 }
 
 /**
- * Process flights for gate occupancy analysis
+ * Process gate occupancy data with improved structure
  */
 function processGateOccupancy(flights: any[], currentTime: Date) {
   // Group flights by gate
   const gateMap = new Map<string, any[]>()
   
   flights.forEach(flight => {
-    // Handle cancelled flights with original gates
-    if (flight.isCancelled && flight.originalGate) {
-      console.log(`📍 Adding cancelled flight ${flight.flightName} to gate ${flight.originalGate} for display`)
-      // Add cancelled flights to their original gate for Gantt display
-      const gate = flight.originalGate
-      if (!gateMap.has(gate)) {
-        gateMap.set(gate, [])
+    // Handle cancelled flights differently - use originalGate if available
+    const gateID = flight.isCancelled && flight.originalGate ? flight.originalGate : flight.gate
+    
+    if (gateID) {
+      if (!gateMap.has(gateID)) {
+        gateMap.set(gateID, [])
       }
-      // Restore the gate for display purposes
-      gateMap.get(gate)!.push({
-        ...flight,
-        gate: gate,
-        isCancelled: true
-      })
-    } else if (flight.gate) {
-      // Normal flight processing
-      if (!gateMap.has(flight.gate)) {
-        gateMap.set(flight.gate, [])
-      }
-      gateMap.get(flight.gate)!.push(flight)
+      gateMap.get(gateID)!.push(flight)
     } else {
       // Flights with no gate (including cancelled flights with no original gate)
       const noGateKey = 'NO_GATE'
@@ -327,15 +331,20 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         flightStatesReadable: (flight.publicFlightState?.flightStates || []).map(getFlightStateReadable),
         delayMinutes: calculateDelay(flight),
         delayFormatted: formatDelay(calculateDelay(flight)),
-        delayReason: calculateDelay(flight) > 0 ? 'Operational' : '',
-        isDelayed: flight.publicFlightState?.flightStates?.includes('DEL') || calculateDelay(flight) > 15,
         scheduleDateTime: flight.scheduleDateTime,
-        estimatedDateTime: flight.publicEstimatedOffBlockTime || null,
-        actualDateTime: flight.actualOffBlockTime || null,
-        actualOffBlockTime: flight.actualOffBlockTime || null,
-        expectedTimeBoarding: flight.expectedTimeBoarding || null
+        estimatedDateTime: flight.publicEstimatedOffBlockTime || flight.scheduleDateTime,
+        isDelayed: calculateDelay(flight) > 0,
+        isCancelled: flight.isCancelled || false,
+        originalGate: flight.originalGate || null
       }))
     }
+  })
+
+  // Sort gates by ID
+  gates.sort((a, b) => {
+    if (a.gateID === 'NO_GATE') return 1
+    if (b.gateID === 'NO_GATE') return -1
+    return a.gateID.localeCompare(b.gateID)
   })
 
   // Calculate summary statistics
@@ -344,47 +353,30 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
     return acc
   }, {} as Record<string, number>)
 
-  const pierSet = new Set(gates.map(g => g.pier))
-  const activePiers = gates.filter(g => g.status !== 'AVAILABLE').map(g => g.pier)
-  const uniqueActivePiers = [...new Set(activePiers)]
+  const averageUtilization = gates.length > 0
+    ? gates.reduce((sum, gate) => sum + gate.utilization.current, 0) / gates.length
+    : 0
 
-  // Calculate delay statistics
+  // Calculate additional metrics
   const delayedFlights = flights.filter(f => calculateDelay(f) > 0)
-  const totalDelayMinutes = delayedFlights.reduce((sum, f) => sum + calculateDelay(f), 0)
-  const averageDelayMinutes = delayedFlights.length > 0 ? Math.round(totalDelayMinutes / delayedFlights.length) : 0
-  
-  const maxDelayFlight = delayedFlights.reduce((max, f) => {
-    const delay = calculateDelay(f)
-    return delay > calculateDelay(max) ? f : max
-  }, delayedFlights[0] || null)
+  const averageDelay = delayedFlights.length > 0
+    ? delayedFlights.reduce((sum, f) => sum + calculateDelay(f), 0) / delayedFlights.length
+    : 0
+  const maxDelay = delayedFlights.length > 0
+    ? Math.max(...delayedFlights.map(f => calculateDelay(f)))
+    : 0
 
-  // Count total scheduled flights
-  const totalScheduledFlights = gates.reduce((sum, gate) => sum + gate.scheduledFlights.length, 0)
-  console.log(`📊 Total scheduled flights across all gates: ${totalScheduledFlights}`)
-  
+  // Add metadata for analysis
+  const activePiers = new Set(gates
+    .filter(g => g.status === 'OCCUPIED' && g.pier !== 'NO_GATE')
+    .map(g => g.pier))
+
   return {
-    summary: {
-      totalGates: gates.length,
-      totalPiers: pierSet.size,
-      activePiers: uniqueActivePiers.length,
-      activePiersList: uniqueActivePiers,
-      statusBreakdown,
-      averageUtilization: Math.round((gates.filter(g => g.status === 'OCCUPIED').length / gates.length) * 100),
-      delayedFlights: {
-        totalDelayedFlights: delayedFlights.length,
-        averageDelayMinutes,
-        totalDelayMinutes,
-        maxDelay: maxDelayFlight ? {
-          minutes: calculateDelay(maxDelayFlight),
-          formatted: formatDelay(calculateDelay(maxDelayFlight)),
-          flight: maxDelayFlight
-        } : {
-          minutes: 0,
-          formatted: '',
-          flight: null
-        }
-      },
-      schipholContext: {
+    metadata: {
+      timestamp: currentTime.toISOString(),
+      amsterdamTime: currentTime.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
+      flightsAnalyzed: flights.length,
+      schipholInfrastructure: {
         totalSchipholGates: 223,
         totalSchipholPiers: 8,
         klmOperationalFootprint: Math.round((gates.length / 223) * 100),
@@ -410,46 +402,31 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
  * Process flights for gate changes (GCH state)
  */
 function processGateChanges(flights: any[], currentTime: Date) {
-  const gateChangeEvents = flights
-    .filter(flight => {
-      // Check if flight has GCH in its states
-      return flight.publicFlightState?.flightStates?.includes('GCH') && flight.gate
-    })
-    .map(flight => {
-      const scheduleTime = new Date(flight.scheduleDateTime)
-      const timeUntilDeparture = Math.round((scheduleTime.getTime() - currentTime.getTime()) / (1000 * 60))
-      
-      // Calculate delay
-      let delayMinutes = 0
-      if (flight.publicEstimatedOffBlockTime && flight.scheduleDateTime) {
-        const scheduled = new Date(flight.scheduleDateTime)
-        const estimated = new Date(flight.publicEstimatedOffBlockTime)
-        delayMinutes = Math.round((estimated.getTime() - scheduled.getTime()) / (1000 * 60))
-      }
+  // Filter flights with gate changes
+  const gateChangedFlights = flights.filter(flight => 
+    flight.publicFlightState?.flightStates?.includes('GCH')
+  )
 
-      return {
-        flightNumber: flight.flightNumber.toString(),
-        flightName: flight.flightName,
-        currentGate: flight.gate,
-        pier: flight.pier || 'Unknown',
-        destination: flight.route.destinations[0] || 'Unknown',
-        aircraftType: flight.aircraftType.iataMain || flight.aircraftType.iataSub || 'Unknown',
-        scheduleDateTime: flight.scheduleDateTime,
-        timeUntilDeparture,
-        isDelayed: flight.publicFlightState?.flightStates?.includes('DEL') || delayMinutes > 15,
-        delayMinutes: Math.max(0, delayMinutes),
-        isPriority: timeUntilDeparture < 60 && timeUntilDeparture > 0,
-        flightStates: flight.publicFlightState?.flightStates || []
-      }
-    })
-    .sort((a, b) => a.timeUntilDeparture - b.timeUntilDeparture)
+  // Sort by scheduled departure time
+  gateChangedFlights.sort((a, b) => 
+    new Date(a.scheduleDateTime).getTime() - new Date(b.scheduleDateTime).getTime()
+  )
+
+  console.log(`🔄 Found ${gateChangedFlights.length} flights with gate changes`)
 
   return {
-    gateChangeEvents,
     metadata: {
-      total: gateChangeEvents.length,
-      urgent: gateChangeEvents.filter(e => e.isPriority).length,
-      delayed: gateChangeEvents.filter(e => e.isDelayed).length
-    }
+      timestamp: currentTime.toISOString(),
+      amsterdamTime: currentTime.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
+      totalGateChanges: gateChangedFlights.length
+    },
+    flights: gateChangedFlights.map(flight => ({
+      ...flight,
+      gateChangeInfo: {
+        currentGate: flight.gate || 'TBD',
+        hasGateChange: true,
+        flightStates: flight.publicFlightState?.flightStates || []
+      }
+    }))
   }
 }

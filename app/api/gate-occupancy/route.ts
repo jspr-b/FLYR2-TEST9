@@ -3,6 +3,9 @@ import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDup
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
 import { getMostSignificantState } from '@/lib/flight-state-priority'
 
+// Extend Vercel function timeout to 60 seconds
+export const maxDuration = 60
+
 // Gate occupancy status definitions
 type GateOccupancyStatus = 
   | 'SCHEDULED'      // Gate has flights scheduled (SCH, DEL, GCH states)

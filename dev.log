@@ -7799,3 +7799,112 @@ Page 9: 20 flights
 Total flights fetched: 200 from 10 pages
 ⚠️ Reached maximum page limit (10). There might be more flights available.
 ✅ Background refresh completed for: dashboard-combined-data (took 1s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: dashboard-combined-data
+Fetching background refresh pages of Schiphol API data (max: 10)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=9
+Page 9: 20 flights
+Total flights fetched: 200 from 10 pages
+⚠️ Reached maximum page limit (10). There might be more flights available.
+✅ Background refresh completed for: dashboard-combined-data (took 1s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: dashboard-combined-data
+Fetching background refresh pages of Schiphol API data (max: 10)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=0
+Schiphol API error on page 0: 429 Too Many Requests Usage limit exceeded
+Error fetching Schiphol flights: Error: HTTP 429: Too Many Requests
+    at fetchAllPages (lib/schiphol-api.ts:376:12)
+    at async eval (lib/schiphol-api.ts:125:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  374 |       }
+  375 |       // Only throw if this is the first page or we have no data
+> 376 |       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      |            ^
+  377 |     }
+  378 |
+  379 |     let data: any = {}
+❌ Background refresh failed for: dashboard-combined-data Error: HTTP 429: Too Many Requests
+    at fetchAllPages (lib/schiphol-api.ts:376:12)
+    at async eval (lib/schiphol-api.ts:125:23)
+    at async eval (lib/cache-manager.ts:98:8)
+    at async CacheManager.checkAndRefreshCaches (lib/cache-manager.ts:114:4)
+  374 |       }
+  375 |       // Only throw if this is the first page or we have no data
+> 376 |       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      |            ^
+  377 |     }
+  378 |
+  379 |     let data: any = {}
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: dashboard-combined-data
+Fetching background refresh pages of Schiphol API data (max: 10)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=9
+Page 9: 20 flights
+Total flights fetched: 200 from 10 pages
+⚠️ Reached maximum page limit (10). There might be more flights available.
+✅ Background refresh completed for: dashboard-combined-data (took 1s)
+🔍 Found 1 caches to refresh
+🔄 Starting background refresh for: dashboard-combined-data
+Fetching background refresh pages of Schiphol API data (max: 10)...
+Fetching page 0: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=0
+Page 0: 20 flights
+Fetching page 1: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=1
+Page 1: 20 flights
+Fetching page 2: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=2
+Page 2: 20 flights
+Fetching page 3: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=3
+Page 3: 20 flights
+Fetching page 4: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=4
+Page 4: 20 flights
+Fetching page 5: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=5
+Page 5: 20 flights
+Fetching page 6: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=6
+Page 6: 20 flights
+Fetching page 7: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=7
+Page 7: 20 flights
+Fetching page 8: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=8
+Page 8: 20 flights
+Fetching page 9: https://api.schiphol.nl/public-flights/flights?flightDirection=D&airline=KL&scheduleDate=2025-09-15&page=9
+Page 9: 20 flights
+Total flights fetched: 200 from 10 pages
+⚠️ Reached maximum page limit (10). There might be more flights available.
+✅ Background refresh completed for: dashboard-combined-data (took 1s)
+ ✓ Compiled in 348ms (481 modules)
+ ✓ Compiled in 235ms (481 modules)
