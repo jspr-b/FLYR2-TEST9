@@ -107,11 +107,12 @@ export async function GET(request: NextRequest) {
       return flight
     })
 
-    // Count gates - only exclude cancelled flights WITH gates from metrics
+    // Count gates - need to account for cancelled flights properly
     const tbdGates = uniqueFlights.filter(f => f.gate === 'TBD').length
-    const assignedGates = uniqueFlights.filter(f => f.gate && f.gate !== 'TBD').length
-    // No gates includes operational flights + cancelled flights without gates
-    const noGates = uniqueFlights.filter(f => !f.gate).length
+    // For assigned gates, also include cancelled flights with originalGate
+    const assignedGates = uniqueFlights.filter(f => (f.gate && f.gate !== 'TBD') || (f.isCancelled && f.originalGate && f.originalGate !== 'TBD')).length
+    // No gates only includes flights that never had a gate (not cancelled flights that had gates)
+    const noGates = uniqueFlights.filter(f => !f.gate && !f.originalGate).length
     const cancelledWithGates = uniqueFlights.filter(f => f.isCancelled && f.originalGate).length
     const cancelledNoGates = uniqueFlights.filter(f => f.isCancelled && !f.originalGate).length
     
@@ -128,7 +129,19 @@ export async function GET(request: NextRequest) {
         totalFlights: uniqueFlights.length,
         timestamp: currentTime.toISOString(),
         amsterdamTime: currentTime.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
-        todayDate
+        todayDate,
+        // Add gate statistics for consistency
+        gateStatistics: {
+          assignedGates,
+          tbdGates,
+          noGates,
+          cancelledWithGates,
+          cancelledNoGates,
+          // Calculate unique gates used (including cancelled flights' original gates)
+          uniqueGatesUsed: new Set(uniqueFlights
+            .map(f => f.gate || f.originalGate)
+            .filter(g => g && g !== 'TBD')).size
+        }
       }
     }
 
@@ -378,7 +391,10 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
       // Add no-gate counts for the UI
       operationalNoGateCount: flights.filter(f => !f.gate && !f.isCancelled).length,
       // Total no-gate for display (operational + cancelled without gates)
-      displayNoGateCount: flights.filter(f => !f.gate).length
+      displayNoGateCount: flights.filter(f => !f.gate).length,
+      // Add counts that properly account for cancelled flights
+      actualTotalGatesUsed: new Set(flights.map(f => f.gate || f.originalGate).filter(g => g && g !== 'TBD')).size,
+      actualFlightsWithGates: flights.filter(f => (f.gate && f.gate !== 'TBD') || (f.originalGate && f.originalGate !== 'TBD')).length
     },
     gates: gates // Return all gates
   }

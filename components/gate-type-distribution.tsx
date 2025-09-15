@@ -412,13 +412,13 @@ export function GateTypeDistribution() {
                 <div>
                   <span className="text-gray-600">KLM Gates Today:</span>
                   <div className="font-semibold text-blue-700">
-                    {schipholContext?.klmGatesUsedToday || gateStatusMetrics?.assignedGateFlights ? Math.round(gateStatusMetrics?.assignedGateFlights / 3.8) : 97} / {schipholContext?.totalSchipholGates || 223}
+                    {schipholContext?.klmGatesUsedToday || 98} / {schipholContext?.totalSchipholGates || 223}
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Operational Footprint:</span>
                   <div className="font-semibold text-blue-700">
-                    {schipholContext?.klmOperationalFootprint || (gateStatusMetrics?.assignedGateFlights ? Math.round((Math.round(gateStatusMetrics?.assignedGateFlights / 3.8) / 223) * 100) : 43)}%
+                    {schipholContext?.klmOperationalFootprint || Math.round((98 / 223) * 100)}%
                   </div>
                 </div>
                 <div>
