@@ -24,7 +24,7 @@ const pendingRequests = new Map<string, Promise<SchipholApiResponse>>()
 
 // Concurrent page fetching for better performance
 const CONCURRENT_PAGES = 3 // Fetch 3 pages at once
-const PAGE_DELAY = 50 // Reduced delay between pages
+const PAGE_DELAY = 25 // Further reduced delay between pages for faster fetching
 
 export interface SchipholApiConfig {
   flightDirection?: 'D' | 'A'

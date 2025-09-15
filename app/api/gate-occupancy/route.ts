@@ -3,8 +3,9 @@ import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDup
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
 import { getMostSignificantState } from '@/lib/flight-state-priority'
 
-// Extend Vercel function timeout to 60 seconds
-export const maxDuration = 60
+// Extend Vercel function timeout to 300 seconds (5 minutes) for Pro plan
+// Note: Hobby plan is limited to 10 seconds, Pro/Enterprise can go up to 300 seconds
+export const maxDuration = 300
 
 // Gate occupancy status definitions
 type GateOccupancyStatus = 

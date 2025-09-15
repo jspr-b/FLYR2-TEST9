@@ -4,8 +4,9 @@ import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time
 import { ensureCacheWarmed } from '@/lib/cache-manager'
 import { getMostSignificantState } from '@/lib/flight-state-priority'
 
-// Extend Vercel function timeout to 60 seconds
-export const maxDuration = 60
+// Extend Vercel function timeout to 300 seconds (5 minutes) for Pro plan
+// Note: Hobby plan is limited to 10 seconds, Pro/Enterprise can go up to 300 seconds
+export const maxDuration = 300
 
 /**
  * Combined endpoint that fetches flight data once and provides all dashboard information
