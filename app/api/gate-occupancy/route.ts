@@ -446,7 +446,7 @@ export async function GET(request: NextRequest) {
     const filters = {
       flightDirection: 'D' as const,
       scheduleDate: today,
-      isOperationalFlight: true,
+      isOperationalFlight: false, // Include cancelled flights to get accurate gate counts
       prefixicao: 'KL'
     }
     
@@ -459,28 +459,35 @@ export async function GET(request: NextRequest) {
     // Group flights by gate
     const gateFlightsMap = new Map<string, any[]>()
     
-    filteredFlights.forEach(flight => {
-      // For cancelled flights, use originalGate if available for Gantt chart display
-      // but still categorize them as UNASSIGNED
-      let gate = flight.gate || 'UNASSIGNED'
-      
-      // If flight is cancelled and has an original gate, create a special entry
-      if (flight.isCancelled && flight.originalGate) {
-        // Add to the original gate for display purposes
-        if (!gateFlightsMap.has(flight.originalGate)) {
-          gateFlightsMap.set(flight.originalGate, [])
-        }
-        // Mark this flight as cancelled but preserve original gate info
-        gateFlightsMap.get(flight.originalGate)!.push({
+    // First, process cancelled flights similar to dashboard-data endpoint
+    const processedFlights = filteredFlights.map(flight => {
+      if (flight.publicFlightState?.flightStates?.includes('CNX')) {
+        console.log(`🚫 Processing cancelled flight: ${flight.flightName} - Gate ${flight.gate || 'NO GATE'}`)
+        return {
           ...flight,
-          gate: flight.originalGate, // Restore gate for display
+          originalGate: flight.gate, // Preserve original gate
+          gate: null, // Set gate to null for cancelled flights
           isCancelled: true
+        }
+      }
+      return flight
+    })
+
+    processedFlights.forEach(flight => {
+      // Use original gate for cancelled flights if available
+      let gate = flight.gate || flight.originalGate || 'UNASSIGNED'
+      
+      if (!gateFlightsMap.has(gate)) {
+        gateFlightsMap.set(gate, [])
+      }
+      
+      // For cancelled flights with original gates, restore gate for display
+      if (flight.isCancelled && flight.originalGate) {
+        gateFlightsMap.get(gate)!.push({
+          ...flight,
+          gate: flight.originalGate // Restore for display
         })
       } else {
-        // Normal flight processing
-        if (!gateFlightsMap.has(gate)) {
-          gateFlightsMap.set(gate, [])
-        }
         gateFlightsMap.get(gate)!.push(flight)
       }
     })
@@ -692,14 +699,26 @@ export async function GET(request: NextRequest) {
     console.log(`  • Max Delay: ${delayedFlightsAnalysis.summary.maxDelay.formatted}`)
     console.log(`  • Hub Gates (D6, E21, G1) operate with subgates - no conflicts tracked`)
 
+    // Calculate proper flight counts including cancelled
+    const totalFlights = processedFlights.length
+    const cancelledFlights = processedFlights.filter(f => f.isCancelled).length
+    const operationalFlights = totalFlights - cancelledFlights
+    
     const responseData = {
       gates: gateOccupancyData,
       delayedFlights: delayedFlightsAnalysis.flights,
-      summary,
+      summary: {
+        ...summary,
+        // Add proper flight counts
+        actualTotalGatesUsed: gateOccupancyData.length,
+        actualFlightsWithGates: processedFlights.filter(f => f.gate || f.originalGate).length
+      },
       metadata: {
         analysisTime: currentTime.toISOString(),
         dataSource: 'Schiphol Public API',
-        flightsAnalyzed: filteredFlights.length,
+        flightsAnalyzed: totalFlights,
+        operationalFlights: operationalFlights,
+        cancelledFlights: cancelledFlights,
         gatesAnalyzed: gateOccupancyData.length,
         delayedFlightsAnalyzed: delayedFlightsAnalysis.summary.totalDelayedFlights,
         lastUpdated: currentTime.toISOString(),
