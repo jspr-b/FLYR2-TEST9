@@ -46,7 +46,7 @@ export function Sidebar() {
         <div className="p-6">
           <h1 className="text-xl font-bold text-gray-800">FLYR</h1>
           <p className="text-sm text-gray-500 mt-1">Aviation Intelligence System</p>
-          <p className="text-xs text-gray-400 mt-2">Built by Praevion</p>
+          <p className="text-xs text-gray-400 mt-2">Built by <a href="https://praevion.eu/" target="_blank" rel="noopener noreferrer" className="text-blue-600/100 dark:text-sky-400/100 hover:underline">Praevion</a></p>
         </div>
 
         <nav className="mt-8">
