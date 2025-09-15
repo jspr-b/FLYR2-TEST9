@@ -412,13 +412,23 @@ export function GateTypeDistribution() {
                 <div>
                   <span className="text-gray-600">KLM Gates Today:</span>
                   <div className="font-semibold text-blue-700">
-                    {schipholContext?.klmGatesUsedToday || 98} / {schipholContext?.totalSchipholGates || 223}
+                    {(() => {
+                      // Calculate physical gates only (exclude NO_GATE)
+                      const totalGates = schipholContext?.klmGatesUsedToday || 98;
+                      // Subtract 1 to exclude NO_GATE category
+                      const physicalGates = totalGates > 0 ? totalGates - 1 : 97;
+                      return physicalGates;
+                    })()} / {schipholContext?.totalSchipholGates || 223}
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Operational Footprint:</span>
                   <div className="font-semibold text-blue-700">
-                    {schipholContext?.klmOperationalFootprint || Math.round((98 / 223) * 100)}%
+                    {(() => {
+                      const totalGates = schipholContext?.klmGatesUsedToday || 98;
+                      const physicalGates = totalGates > 0 ? totalGates - 1 : 97;
+                      return Math.round((physicalGates / 223) * 100);
+                    })()}%
                   </div>
                 </div>
                 <div>
