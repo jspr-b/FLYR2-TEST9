@@ -287,7 +287,7 @@ export function TerminalsChart() {
 
   const getBarHeight = (flights: number | null) => {
     if (!flights || maxFlights === 0) return 8
-    return Math.max((flights / maxFlights) * 200, 8)
+    return Math.max((flights / maxFlights) * 160, 8)
   }
 
   const getUtilizationColor = (utilization: number | null, status: string, type: string) => {
@@ -491,7 +491,7 @@ export function TerminalsChart() {
         <div className="relative mb-4 xs:mb-6 sm:mb-8">
           {/* Chart Area - Responsive for all screen sizes */}
           <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0">
-            <div className="flex items-end justify-center min-w-[400px] xs:min-w-[500px] sm:min-w-0 gap-2 xs:gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-48 xs:h-64 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8">
+            <div className="flex items-end justify-center min-w-[400px] xs:min-w-[500px] sm:min-w-0 gap-2 xs:gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-56 xs:h-72 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8 pt-8">
               {pierData.map((data, index) => {
                 const isSelected = selectedPier === data.pier
                 const height = getBarHeight(data.flights)
@@ -499,8 +499,8 @@ export function TerminalsChart() {
 
                 return (
                   <div key={index} className="flex flex-col items-center group cursor-pointer">
-                    <div className="text-center mb-1 xs:mb-2">
-                      <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900">{formatValue(data.flights)}</span>
+                    <div className="text-center mb-2 xs:mb-3">
+                      <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 block">{formatValue(data.flights)}</span>
                       <span className="text-[9px] xs:text-[10px] sm:text-xs text-gray-500 hidden xs:block">flights</span>
                     </div>
                     <div

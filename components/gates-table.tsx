@@ -16,6 +16,7 @@ interface GateData {
   flights: number
   aircraftTypes: string[]
   status: "Active" | "Inactive" | "Maintenance"
+  firstActivity: string | null
   lastActivity: string | null
   utilization: number
   pier: string
@@ -47,6 +48,14 @@ export function GatesTable() {
       aircraftTypes: gate.scheduledFlights?.map((f: any) => f.aircraftType).filter(Boolean) || [],
       status: gate.utilization.temporalStatus === 'DEAD_ZONE' ? 'Inactive' : 
               gate.utilization.temporalStatus === 'ACTIVE' ? 'Active' : 'Inactive',
+      firstActivity: gate.scheduledFlights?.length > 0 ? 
+        (() => {
+          const firstFlight = gate.scheduledFlights[0]
+          // Use estimated time if flight is delayed, otherwise use scheduled time
+          return firstFlight.isDelayed && firstFlight.estimatedDateTime 
+            ? firstFlight.estimatedDateTime 
+            : firstFlight.scheduleDateTime
+        })() : null,
       lastActivity: gate.scheduledFlights?.length > 0 ? 
         (() => {
           const lastFlight = gate.scheduledFlights[gate.scheduledFlights.length - 1]
@@ -97,10 +106,17 @@ export function GatesTable() {
   }
 
   const sortedData = [...gateData].sort((a, b) => {
-    if (sortConfig.key === 'flights' || sortConfig.key === 'utilization') {
+    if (sortConfig.key === 'flights') {
       const aValue = a[sortConfig.key] || 0
       const bValue = b[sortConfig.key] || 0
       return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue
+    }
+    
+    // Handle date sorting for firstActivity and lastActivity
+    if (sortConfig.key === 'firstActivity' || sortConfig.key === 'lastActivity') {
+      const aTime = a[sortConfig.key] ? new Date(a[sortConfig.key]).getTime() : 0
+      const bTime = b[sortConfig.key] ? new Date(b[sortConfig.key]).getTime() : 0
+      return sortConfig.direction === 'ascending' ? aTime - bTime : bTime - aTime
     }
     
     const aValue = a[sortConfig.key]
@@ -183,17 +199,6 @@ export function GatesTable() {
           )}
         </td>
         <td className="py-2 lg:py-3 px-1.5 lg:px-2">
-          <div className="flex items-center gap-1 lg:gap-2">
-            <div className="w-12 lg:w-16 bg-gray-200 rounded-full h-1.5 lg:h-2">
-              <div
-                className="bg-blue-500 h-1.5 lg:h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(100, gate.utilization)}%` }}
-              />
-            </div>
-            <span className="text-[10px] lg:text-xs text-gray-600">{formatUtilization(gate.utilization)}%</span>
-          </div>
-        </td>
-        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
           <span
             className={`inline-flex items-center gap-0.5 lg:gap-1 px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-full text-[10px] lg:text-xs font-medium ${getStatusColor(gate.status)}`}
           >
@@ -201,6 +206,9 @@ export function GatesTable() {
             {gate.status === "Active" && <Clock className="h-2.5 lg:h-3 w-2.5 lg:w-3" />}
             {gate.status}
           </span>
+        </td>
+        <td className="py-2 lg:py-3 px-1.5 lg:px-2">
+          <span className="text-[10px] lg:text-xs text-gray-600">{formatTime(gate.firstActivity)}</span>
         </td>
         <td className="py-2 lg:py-3 px-1.5 lg:px-2">
           <span className="text-[10px] lg:text-xs text-gray-600">{formatTime(gate.lastActivity)}</span>
@@ -302,16 +310,16 @@ export function GatesTable() {
                 <th className="text-left py-3 px-2 font-medium text-gray-900">
                   Gate Type
                 </th>
+                <th className="text-left py-3 px-2 font-medium text-gray-900">Status</th>
                 <th className="text-left py-3 px-2 font-medium text-gray-900">
                   <button
-                    onClick={() => handleSort("utilization")}
+                    onClick={() => handleSort("firstActivity")}
                     className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
                   >
-                    Utilization
+                    First Activity
                     <ArrowUpDown className="h-4 w-4" />
                   </button>
                 </th>
-                <th className="text-left py-3 px-2 font-medium text-gray-900">Status</th>
                 <th className="text-left py-3 px-2 font-medium text-gray-900">Last Activity</th>
               </tr>
             </thead>
@@ -376,16 +384,16 @@ export function GatesTable() {
                       <th className="text-left py-3 px-2 font-medium text-gray-900">
                         Gate Type
                       </th>
+                      <th className="text-left py-3 px-2 font-medium text-gray-900">Status</th>
                       <th className="text-left py-3 px-2 font-medium text-gray-900">
                         <button
-                          onClick={() => handleSort("utilization")}
+                          onClick={() => handleSort("firstActivity")}
                           className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
                         >
-                          Utilization
+                          First Activity
                           <ArrowUpDown className="h-4 w-4" />
                         </button>
                       </th>
-                      <th className="text-left py-3 px-2 font-medium text-gray-900">Status</th>
                       <th className="text-left py-3 px-2 font-medium text-gray-900">Last Activity</th>
                     </tr>
                   </thead>
