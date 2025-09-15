@@ -287,6 +287,12 @@ function processGateOccupancy(flights: any[], currentTime: Date) {
         } else if (flight.publicFlightState?.flightStates?.includes('GTO')) {
           status = 'OCCUPIED'
           occupiedBy = flight.flightName
+        } else if (flight.publicFlightState?.flightStates?.includes('GCL')) {
+          status = 'OCCUPIED'
+          occupiedBy = flight.flightName
+        } else if (flight.publicFlightState?.flightStates?.includes('GTD')) {
+          status = 'OCCUPIED'
+          occupiedBy = flight.flightName
         } else if (timeDiff < 60 * 60 * 1000 && timeDiff > 0) { // Next hour
           status = 'PREPARING'
           occupiedBy = flight.flightName

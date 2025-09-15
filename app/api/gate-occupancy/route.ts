@@ -171,8 +171,8 @@ function determineGateStatus(flights: any[], currentTime: Date): GateOccupancySt
     // Priority: Active gate states > Gate changes > Primary state mapping
     
     // First, check for any active gate states (these override everything)
-    // Only BRD (Boarding) and GTO (Gate Open) are considered truly active
-    const occupiedStates = ['BRD', 'GTO']
+    // BRD (Boarding), GTO (Gate Open), GCL (Gate Closing), GTD (Gate Closed) are considered active
+    const occupiedStates = ['BRD', 'GTO', 'GCL', 'GTD']
     for (const state of occupiedStates) {
       if (flightStates.includes(state)) {
         return 'OCCUPIED' // Active gate state found
@@ -293,8 +293,8 @@ function calculateCurrentUtilization(flights: any[], currentTime: Date): number 
     const flightStates = flight.publicFlightState?.flightStates || []
     
     // Check for any physically active states regardless of primary state
-    // Only BRD and GTO count as physically active
-    const physicalStates = ['BRD', 'GTO']
+    // BRD, GTO, GCL, GTD count as physically active
+    const physicalStates = ['BRD', 'GTO', 'GCL', 'GTD']
     return physicalStates.some((state: string) => flightStates.includes(state))
   })
   
@@ -317,8 +317,8 @@ function determinePhysicalActivity(flights: any[]): 'NONE' | 'BOARDING' | 'DEPAR
     const flightStates = flight.publicFlightState?.flightStates || []
     
     // Check for any active states regardless of primary state
-    // Only BRD and GTO are considered active (not GCL, GTD, or DEP)
-    const activeStates = ['BRD', 'GTO']
+    // BRD, GTO, GCL, GTD are considered active (not DEP)
+    const activeStates = ['BRD', 'GTO', 'GCL', 'GTD']
     return activeStates.some(state => flightStates.includes(state))
   })
   
@@ -329,11 +329,12 @@ function determinePhysicalActivity(flights: any[]): 'NONE' | 'BOARDING' | 'DEPAR
     const flightStates = flight.publicFlightState?.flightStates || []
     
     // Return all active states found in this flight
-    // Only BRD and GTO are considered active
-    return flightStates.filter((state: string) => ['BRD', 'GTO'].includes(state))
+    // BRD, GTO, GCL, GTD are considered active
+    return flightStates.filter((state: string) => ['BRD', 'GTO', 'GCL', 'GTD'].includes(state))
   })
   
   if (allStates.includes('BRD') || allStates.includes('GTO')) return 'BOARDING'
+  if (allStates.includes('GCL') || allStates.includes('GTD')) return 'OCCUPIED'
   if (allStates.includes('DEP')) return 'DEPARTING'
   if (allStates.includes('GCL') || allStates.includes('GTD')) return 'OCCUPIED'
   
@@ -346,8 +347,8 @@ function determineTemporalStatus(currentTime: Date, flights: any[]): 'DEAD_ZONE'
     const flightStates = flight.publicFlightState?.flightStates || []
     
     // Check for any active states regardless of primary state
-    // Only BRD and GTO are considered active
-    const activeStates = ['BRD', 'GTO']
+    // BRD, GTO, GCL, GTD are considered active
+    const activeStates = ['BRD', 'GTO', 'GCL', 'GTD']
     return activeStates.some((state: string) => flightStates.includes(state))
   })
   

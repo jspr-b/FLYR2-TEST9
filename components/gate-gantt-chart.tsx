@@ -1213,10 +1213,13 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
               : `Gates with flights only • ${processedGateData.length} gates displayed • ${
                   processedGateData.filter((g) => 
                     g.flights.some((f: any) => 
-                      f.flightStates?.includes('BRD') || f.flightStates?.includes('GTO')
+                      f.flightStates?.includes('BRD') || 
+                      f.flightStates?.includes('GTO') ||
+                      f.flightStates?.includes('GCL') ||
+                      f.flightStates?.includes('GTD')
                     )
                   ).length
-                } active (BRD/GTO)`}
+                } active`}
             {" • Timeline shows "}
             {timeRangeHours === 6
               ? "30-minute"

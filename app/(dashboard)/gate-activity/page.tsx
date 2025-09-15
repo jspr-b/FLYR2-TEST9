@@ -853,9 +853,15 @@ export default function GateActivityPage() {
                               <div className="space-y-2 text-sm">
                                 <div className="font-semibold text-gray-900">Gate Activity Status</div>
                                 <p className="text-xs text-gray-600">
-                                  Gates with flights in boarding (BRD) or gate open (GTO) states within a 2-hour operational window.
+                                  Gates with flights in active states:
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <ul className="text-xs text-gray-600 ml-3 space-y-0.5">
+                                  <li>• BRD - Boarding</li>
+                                  <li>• GTO - Gate Open</li>
+                                  <li>• GCL - Gate Closing</li>
+                                  <li>• GTD - Gate Closed</li>
+                                </ul>
+                                <p className="text-xs text-gray-500 mt-2">
                                   This metric shows real-time gate occupancy for operational planning.
                                 </p>
                               </div>

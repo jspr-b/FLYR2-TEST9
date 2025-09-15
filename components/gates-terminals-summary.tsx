@@ -239,9 +239,15 @@ export function GatesTerminalsSummary() {
                           The Gate Activity page shows <span className="font-semibold">99 gate categories</span>, which includes a "NO_GATE" category for flights without gate assignments.
                         </p>
                         <div className="mt-2 pt-2 border-t">
-                          <p className="text-xs font-semibold text-gray-700">Active Gates Definition:</p>
-                          <p className="text-xs text-gray-600">
-                            Gates currently occupied by aircraft with flights in boarding (BRD), gate open (GTO), gate closing (GCL), or gate closed (GTD) states.
+                          <p className="text-xs font-semibold text-gray-700">Active Gates Include:</p>
+                          <ul className="text-xs text-gray-600 ml-2 mt-1 space-y-0.5">
+                            <li>• BRD - Boarding</li>
+                            <li>• GTO - Gate Open</li>
+                            <li>• GCL - Gate Closing</li>
+                            <li>• GTD - Gate Closed</li>
+                          </ul>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Gates with aircraft present and crew activity.
                           </p>
                         </div>
                       </div>
