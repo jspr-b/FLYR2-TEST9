@@ -161,11 +161,16 @@ export async function GET(request: NextRequest) {
       response.gateOccupancy = gateOccupancyData
       // Also add raw flights data for gate status metrics
       response.flights = uniqueFlights
-    } else if (includeGateChanges) {
-      // Only return flights for gate changes view
-      response.flights = uniqueFlights
-    } else {
-      // Return all flight data by default
+    }
+    
+    // Add gate changes data if requested
+    if (includeGateChanges) {
+      const gateChangesData = processGateChanges(uniqueFlights, currentTime)
+      response.gateChanges = gateChangesData
+    }
+    
+    // Always include flights if not already added
+    if (!response.flights) {
       response.flights = uniqueFlights
     }
 
@@ -442,19 +447,40 @@ function processGateChanges(flights: any[], currentTime: Date) {
 
   console.log(`🔄 Found ${gateChangedFlights.length} flights with gate changes`)
 
+  // Transform flights to match the expected GateChangeEvent format
+  const gateChangeEvents = gateChangedFlights.map(flight => {
+    const scheduleTime = new Date(flight.scheduleDateTime)
+    const timeUntilDeparture = Math.round((scheduleTime.getTime() - currentTime.getTime()) / (1000 * 60)) // minutes
+    
+    return {
+      flightNumber: flight.flightNumber.toString(),
+      flightName: flight.flightName,
+      currentGate: flight.gate || 'TBD',
+      pier: flight.gate ? flight.gate.charAt(0) : 'TBD',
+      destination: flight.route?.destinations?.[0] || 'Unknown',
+      aircraftType: flight.aircraftType?.iataMain || flight.aircraftType?.iataSub || 'Unknown',
+      scheduleDateTime: flight.scheduleDateTime,
+      timeUntilDeparture,
+      isDelayed: calculateDelay(flight) > 0,
+      delayMinutes: calculateDelay(flight),
+      isPriority: timeUntilDeparture < 60 && timeUntilDeparture > 0, // Priority if departing within 60 minutes
+      flightStates: flight.publicFlightState?.flightStates || [],
+      flightStatesReadable: (flight.publicFlightState?.flightStates || []).map(getFlightStateReadable)
+    }
+  })
+
+  // Count urgent and delayed flights
+  const urgent = gateChangeEvents.filter(event => event.isPriority).length
+  const delayed = gateChangeEvents.filter(event => event.isDelayed).length
+
   return {
+    gateChangeEvents,
     metadata: {
+      total: gateChangeEvents.length,
+      urgent,
+      delayed,
       timestamp: currentTime.toISOString(),
-      amsterdamTime: currentTime.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }),
-      totalGateChanges: gateChangedFlights.length
-    },
-    flights: gateChangedFlights.map(flight => ({
-      ...flight,
-      gateChangeInfo: {
-        currentGate: flight.gate || 'TBD',
-        hasGateChange: true,
-        flightStates: flight.publicFlightState?.flightStates || []
-      }
-    }))
+      amsterdamTime: currentTime.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' })
+    }
   }
 }
