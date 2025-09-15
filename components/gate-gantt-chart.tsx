@@ -1210,7 +1210,13 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
           <p className="text-xs text-gray-600">
             {showAllGates
               ? `All gates • ${processedGateData.length} gates displayed • ${processedGateData.filter((g) => g.flights.length > 0).length} with flights`
-              : `Gates with flights only • ${processedGateData.length} active gates`}
+              : `Gates with flights only • ${processedGateData.length} gates displayed • ${
+                  processedGateData.filter((g) => 
+                    g.flights.some((f: any) => 
+                      f.flightStates?.includes('BRD') || f.flightStates?.includes('GTO')
+                    )
+                  ).length
+                } active (BRD/GTO)`}
             {" • Timeline shows "}
             {timeRangeHours === 6
               ? "30-minute"
