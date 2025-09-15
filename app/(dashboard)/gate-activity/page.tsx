@@ -198,8 +198,8 @@ export default function GateActivityPage() {
     flightStates: (() => {
       const allFlightStates = data.gates.flatMap(gate => 
         gate.scheduledFlights.map(flight => ({
-          state: flight.primaryState,
-          readable: flight.primaryStateReadable,
+          state: flight.primaryState === 'GCH' ? 'SCH' : flight.primaryState, // Count GCH as SCH
+          readable: flight.primaryState === 'GCH' ? 'Scheduled' : flight.primaryStateReadable,
           gate: gate.gateID,
           pier: gate.pier
         }))
@@ -440,8 +440,8 @@ export default function GateActivityPage() {
                   {/* Flight State Distribution */}
                   <div className="space-y-2 flex-1 overflow-y-auto pr-1">
                     {(() => {
-                      // Define all possible flight states including GCH and CNX
-                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL', 'GCH', 'CNX'];
+                      // Define all possible flight states excluding GCH (gate change is not an operational state)
+                      const allFlightStates = ['SCH', 'BRD', 'GTO', 'GCL', 'GTD', 'DEP', 'DEL', 'CNX'];
                       const currentStates = processedData?.flightStates || {};
                       
                       // Create entries for all states, defaulting to 0 if not present
@@ -513,14 +513,6 @@ export default function GateActivityPage() {
                             iconColor: 'text-red-600',
                             Icon: Clock,
                             description: 'Flight delayed'
-                          },
-                          GCH: { 
-                            label: 'Gate Change', 
-                            color: 'bg-yellow-500', 
-                            bgColor: 'bg-yellow-100',
-                            iconColor: 'text-yellow-600',
-                            Icon: ArrowRightLeft,
-                            description: 'Gate has changed'
                           },
                           CNX: {
                             label: 'Cancelled',
