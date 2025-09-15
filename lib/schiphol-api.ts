@@ -592,10 +592,22 @@ export function filterFlights(
       
       // Only include flights where the mainFlight (operating carrier) starts with 'KL'
       // This excludes codeshares operated by other airlines (like HV, Transavia)
-      return mainFlight.startsWith('KL')
+      if (!mainFlight.startsWith('KL')) {
+        return false
+      }
+      
+      // Exclude ground transportation services (KL9xxx range: 9000-9999)
+      // These are typically bus/train services that don't update frequently
+      const flightNumber = flight.flightNumber
+      if (flightNumber >= 9000 && flightNumber <= 9999) {
+        console.log(`🚌 Filtering ground transport: ${flight.flightName} (flight number ${flightNumber})`)
+        return false
+      }
+      
+      return true
     })
     const afterKLMFilter = filtered.length
-    console.log(`KLM filter: ${beforeKLMFilter} → ${afterKLMFilter} flights (removed ${beforeKLMFilter - afterKLMFilter} codeshares)`)
+    console.log(`KLM filter: ${beforeKLMFilter} → ${afterKLMFilter} flights (removed ${beforeKLMFilter - afterKLMFilter} codeshares/ground transport)`)
   }
 
   if (filters.scheduleDate) {
