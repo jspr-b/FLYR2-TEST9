@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Plane, Clock, AlertTriangle, TrendingUp, TrendingDown, Building2, Activity, AlertCircle } from "lucide-react"
+import { Plane, Clock, AlertTriangle, TrendingUp, TrendingDown, Building2, Activity, AlertCircle, Route, BarChart3, Code2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { FlightResponse } from "@/types/flight"
 import { calculateDelayMinutes, extractLocalHour } from "@/lib/timezone-utils"
@@ -280,6 +280,14 @@ export function DashboardKPIs() {
         // Use dashboardData's totalFlights as the source of truth
         const totalFlightsToday = dashboardData?.metadata?.totalFlights || dashboardKPIs?.totalFlights || 0
         
+        // Calculate departed flights from the flights data
+        let departedFlightsCount = 0
+        if (dashboardData?.flights) {
+          departedFlightsCount = dashboardData.flights.filter((flight: any) => 
+            flight.publicFlightState?.flightStates?.includes('DEP')
+          ).length
+        }
+        
         if (dashboardKPIs || dashboardData) {
           const initialKPIData: KPIData[] = [
             {
@@ -296,7 +304,7 @@ export function DashboardKPIs() {
             {
               label: "Total Registered Flights Today",
               value: totalFlightsToday.toString(),
-              change: `${totalFlightsToday} KLM departures`,
+              change: `${departedFlightsCount} departed`,
               changeType: "neutral",
               icon: Plane,
               color: "text-blue-600",
@@ -887,112 +895,142 @@ export function DashboardKPIs() {
         </div>
       </div>
 
-      {/* Bottom Row - Navigation/Quick Access Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+      {/* Bottom Row - Navigation/Quick Access Cards - Enhanced for responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
         <Link
           href="/aircraft-type-delay-performance"
-          className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-blue-100 hover:to-blue-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-4 sm:p-5 lg:p-6 transition-all duration-200 hover:shadow-lg hover:from-blue-100 hover:to-blue-200 hover:-translate-y-1"
         >
-          <div className="flex items-center gap-4 mb-3">
-            <div className="bg-blue-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
-              <Plane className="h-6 w-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3">
+            <div className="bg-blue-600 text-white p-2.5 sm:p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 self-start">
+              <Plane className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
-                Explore Full Aircraft Delay Breakdown
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                <span className="sm:hidden">Aircraft Delays</span>
+                <span className="hidden sm:inline">Explore Full Aircraft Delay Breakdown</span>
               </h3>
-              <p className="text-sm text-gray-600">Detailed fleet performance analysis</p>
+              <p className="text-xs sm:text-sm text-gray-600">Detailed fleet performance analysis</p>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-600 font-medium">10 aircraft types • Performance metrics</span>
-            <TrendingUp className="h-4 w-4 text-blue-600 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="text-xs sm:text-sm text-blue-600 font-medium truncate">10 aircraft types • Performance</span>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
           </div>
         </Link>
 
         <Link
           href="/gate-activity"
-          className="group bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-green-100 hover:to-green-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-4 sm:p-5 lg:p-6 transition-all duration-200 hover:shadow-lg hover:from-green-100 hover:to-green-200 hover:-translate-y-1"
         >
-          <div className="flex items-center gap-4 mb-3">
-            <div className="bg-green-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
-              <Building2 className="h-6 w-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3">
+            <div className="bg-green-600 text-white p-2.5 sm:p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 self-start">
+              <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-700 transition-colors duration-200">
-                View Detailed Gate Activity
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-green-700 transition-colors duration-200 leading-tight">
+                <span className="sm:hidden">Gate Activity</span>
+                <span className="hidden sm:inline">View Detailed Gate Activity</span>
               </h3>
-              <p className="text-sm text-gray-600">Real-time pier & gate utilization</p>
+              <p className="text-xs sm:text-sm text-gray-600">Real-time pier & gate utilization</p>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-green-600 font-medium">7 active piers • 47 gates monitored</span>
-            <TrendingUp className="h-4 w-4 text-green-600 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="text-xs sm:text-sm text-green-600 font-medium truncate">7 piers • 47 gates</span>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
           </div>
         </Link>
 
         <Link
           href="/delay-trends-by-hour"
-          className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-purple-100 hover:to-purple-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-4 sm:p-5 lg:p-6 transition-all duration-200 hover:shadow-lg hover:from-purple-100 hover:to-purple-200 hover:-translate-y-1"
         >
-          <div className="flex items-center gap-4 mb-3">
-            <div className="bg-purple-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
-              <Clock className="h-6 w-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3">
+            <div className="bg-purple-600 text-white p-2.5 sm:p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 self-start">
+              <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 transition-colors duration-200">
-                Open Hourly Delay Trends
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-purple-700 transition-colors duration-200 leading-tight">
+                <span className="sm:hidden">Hourly Trends</span>
+                <span className="hidden sm:inline">Open Hourly Delay Trends</span>
               </h3>
-              <p className="text-sm text-gray-600">Time-based delay pattern analysis</p>
+              <p className="text-xs sm:text-sm text-gray-600">Time-based delay pattern analysis</p>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-purple-600 font-medium">24-hour breakdown • Variance tracking</span>
-            <TrendingUp className="h-4 w-4 text-purple-600 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="text-xs sm:text-sm text-purple-600 font-medium truncate">24-hour • Variance</span>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
           </div>
         </Link>
 
         <Link
           href="/route-analytics"
-          className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-orange-100 hover:to-orange-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 p-4 sm:p-5 lg:p-6 transition-all duration-200 hover:shadow-lg hover:from-orange-100 hover:to-orange-200 hover:-translate-y-1"
         >
-          <div className="flex items-center gap-4 mb-3">
-            <div className="bg-orange-500 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
-              <TrendingUp className="h-6 w-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3">
+            <div className="bg-orange-500 text-white p-2.5 sm:p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 self-start">
+              <Route className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-200">
-                Explore Route Analytics
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-orange-700 transition-colors duration-200 leading-tight">
+                <span className="sm:hidden">Route Analytics</span>
+                <span className="hidden sm:inline">Explore Route Analytics</span>
               </h3>
-              <p className="text-sm text-gray-600">Detailed route performance & trends</p>
+              <p className="text-xs sm:text-sm text-gray-600">Detailed route performance & trends</p>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-orange-600 font-medium">All destinations • Delay & volume trends</span>
-            <TrendingUp className="h-4 w-4 text-orange-500 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="text-xs sm:text-sm text-orange-600 font-medium truncate">All destinations • Trends</span>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
           </div>
         </Link>
 
         <Link
           href="/busiest-gates-and-terminals"
-          className="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 p-6 transition-all duration-200 hover:shadow-lg hover:from-indigo-100 hover:to-indigo-200 hover:-translate-y-1"
+          className="group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 p-4 sm:p-5 lg:p-6 transition-all duration-200 hover:shadow-lg hover:from-indigo-100 hover:to-indigo-200 hover:-translate-y-1"
         >
-          <div className="flex items-center gap-4 mb-3">
-            <div className="bg-indigo-600 text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200">
-              <Plane className="h-6 w-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3">
+            <div className="bg-indigo-600 text-white p-2.5 sm:p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 self-start">
+              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors duration-200">
-                Analyze Busiest Gates & Terminals
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors duration-200 leading-tight">
+                <span className="sm:hidden">Busiest Gates</span>
+                <span className="hidden sm:inline">Analyze Busiest Gates & Terminals</span>
               </h3>
-              <p className="text-sm text-gray-600">Terminal capacity & utilization analysis</p>
+              <p className="text-xs sm:text-sm text-gray-600">Terminal capacity & utilization analysis</p>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-indigo-600 font-medium">Pier breakdown • Peak usage patterns</span>
-            <TrendingUp className="h-4 w-4 text-indigo-600 group-hover:translate-x-1 transition-transform duration-200" />
+            <span className="text-xs sm:text-sm text-indigo-600 font-medium truncate">Pier breakdown • Patterns</span>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-600 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
           </div>
         </Link>
+        
+        {/* Praevion Card */}
+        <a
+          href="https://praevion.eu/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg border border-sky-200 p-4 sm:p-5 lg:p-6 transition-all duration-200 hover:shadow-lg hover:from-sky-100 hover:to-sky-200 hover:-translate-y-1"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3">
+            <div className="bg-sky-600 text-white p-2.5 sm:p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 self-start">
+              <Code2 className="h-5 w-5 sm:h-6 sm:w-6" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-sky-700 transition-colors duration-200 leading-tight">
+                <span className="sm:hidden">Built by Praevion</span>
+                <span className="hidden sm:inline">Custom B2B Software Solutions</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600">Enterprise software development</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-sm text-sky-600 font-medium truncate">Custom solutions • B2B focus</span>
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-sky-600 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
+          </div>
+        </a>
       </div>
     </div>
   )
