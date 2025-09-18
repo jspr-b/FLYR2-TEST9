@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
         flightDirection: 'D' as const,
         airline: 'KL',
         scheduleDate: todayDate,
-        fetchAllPages: true
+        fetchAllPages: true,
+        maxPagesToFetch: 50
       }
       
       await ensureCacheWarmed('gate-changes-kl-departures', apiConfig)

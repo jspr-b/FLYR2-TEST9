@@ -456,7 +456,12 @@ export function GateGanttChart({ gateData }: GateGanttChartProps) {
         ? filteredData
         : filteredData.filter((gate) => gate.flights.length > 0);
 
-      return finalData.sort((a, b) => a.gateID.localeCompare(b.gateID));
+      return finalData.sort((a, b) => {
+        // Always put NO_GATE at the bottom
+        if (a.gateID === 'NO_GATE') return 1;
+        if (b.gateID === 'NO_GATE') return -1;
+        return a.gateID.localeCompare(b.gateID);
+      });
     } catch (error) {
       console.error("Error processing gate data:", error);
       return [];

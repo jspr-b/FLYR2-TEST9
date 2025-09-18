@@ -4,8 +4,8 @@ import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time
 import { ensureCacheWarmed } from '@/lib/cache-manager'
 import { getMostSignificantState } from '@/lib/flight-state-priority'
 
-// Extend Vercel function timeout to 60 seconds
-export const maxDuration = 60
+// Extend Vercel function timeout to 120 seconds
+export const maxDuration = 120
 
 /**
  * Combined endpoint that fetches flight data once and provides all dashboard information
@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
       airline: 'KL',
       scheduleDate: todayDate,
       fetchAllPages: true,
-      isBackgroundRefresh: false
+      isBackgroundRefresh: false,
+      maxPagesToFetch: 50
     }
     
     // Register cache warming task BEFORE fetching data
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       const backgroundConfig = {
         ...apiConfig,
         isBackgroundRefresh: true,
-        maxPagesToFetch: 25 // Limit pages for background refresh to avoid timeout
+        maxPagesToFetch: 30 // Limit pages for background refresh to avoid timeout
       }
       return await fetchSchipholFlights(backgroundConfig)
     }, 4 * 60 * 1000) // 4 minutes - more frequent than UI refresh to ensure fresh data
@@ -89,7 +90,8 @@ export async function GET(request: NextRequest) {
       )
       
       // Apply stale filter only to non-cancelled flights
-      const freshNonCancelled = removeStaleFlights(nonCancelledFlights)
+      // Use 72 hours (3 days) for scheduled flights as they may be entered days in advance
+      const freshNonCancelled = removeStaleFlights(nonCancelledFlights, 72)
       
       // Combine fresh non-cancelled with ALL cancelled flights
       freshFlights = [...freshNonCancelled, ...cancelledFlights]
@@ -97,7 +99,8 @@ export async function GET(request: NextRequest) {
       console.log(`📊 Keeping ALL ${cancelledFlights.length} cancelled flights scheduled for today (regardless of cancellation date)`)
     } else {
       // Normal stale filtering when not including cancelled
-      freshFlights = removeStaleFlights(filteredFlights)
+      // Use 72 hours (3 days) for scheduled flights as they may be entered days in advance
+      freshFlights = removeStaleFlights(filteredFlights, 72)
     }
     
     let uniqueFlights = removeDuplicateFlights(freshFlights)

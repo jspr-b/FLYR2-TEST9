@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     const rawData = await fetchSchipholFlights({
       flightDirection: 'D',
       scheduleDate: todayDate,
-      fetchAllPages: true
+      fetchAllPages: true,
+      maxPagesToFetch: 50
     })
 
     console.log(`Total raw flights: ${rawData.flights.length}`)

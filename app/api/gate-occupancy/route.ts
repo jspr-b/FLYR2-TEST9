@@ -3,8 +3,8 @@ import { fetchSchipholFlights, transformSchipholFlight, filterFlights, removeDup
 import { getCurrentAmsterdamTime, getTodayAmsterdam } from '@/lib/amsterdam-time'
 import { getMostSignificantState } from '@/lib/flight-state-priority'
 
-// Extend Vercel function timeout to 60 seconds
-export const maxDuration = 60
+// Extend Vercel function timeout to 120 seconds
+export const maxDuration = 120
 
 // Gate occupancy status definitions
 type GateOccupancyStatus = 
@@ -446,7 +446,7 @@ export async function GET(request: NextRequest) {
       isBackgroundRefresh,
       // For background refresh, only fetch first 5 pages to get recent updates
       // This reduces load and prevents timeouts during automatic refresh
-      maxPagesToFetch: isBackgroundRefresh ? 5 : 25
+      maxPagesToFetch: isBackgroundRefresh ? 5 : 50
     }
 
     const schipholData = await fetchSchipholFlights(apiConfig)
@@ -461,7 +461,7 @@ export async function GET(request: NextRequest) {
     
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
-    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
+    filteredFlights = removeStaleFlights(filteredFlights, 72) // Remove flights older than 72 hours (3 days)
 
     console.log(`📊 Processing ${filteredFlights.length} flights for gate occupancy analysis`)
 

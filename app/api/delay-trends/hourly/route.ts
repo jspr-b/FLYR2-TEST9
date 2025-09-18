@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
       flightDirection: 'D' as const,
       airline: 'KL',
       scheduleDate: today,
-      fetchAllPages: true
+      fetchAllPages: true,
+      maxPagesToFetch: 50
     }
 
     // Fetch flights from Schiphol API (same as /api/flights)
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
     const filters = {
       flightDirection: 'D' as const,
       scheduleDate: today,
-      isOperationalFlight: true,
+      isOperationalFlight: false, // Include cancelled flights for complete picture
       prefixicao: 'KL'
     }
     let filteredFlights = filterFlights(allFlights, filters)
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     filteredFlights = removeDuplicateFlights(filteredFlights)
     console.log(`📊 DELAY TRENDS: After deduplication: ${filteredFlights.length} flights`)
     
-    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
+    filteredFlights = removeStaleFlights(filteredFlights, 72) // Remove flights older than 72 hours
     console.log(`📊 DELAY TRENDS: After removing stale: ${filteredFlights.length} flights`)
 
     // Calculate hourly delays from real flight data

@@ -10,8 +10,8 @@ const SCHIPHOL_APP_ID = process.env.SCHIPHOL_APP_ID || 'cfcad115'
 const SCHIPHOL_API_BASE = 'https://api.schiphol.nl/public-flights'
 
 // Production timeout settings - configurable based on request type
-const DEFAULT_API_TIMEOUT = 30000 // 30 seconds for better reliability
-const BACKGROUND_API_TIMEOUT = 45000 // 45 seconds for background refreshes
+const DEFAULT_API_TIMEOUT = 60000 // 60 seconds for better reliability
+const BACKGROUND_API_TIMEOUT = 60000 // 60 seconds for background refreshes
 const MAX_RETRIES = 2 // Reduced from 3
 const RETRY_DELAY = 500 // Reduced from 1000ms
 
@@ -248,9 +248,9 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
   const allFlights: any[] = []
   let page = 0
   // Use custom max pages if provided (for background refresh), otherwise default
-  const maxPages = config.maxPagesToFetch || 25
+  const maxPages = config.maxPagesToFetch || 50
   let consecutiveEmptyPages = 0
-  const maxEmptyPages = 2 // Stop after 2 consecutive empty pages
+  const maxEmptyPages = 3 // Stop after 3 consecutive empty pages
   
   console.log(`Fetching ${config.isBackgroundRefresh ? 'background refresh' : 'all'} pages of Schiphol API data (max: ${maxPages})...`)
   
@@ -421,10 +421,16 @@ async function fetchAllPages(config: SchipholApiConfig): Promise<SchipholApiResp
   }
   
   console.log(`Total flights fetched: ${allFlights.length} from ${page} pages`)
+  console.log(`Average flights per page: ${page > 0 ? Math.round(allFlights.length / page) : 0}`)
   
   // Only warn if we hit max pages without empty pages
   if (page >= maxPages && consecutiveEmptyPages < maxEmptyPages) {
     console.warn(`⚠️ Reached maximum page limit (${maxPages}). There might be more flights available.`)
+  }
+  
+  // Log if we stopped due to empty pages
+  if (consecutiveEmptyPages >= maxEmptyPages) {
+    console.log(`📊 Stopped fetching after ${consecutiveEmptyPages} consecutive empty pages at page ${page}`)
   }
   
   const result = createResponse(allFlights, page)
@@ -586,28 +592,47 @@ export function filterFlights(
   // Filter for KLM-operated flights only (not codeshares)
   if (filters.prefixicao === 'KL') {
     const beforeKLMFilter = filtered.length
+    const codeshareFlights: SchipholFlight[] = []
+    const groundTransportFlights: SchipholFlight[] = []
+    
     filtered = filtered.filter(flight => {
-      // Check if this is a true KLM-operated flight (not a codeshare)
-      const mainFlight = flight.mainFlight || flight.flightName || ''
-      
-      // Only include flights where the mainFlight (operating carrier) starts with 'KL'
-      // This excludes codeshares operated by other airlines (like HV, Transavia)
-      if (!mainFlight.startsWith('KL')) {
-        return false
-      }
-      
       // Exclude ground transportation services (KL9xxx range: 9000-9999)
-      // These are typically bus/train services that don't update frequently
+      // These are typically bus/train services
       const flightNumber = flight.flightNumber
       if (flightNumber >= 9000 && flightNumber <= 9999) {
+        groundTransportFlights.push(flight)
         console.log(`🚌 Filtering ground transport: ${flight.flightName} (flight number ${flightNumber})`)
         return false
       }
       
+      // Exclude codeshare flights where KLM sells but doesn't operate
+      // Check if mainFlight exists and starts with 'KL'
+      if (flight.mainFlight && !flight.mainFlight.startsWith('KL')) {
+        codeshareFlights.push(flight)
+        console.log(`✈️ Filtering codeshare: ${flight.flightName} operated by ${flight.mainFlight}`)
+        return false
+      }
+      
+      // Log flights without mainFlight for debugging
+      if (!flight.mainFlight) {
+        console.log(`🔍 Flight without mainFlight: ${flight.flightName} to ${flight.route?.destinations?.[0] || 'Unknown'}`)
+      }
+      
+      // Include all KLM-operated flights
       return true
     })
     const afterKLMFilter = filtered.length
-    console.log(`KLM filter: ${beforeKLMFilter} → ${afterKLMFilter} flights (removed ${beforeKLMFilter - afterKLMFilter} codeshares/ground transport)`)
+    console.log(`KLM filter: ${beforeKLMFilter} → ${afterKLMFilter} flights (removed ${beforeKLMFilter - afterKLMFilter})`)
+    console.log(`  - Codeshare flights: ${codeshareFlights.length} (sold by KLM but operated by other airlines)`)
+    console.log(`  - Ground transport: ${groundTransportFlights.length} (bus/train services)`)
+    
+    // Log some examples of filtered codeshares for debugging
+    if (codeshareFlights.length > 0) {
+      console.log(`  - Codeshare examples:`)
+      codeshareFlights.slice(0, 5).forEach(flight => {
+        console.log(`    ${flight.flightName} → ${flight.route?.destinations?.[0] || 'Unknown'} (operated by ${flight.mainFlight})`)
+      })
+    }
   }
 
   if (filters.scheduleDate) {

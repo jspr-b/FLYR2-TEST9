@@ -29,16 +29,19 @@ export function GateRow({
       {/* Gate Label */}
       <div className="flex items-center mb-2">
         <div className="w-16 text-sm font-medium text-gray-900">
-          {gate.gateID}
+          {gate.gateID === 'NO_GATE' ? 'No Gate' : gate.gateID}
         </div>
         <div className="text-xs text-gray-500">
-          Pier {gate.pier} • {gate.flights.length} flight{gate.flights.length !== 1 ? 's' : ''}
+          {gate.gateID === 'NO_GATE' 
+            ? `Unassigned • ${gate.flights.length} flight${gate.flights.length !== 1 ? 's' : ''}`
+            : `Pier ${gate.pier} • ${gate.flights.length} flight${gate.flights.length !== 1 ? 's' : ''}`
+          }
         </div>
       </div>
       
       {/* Timeline Bar - Dynamic Height Based on Stacks */}
       <div 
-        className="relative bg-gray-50 rounded border"
+        className={`relative rounded border ${gate.gateID === 'NO_GATE' ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50'}`}
         style={{ height: `${Math.max(48, ((gate as any).maxConcurrentFlights || 1) * 36 + 12)}px` }}
       >
         {/* Grid lines */}

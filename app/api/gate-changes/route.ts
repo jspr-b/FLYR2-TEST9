@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
       flightDirection: 'D' as const, // Departures only
       airline: 'KL', // Need to specify airline to get gate data from API
       scheduleDate: todayDate,
-      fetchAllPages: true
+      fetchAllPages: true,
+      maxPagesToFetch: 50
     }
     
     // Ensure cache is warmed and register for background refresh
@@ -44,12 +45,12 @@ export async function GET(request: NextRequest) {
     const filteredFlights = filterFlights(transformedFlights, {
       flightDirection: 'D',
       scheduleDate: todayDate,
-      isOperationalFlight: true,
+      isOperationalFlight: false, // Include cancelled flights for complete data
       prefixicao: 'KL' // Include all KL flights (including codeshares)
     })
     
     // Remove stale and duplicate flights
-    const freshFlights = removeStaleFlights(filteredFlights)
+    const freshFlights = removeStaleFlights(filteredFlights, 72)
     const uniqueFlights = removeDuplicateFlights(freshFlights)
 
     console.log(`🔍 Processing ${uniqueFlights.length} unique operational flights`)

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       airline: 'KL',
       scheduleDate: today,
       fetchAllPages: true,
-      maxPagesToFetch: 25 // Match other endpoints to get all flights
+      maxPagesToFetch: 50 // Match other endpoints to get all flights
     }
 
     // Fetch flights from Schiphol API (same as /api/flights)
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
-    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
+    filteredFlights = removeStaleFlights(filteredFlights, 72) // Remove flights older than 72 hours
 
     console.log(`📊 DASHBOARD KPIS: Processing ${filteredFlights.length} flights${includeCancelled ? ' (including cancelled)' : ''}`)
 

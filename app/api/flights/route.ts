@@ -33,7 +33,8 @@ export async function GET(request: Request) {
       flightDirection: (filters as any).flightDirection,
       airline: (filters as any).prefixicao,
       scheduleDate: (filters as any).scheduleDate,
-      fetchAllPages: true // Fetch all pages to get complete data
+      fetchAllPages: true, // Fetch all pages to get complete data
+      maxPagesToFetch: 50
     }
 
     // Fetch flights from Schiphol API
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
     console.log(`After filtering: ${filteredFlights.length} flights`)
     
     filteredFlights = removeDuplicateFlights(filteredFlights)
-    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
+    filteredFlights = removeStaleFlights(filteredFlights, 72) // Remove flights older than 72 hours
     console.log(`After deduplication: ${filteredFlights.length} flights`)
 
     // Summary of data flow

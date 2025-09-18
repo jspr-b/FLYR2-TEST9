@@ -210,7 +210,8 @@ export async function GET() {
       flightDirection: 'D' as const,
       airline: 'KL',
       scheduleDate: today,
-      fetchAllPages: true
+      fetchAllPages: true,
+      maxPagesToFetch: 50
     }
 
     // Fetch flights from Schiphol API (same as /api/flights)
@@ -221,12 +222,12 @@ export async function GET() {
     const filters = {
       flightDirection: 'D' as const,
       scheduleDate: today,
-      isOperationalFlight: true,
+      isOperationalFlight: false, // Include cancelled flights for complete data
       prefixicao: 'KL'
     }
     let filteredFlights = filterFlights(allFlights, filters)
     filteredFlights = removeDuplicateFlights(filteredFlights)
-    filteredFlights = removeStaleFlights(filteredFlights, 24) // Remove flights older than 24 hours
+    filteredFlights = removeStaleFlights(filteredFlights, 72) // Remove flights older than 72 hours
 
     // Calculate destination statistics from flight data (Europe only)
     const destinationStats = calculateDestinationStats(filteredFlights)

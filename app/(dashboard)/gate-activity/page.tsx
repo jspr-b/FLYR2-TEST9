@@ -586,7 +586,7 @@ export default function GateActivityPage() {
                                           f.flightStates.includes('CNX') && g.gateID && g.gateID !== 'TBD'
                                         )
                                       ) || [];
-                                      return cancelledWithGates.length > 0 ? ' (had gate assignments)' : '';
+                                      return '';
                                     })()}
                                   </div>
                                 </div>
