@@ -208,7 +208,7 @@ export function GatesTerminalsSummary() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 mb-3 xs:mb-4 sm:mb-6">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 mb-3 xs:mb-4 sm:mb-6">
         {[...Array(4)].map((_, index) => (
           <div key={index} className="bg-white rounded-lg border border-gray-200 p-3 xs:p-4 sm:p-6 animate-pulse">
             <div className="h-3 xs:h-4 bg-gray-200 rounded mb-2 sm:mb-3"></div>
@@ -221,7 +221,7 @@ export function GatesTerminalsSummary() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 mb-3 xs:mb-4 sm:mb-6">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 mb-3 xs:mb-4 sm:mb-6">
       {summaryStats.map((stat, index) => (
         <div key={index} className="bg-white rounded-lg border border-gray-200 p-3 xs:p-4 sm:p-5 lg:p-6 cursor-default">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

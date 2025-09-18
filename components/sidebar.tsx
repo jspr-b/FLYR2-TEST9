@@ -21,7 +21,7 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile slide button */}
-      <div className="lg:hidden fixed bottom-6 left-4 z-50">
+      <div className="xl:hidden fixed bottom-6 left-4 z-50">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="bg-blue-600 text-white p-4 rounded-full shadow-lg cursor-pointer hover:bg-blue-700 transition-all duration-200 hover:scale-105"
@@ -32,7 +32,7 @@ export function Sidebar() {
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setSidebarOpen(false)} />
+        <div className="xl:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -40,7 +40,7 @@ export function Sidebar() {
         className={`
         w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-40 transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0
+        xl:translate-x-0
       `}
       >
         <div className="p-6">

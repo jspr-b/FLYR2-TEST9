@@ -156,7 +156,7 @@ export function RouteDelayTable() {
         {/* Desktop grid headers */}
         <div className="hidden md:block">
           {/* Large desktop headers */}
-          <div className="hidden lg:grid grid-cols-12 gap-2 px-2 mb-2 text-xs font-semibold text-muted-foreground">
+          <div className="hidden xl:grid grid-cols-12 gap-2 px-2 mb-2 text-xs font-semibold text-muted-foreground">
             <div className="col-span-3">Destination</div>
             <div className="text-center">On Time</div>
             <div className="text-center">Delayed</div>
@@ -168,17 +168,18 @@ export function RouteDelayTable() {
             <div className="text-center">Latest</div>
             <div className="col-span-2 text-center">Flights</div>
           </div>
-          {/* Medium screen headers */}
-          <div className="grid lg:hidden grid-cols-8 gap-2 px-2 mb-2 text-xs font-semibold text-muted-foreground">
-            <div className="col-span-3">Destination</div>
-            <div className="text-center">Status</div>
-            <div className="text-center">Delays</div>
-            <div className="text-center">Times</div>
-            <div className="col-span-2 text-center">Flights</div>
+          {/* Medium screen headers - simplified for 1024x768 */}
+          <div className="grid xl:hidden grid-cols-7 gap-2 px-2 mb-2 text-[10px] sm:text-xs font-semibold text-muted-foreground">
+            <div className="col-span-2">Destination</div>
+            <div className="text-center">On Time</div>
+            <div className="text-center">Delayed</div>
+            <div className="text-center">Avg Delay</div>
+            <div className="text-center">% ≥15m</div>
+            <div className="text-center">Flights</div>
           </div>
         </div>
         {/* Card list, scrollable */}
-        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+        <div className="space-y-1.5 sm:space-y-2 max-h-[400px] md:max-h-[450px] xl:max-h-[500px] overflow-y-auto">
           {data.routes.map((route) => {
             const delaySeverity = getDelaySeverity(route.avgDelay)
             return (
@@ -186,7 +187,7 @@ export function RouteDelayTable() {
                 {/* Large desktop grid row */}
                 <div
                   key={route.destination + '-desktop'}
-                  className="hidden lg:grid grid-cols-12 gap-2 items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-default"
+                  className="hidden xl:grid grid-cols-12 gap-2 items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-default"
                 >
                   {/* Destination info */}
                   <div className="flex items-center space-x-3 col-span-3 min-w-0">
@@ -255,67 +256,59 @@ export function RouteDelayTable() {
                     )}
                   </div>
                 </div>
-                {/* Medium screen card */}
+                {/* Medium screen card - optimized for 1024x768 */}
                 <div
                   key={route.destination + '-medium'}
-                  className="hidden md:grid lg:hidden grid-cols-8 gap-2 items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-default"
+                  className="hidden md:grid xl:hidden grid-cols-7 gap-2 items-center p-2 sm:p-3 border rounded-lg hover:bg-accent/50 transition-colors cursor-default"
                 >
                   {/* Destination info */}
-                  <div className="flex items-center space-x-2 col-span-3 min-w-0">
-                    <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                      <span className="text-xs font-semibold text-blue-600 cursor-default">
+                  <div className="flex items-center gap-1.5 sm:gap-2 col-span-2 min-w-0">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 rounded flex items-center justify-center shrink-0">
+                      <span className="text-[10px] sm:text-xs font-semibold text-blue-600 cursor-default">
                         {route.destination}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm cursor-default truncate" title={route.destinationName}>
-                        {route.destinationName}
+                      <p className="font-medium text-xs sm:text-sm cursor-default truncate" title={route.destinationName}>
+                        {route.destinationName.length > 15 ? route.destinationName.substring(0, 15) + '...' : route.destinationName}
                       </p>
-                      <p className="text-xs text-muted-foreground cursor-default">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground cursor-default">
                         {route.totalFlights} flights
                       </p>
                     </div>
                   </div>
-                  {/* Status */}
+                  {/* On Time */}
                   <div className="text-center">
-                    <div className="text-xs">
-                      <span className="text-green-600 font-semibold">{route.onTimeFlights}</span>
-                      <span className="text-muted-foreground">/{route.totalFlights}</span>
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">on time</div>
+                    <span className="text-green-600 font-semibold text-xs sm:text-sm">{route.onTimeFlights}</span>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">/{route.totalFlights}</span>
                   </div>
-                  {/* Delays */}
+                  {/* Delayed */}
                   <div className="text-center">
-                    <div className="text-xs font-semibold">{route.avgDelay}m</div>
-                    <div className="text-[10px] text-muted-foreground">{route.percentDelayedOver15}% ≥15m</div>
+                    <span className="text-red-600 font-semibold text-xs sm:text-sm">{route.delayedFlights}</span>
                   </div>
-                  {/* Times */}
+                  {/* Avg Delay */}
                   <div className="text-center">
-                    <div className="text-xs font-mono">
-                      {route.earliestDeparture ? route.earliestDeparture.slice(11, 16) : '-'}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">to</div>
-                    <div className="text-xs font-mono">
-                      {route.latestDeparture ? route.latestDeparture.slice(11, 16) : '-'}
-                    </div>
+                    <span className="font-semibold text-xs sm:text-sm">{route.avgDelay}min</span>
+                    <span className="block text-[9px] sm:text-[10px] text-muted-foreground">max {route.maxDelay}m</span>
                   </div>
-                  {/* Flight Numbers */}
-                  <div className="col-span-2 text-center">
-                    <Badge className={delaySeverity.color + " text-xs mb-1"}>
-                      {delaySeverity.label}
-                    </Badge>
+                  {/* % Delayed */}
+                  <div className="text-center">
+                    <span className="font-semibold text-xs sm:text-sm">{route.percentDelayedOver15}%</span>
+                  </div>
+                  {/* Flight Count with dropdown */}
+                  <div className="text-center">
                     {route.flightNumbers.length > 0 ? (
-                      <details className="text-xs group">
-                        <summary className="cursor-pointer text-blue-600 hover:text-blue-800 text-[11px] flex items-center justify-center gap-0.5">
-                          <span>{route.flightNumbers.length} flights</span>
-                          <span className="text-[9px] transition-transform group-open:rotate-180">▼</span>
+                      <details className="text-[10px] sm:text-xs group">
+                        <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center gap-0.5">
+                          <span>{route.flightNumbers.length}</span>
+                          <span className="text-[8px] sm:text-[9px] transition-transform group-open:rotate-180">▼</span>
                         </summary>
-                        <div className="mt-1 font-mono text-[10px] break-words text-left bg-gray-50 p-1.5 rounded mx-1 border border-gray-200 max-h-24 overflow-y-auto">
+                        <div className="absolute z-10 mt-1 font-mono text-[10px] bg-white shadow-lg p-2 rounded border border-gray-200 max-h-32 overflow-y-auto max-w-xs">
                           {route.flightNumbers.join(', ')}
                         </div>
                       </details>
                     ) : (
-                      <span className="text-[10px] text-muted-foreground">-</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">-</span>
                     )}
                   </div>
                 </div>

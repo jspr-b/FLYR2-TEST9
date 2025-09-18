@@ -168,7 +168,7 @@ export function RouteVolumeChart() {
   const sortedRoutes = getSortedRoutes()
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 md:p-6">
       <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-2 mb-2">
           <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" />
@@ -232,45 +232,74 @@ export function RouteVolumeChart() {
         </div>
       </div>
 
-      {/* Horizontal Bar Chart */}
+      {/* Horizontal Bar Chart - Responsive Design */}
       <div className="space-y-2 sm:space-y-3 max-h-[300px] sm:max-h-[400px] overflow-y-auto">
         {sortedRoutes.map((route, index) => (
-          <div key={route.destination} className="flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4">
-            {/* Rank */}
-            <div className="w-5 xs:w-6 text-[10px] xs:text-xs font-medium text-gray-500 text-right">
-              #{index + 1}
-            </div>
-            
-            {/* Destination Code */}
-            <div className="w-8 xs:w-10 sm:w-12 text-[10px] xs:text-xs font-bold text-gray-900">
-              {route.destination}
-            </div>
-            
-            {/* Destination Name - only show on larger screens */}
-            <div className="hidden min-[480px]:block w-16 xs:w-20 sm:w-24 md:w-32 lg:w-40 text-[10px] xs:text-xs text-gray-700 truncate" title={route.destinationName}>
-              {route.destinationName}
-            </div>
-            
-            {/* Bar */}
-            <div className="flex-1 relative min-w-0">
-              <div className="h-6 xs:h-7 sm:h-8 bg-gray-100 rounded-md sm:rounded-lg overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-300 ${getDelayColor(route)} flex items-center justify-end pr-1 sm:pr-2`}
-                  style={{ width: `${getBarWidth(route)}%` }}
-                >
-                  <span className="text-[10px] xs:text-xs font-medium whitespace-nowrap" style={{ color: getTextColor(route) }}>
-                    {getMetricLabel(route)}
-                  </span>
+          <div key={route.destination} className="group">
+            {/* Desktop/Tablet Layout */}
+            <div className="hidden sm:flex items-center gap-2 sm:gap-3 md:gap-4">
+              {/* Rank */}
+              <div className="w-6 text-[10px] sm:text-xs font-medium text-gray-500 text-right">
+                #{index + 1}
+              </div>
+              
+              {/* Destination Code */}
+              <div className="w-10 sm:w-12 text-[10px] sm:text-xs font-bold text-gray-900">
+                {route.destination}
+              </div>
+              
+              {/* Destination Name - show on medium+ screens */}
+              <div className="hidden md:block w-24 lg:w-32 xl:w-40 text-[10px] sm:text-xs text-gray-700 truncate" title={route.destinationName}>
+                {route.destinationName}
+              </div>
+              
+              {/* Bar */}
+              <div className="flex-1 relative">
+                <div className="h-6 sm:h-7 md:h-8 bg-gray-100 rounded-md sm:rounded-lg overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${getDelayColor(route)} flex items-center justify-end pr-1 sm:pr-2`}
+                    style={{ width: `${getBarWidth(route)}%` }}
+                  >
+                    <span className="text-[10px] sm:text-xs font-medium whitespace-nowrap" style={{ color: getTextColor(route) }}>
+                      {getMetricLabel(route)}
+                    </span>
+                  </div>
                 </div>
               </div>
+              
+              {/* Flight Count */}
+              <div className="w-12 md:w-16 lg:w-20 text-[10px] sm:text-xs text-gray-500 text-right">
+                <span className="md:hidden">{route.totalFlights}f</span>
+                <span className="hidden md:inline">{route.totalFlights} flights</span>
+              </div>
             </div>
-            
-            {/* Flight Count */}
-            <div className="w-8 xs:w-10 sm:w-12 md:w-14 lg:w-16 text-[10px] xs:text-xs text-gray-500 text-right whitespace-nowrap">
-              <span className="min-[480px]:hidden">{route.totalFlights}</span>
-              <span className="hidden min-[480px]:inline sm:hidden">{route.totalFlights}f</span>
-              <span className="hidden sm:inline md:hidden">{route.totalFlights} fl</span>
-              <span className="hidden md:inline">{route.totalFlights} flights</span>
+
+            {/* Mobile Layout - Stacked */}
+            <div className="sm:hidden border rounded-lg p-2 hover:bg-accent/50 transition-colors">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-medium text-gray-500">#{index + 1}</span>
+                  <span className="text-xs font-bold text-gray-900">{route.destination}</span>
+                  <span className="text-[10px] text-gray-600 truncate max-w-[100px]" title={route.destinationName}>
+                    {route.destinationName}
+                  </span>
+                </div>
+                <span className="text-[10px] text-gray-500">{route.totalFlights} flights</span>
+              </div>
+              
+              {/* Bar for mobile */}
+              <div className="relative">
+                <div className="h-6 bg-gray-100 rounded-md overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${getDelayColor(route)} flex items-center justify-end pr-2`}
+                    style={{ width: `${getBarWidth(route)}%` }}
+                  >
+                    <span className="text-[10px] font-medium whitespace-nowrap" style={{ color: getTextColor(route) }}>
+                      {getMetricLabel(route)}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ))}

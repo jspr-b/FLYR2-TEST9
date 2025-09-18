@@ -773,31 +773,31 @@ export function DashboardKPIs() {
         ))}
       </div>
 
-      {/* Mini Visuals - Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      {/* Mini Visuals - Middle Row - Enhanced for medium screens */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         {/* Hourly Delay Trend Preview */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Top Delay Hours</h3>
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Top Delay Hours</h3>
             <Link
               href="/delay-trends-by-hour"
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
             >
               View All →
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {delayHours.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <div
-                    className={`w-2 h-2 rounded-full ${item.status === "critical" ? "bg-red-500" : "bg-yellow-500"}`}
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${item.status === "critical" ? "bg-red-500" : "bg-yellow-500"}`}
                   ></div>
-                  <span className="text-sm font-medium text-gray-900">{item.hour}</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">{item.hour}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{formatValue(item.flights)} flights</span>
-                  <span className="text-sm font-bold text-gray-500">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">{formatValue(item.flights)} <span className="hidden 2xs:inline">flights</span><span className="2xs:hidden">fl</span></span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-500 whitespace-nowrap">
                     {item.delay ? `${item.delay.toFixed(1)}m` : "n/v"}
                   </span>
                 </div>
@@ -807,22 +807,22 @@ export function DashboardKPIs() {
         </div>
 
         {/* Aircraft Performance Summary */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Aircraft Performance</h3>
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Aircraft Performance</h3>
             <Link
               href="/aircraft-type-delay-performance"
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
             >
               View All →
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {aircraftPerformance.map((aircraft, index) => (
               <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <div
-                    className={`w-2 h-2 rounded-full ${
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${
                       aircraft.status === "good"
                         ? "bg-green-500"
                         : aircraft.status === "fair"
@@ -830,14 +830,14 @@ export function DashboardKPIs() {
                           : "bg-red-500"
                     }`}
                   ></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-900">{aircraft.type}</span>
-                    <span className="text-xs text-gray-500 ml-2">({aircraft.category})</span>
+                  <div className="min-w-0">
+                    <span className="text-xs sm:text-sm font-medium text-gray-900 block truncate">{aircraft.type}</span>
+                    <span className="text-[10px] sm:text-xs text-gray-500">({aircraft.category})</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{formatValue(aircraft.flights)} flights</span>
-                  <span className="text-sm font-bold text-gray-500">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">{formatValue(aircraft.flights)} <span className="hidden 2xs:inline">flights</span><span className="2xs:hidden">fl</span></span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-500 whitespace-nowrap">
                     {aircraft.delay ? `${aircraft.delay.toFixed(1)}m` : "n/v"}
                   </span>
                 </div>
@@ -847,22 +847,22 @@ export function DashboardKPIs() {
         </div>
 
         {/* Gate Load Snapshot */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Busiest Gates Today</h3>
+        <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 lg:p-6 md:col-span-2 xl:col-span-1">
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Busiest Gates Today</h3>
             <Link
               href="/busiest-gates-and-terminals"
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
             >
               View All →
             </Link>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {gateData.map((gate, index) => (
               <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <div
-                    className={`w-2 h-2 rounded-full ${
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${
                       gate.status === "critical"
                         ? "bg-red-500 animate-pulse"
                         : gate.status === "high"
@@ -870,14 +870,14 @@ export function DashboardKPIs() {
                           : "bg-yellow-500"
                     }`}
                   ></div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-900">{gate.gate}</span>
-                    <span className="text-xs text-gray-500 ml-2">({gate.pier})</span>
+                  <div className="min-w-0">
+                    <span className="text-xs sm:text-sm font-medium text-gray-900">{gate.gate}</span>
+                    <span className="text-[10px] sm:text-xs text-gray-500 ml-1 sm:ml-2">({gate.pier})</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{formatValue(gate.flights)} flights</span>
-                  <span className="text-sm font-bold text-gray-500">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                  <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">{formatValue(gate.flights)} <span className="hidden 2xs:inline">flights</span><span className="2xs:hidden">fl</span></span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-500 whitespace-nowrap">
                     {gate.utilization ? `${formatUtilization(gate.utilization)}%` : "n/v"}
                   </span>
                 </div>

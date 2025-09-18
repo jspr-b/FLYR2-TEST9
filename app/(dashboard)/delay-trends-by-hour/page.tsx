@@ -22,8 +22,8 @@ export default function DelayTrendsByHour() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="lg:ml-64 flex-1 bg-gray-50 min-h-screen">
-        <div className="p-4 sm:p-6 lg:p-6 pt-16 lg:pt-8">
+      <div className="xl:ml-64 flex-1 bg-gray-50 min-h-screen">
+        <div className="p-4 sm:p-6 lg:p-6 pt-16 xl:pt-8">
           <div className="mb-6 lg:mb-8">
             <div className="flex items-center gap-3 mb-2">
               <BarChart3 className="h-6 w-6 text-blue-600" />

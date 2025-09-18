@@ -26,8 +26,8 @@ export function PageLoaderWithSidebar({
 }: PageLoaderProps) {
   return (
     <div className="flex">
-      <div className="lg:ml-64 flex-1 bg-gray-50 min-h-screen">
-        <div className="p-3 xs:p-4 sm:p-6 lg:p-8 pt-14 xs:pt-16 lg:pt-8">
+      <div className="xl:ml-64 flex-1 bg-gray-50 min-h-screen">
+        <div className="p-3 xs:p-4 sm:p-6 lg:p-8 pt-14 xs:pt-16 xl:pt-8">
           <PageLoader message={message} submessage={submessage} />
         </div>
       </div>
