@@ -495,8 +495,8 @@ export function TerminalsChart() {
       {!showHourlyView ? (
         <div className="relative mb-4 xs:mb-6 sm:mb-8">
           {/* Chart Area - Responsive for all screen sizes */}
-          <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div className="flex items-end justify-start min-w-[700px] xs:min-w-[800px] sm:min-w-0 gap-3 xs:gap-4 sm:gap-5 md:gap-6 lg:gap-8 h-56 xs:h-72 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8 pt-8 px-4">
+          <div className="relative">
+            <div className="flex items-end justify-center gap-3 xs:gap-4 sm:gap-5 md:gap-6 lg:gap-8 h-56 xs:h-72 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8 pt-8 px-4">
               {pierData.map((data, index) => {
                 const isSelected = selectedPier === data.pier
                 const height = getBarHeight(data.flights)
@@ -538,8 +538,8 @@ export function TerminalsChart() {
       ) : (
         <div className="mb-4 xs:mb-6 sm:mb-8">
           {/* Hourly Density Bar Chart */}
-          <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0">
-            <div className="flex items-end justify-center min-w-[600px] xs:min-w-[700px] sm:min-w-0 gap-0.5 xs:gap-1 sm:gap-2 md:gap-3 lg:gap-4 h-48 xs:h-64 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8">
+          <div className="relative overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="flex items-end justify-start min-w-max gap-0.5 xs:gap-1 sm:gap-2 md:gap-3 lg:gap-4 h-48 xs:h-64 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8 px-4">
               {Array.from({ length: 18 }, (_, i) => i + 6).map(hour => {
                 const hourStr = hour.toString().padStart(2, '0')
                 // Always show only the selected pier's data
