@@ -1,8 +1,23 @@
+"use client"
+
 import { DashboardKPIs } from "@/components/dashboard-kpis"
 import { Sidebar } from "@/components/sidebar"
 import { LayoutDashboard } from "lucide-react"
+import { PageLoader } from "@/components/ui/page-loader"
+import { useClientData } from "@/lib/client-utils"
+import { useState, useEffect } from "react"
 
 export default function Dashboard() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="flex">
       <Sidebar />
@@ -18,9 +33,13 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="grid gap-6">
-            <DashboardKPIs />
-          </div>
+          {isLoading ? (
+            <PageLoader message="Loading dashboard..." submessage="Fetching live operations data" />
+          ) : (
+            <div className="grid gap-6">
+              <DashboardKPIs />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,24 @@
+"use client"
+
 import { Sidebar } from "@/components/sidebar"
 import { GatesTerminalsSummary } from "@/components/gates-terminals-summary"
 import { TerminalsChart } from "@/components/terminals-chart"
 import { GatesTable } from "@/components/gates-table"
 import { Building2 } from "lucide-react"
+import { PageLoader } from "@/components/ui/page-loader"
+import { useState, useEffect } from "react"
 
 export default function BusiestGatesAndTerminals() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="flex">
       <Sidebar />
@@ -24,6 +38,10 @@ export default function BusiestGatesAndTerminals() {
             </p>
           </div>
 
+          {isLoading ? (
+            <PageLoader message="Loading gates and terminals..." submessage="Analyzing pier and gate activity" />
+          ) : (
+            <>
           <GatesTerminalsSummary />
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 xs:gap-4 sm:gap-5 lg:gap-6 mb-3 sm:mb-6">
@@ -34,6 +52,8 @@ export default function BusiestGatesAndTerminals() {
               <GatesTable />
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

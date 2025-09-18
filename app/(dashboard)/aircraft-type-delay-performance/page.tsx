@@ -1,10 +1,24 @@
+"use client"
+
 import { Sidebar } from "@/components/sidebar"
 import { FleetPerformanceSummary } from "@/components/fleet-performance-summary"
 import { AircraftPerformanceChart } from "@/components/aircraft-performance-chart"
 import { AircraftPerformanceTable } from "@/components/aircraft-performance-table"
 import { TrendingUp } from "lucide-react"
+import { PageLoader } from "@/components/ui/page-loader"
+import { useState, useEffect } from "react"
 
 export default function AircraftTypeDelayPerformance() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="flex">
       <Sidebar />
@@ -20,6 +34,10 @@ export default function AircraftTypeDelayPerformance() {
             </p>
           </div>
 
+          {isLoading ? (
+            <PageLoader message="Loading aircraft performance..." submessage="Analyzing fleet delay metrics" />
+          ) : (
+            <>
           <div className="mb-6">
             <FleetPerformanceSummary />
           </div>
@@ -32,6 +50,8 @@ export default function AircraftTypeDelayPerformance() {
               <AircraftPerformanceTable />
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -1,10 +1,24 @@
+"use client"
+
 import { Sidebar } from "@/components/sidebar"
 import { DelayTrendsChart } from "@/components/delay-trends-chart"
 import { DelayTrendsTable } from "@/components/delay-trends-table"
 import { DelayTrendsSummary } from "@/components/delay-trends-summary"
 import { BarChart3 } from "lucide-react"
+import { PageLoader } from "@/components/ui/page-loader"
+import { useState, useEffect } from "react"
 
 export default function DelayTrendsByHour() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="flex">
       <Sidebar />
@@ -18,6 +32,10 @@ export default function DelayTrendsByHour() {
             <p className="text-gray-600 text-sm sm:text-base">Current Day Analysis • Schiphol Airport</p>
           </div>
 
+          {isLoading ? (
+            <PageLoader message="Loading delay trends..." submessage="Analyzing hourly delay patterns" />
+          ) : (
+            <>
           <DelayTrendsSummary />
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
@@ -28,6 +46,8 @@ export default function DelayTrendsByHour() {
               <DelayTrendsTable />
             </div>
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

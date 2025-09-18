@@ -1,11 +1,25 @@
+"use client"
+
 import { DestinationMap } from "@/components/destination-map"
 import { RouteDelayTable } from "@/components/route-delay-table"
 import { RouteVolumeChart } from "@/components/route-volume-chart"
 import { Sidebar } from "@/components/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Route, BarChart3, Clock } from "lucide-react"
+import { PageLoader } from "@/components/ui/page-loader"
+import { useState, useEffect } from "react"
 
 export default function RouteAnalyticsPage() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="flex">
       <Sidebar />
@@ -26,6 +40,9 @@ export default function RouteAnalyticsPage() {
           </div>
 
           {/* Main Content Grid */}
+          {isLoading ? (
+            <PageLoader message="Loading route analytics..." submessage="Fetching destination and route data" />
+          ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 xs:gap-4 sm:gap-5 lg:gap-6">
             {/* Destination Map Section */}
             <Card className="cursor-default">
@@ -81,7 +98,7 @@ export default function RouteAnalyticsPage() {
               </CardContent>
             </Card>
           </div>
-
+          )}
 
         </div>
       </div>

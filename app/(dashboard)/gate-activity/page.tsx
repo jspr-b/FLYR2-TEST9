@@ -8,6 +8,7 @@ import { GateGanttChart } from "@/components/gate-gantt-chart"
 import { GateChangesDashboard } from "@/components/gate-changes-dashboard"
 import { GateTypeDistribution } from "@/components/gate-type-distribution"
 import { Activity, Calendar, Plane, Users, DoorOpen, DoorClosed, Clock, PlaneTakeoff, UserCheck, PauseCircle, Loader2, Info, TrendingUp, ArrowRightLeft, Maximize2, XCircle } from "lucide-react"
+import { PageLoader } from "@/components/ui/page-loader"
 import {
   Popover,
   PopoverContent,
@@ -327,31 +328,6 @@ export default function GateActivityPage() {
     }))
   } : null
 
-  if (loading) {
-    return (
-      <div className="flex">
-        <Sidebar />
-        <div className="lg:ml-64 flex-1 bg-gray-50 min-h-screen">
-          <div className="p-3 xs:p-4 sm:p-6 lg:p-8 pt-14 xs:pt-16 lg:pt-8">
-            <div className="mb-3 xs:mb-4 sm:mb-6 lg:mb-8">
-              <div className="flex items-center gap-2 xs:gap-3 mb-1 xs:mb-2">
-                <Activity className="h-4 xs:h-5 sm:h-6 w-4 xs:w-5 sm:w-6 text-blue-600" />
-                <h1 className="text-base xs:text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                  <span className="sm:hidden">Gate Activity</span>
-                  <span className="hidden sm:inline">Gate Activity Analysis</span>
-                </h1>
-              </div>
-              <p className="text-gray-600 text-[10px] xs:text-xs sm:text-sm lg:text-base">
-                <span className="xs:hidden">Real-Time Status</span>
-                <span className="hidden xs:inline">Real-Time Gate Status • Flight Operations • Activity Monitoring</span>
-              </p>
-            </div>
-            <div className="text-center p-6 xs:p-8 text-xs xs:text-sm">Loading gate activity data...</div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   if (error) {
     return (
@@ -440,6 +416,9 @@ export default function GateActivityPage() {
             )}
           </div>
 
+          {loading ? (
+            <PageLoader message="Loading gate activity..." submessage="Fetching real-time gate occupancy data" />
+          ) : (
           <div className="grid gap-3 xs:gap-4 sm:gap-6">
             {/* Gate Schedule Timeline (Gantt Chart) */}
             <GateGanttChart gateData={ganttData} />
@@ -921,6 +900,7 @@ export default function GateActivityPage() {
 
 
           </div>
+          )}
         </div>
       </div>
     </div>
