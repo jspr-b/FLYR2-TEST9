@@ -113,8 +113,8 @@ export function TerminalsChart() {
               ['BRD', 'GTO', 'GCL', 'GTD', 'DEP'].includes(flight.primaryState)
             )
 
-            // Use logical flights for total count (what user sees scheduled)
-            const flightCount = gate.utilization.logical || 0
+            // Count actual flights directly to avoid double counting
+            const flightCount = scheduledFlights.length
             acc[pierKey].flights += flightCount
             acc[pierKey].totalScheduled += flightCount
             acc[pierKey].currentlyActive += activeFlights.length
@@ -200,8 +200,13 @@ export function TerminalsChart() {
         console.log('🏗️ Pier Usage Analysis:')
         console.log('- Show current activity:', showCurrentActivity)
         Object.values(pierStats).forEach(pier => {
-          console.log(`- Pier ${pier.pier}: ${pier.currentlyActive} currently active, ${pier.totalScheduled} total scheduled`)
+          console.log(`- Pier ${pier.pier}: ${pier.currentlyActive} currently active, ${pier.totalScheduled} total scheduled, ${pier.flights} flights shown`)
         })
+        
+        // Debug D pier splitting
+        const dGates = gates.filter(g => g.pier === 'D')
+        console.log(`- D pier gates: ${dGates.length}`)
+        console.log(`- D pier total flights: ${dGates.reduce((sum, g) => sum + (g.scheduledFlights?.length || 0), 0)}`)
 
         setPierData(transformedPierData)
         setHourlyDensity(hourlyDensityData)
@@ -490,8 +495,8 @@ export function TerminalsChart() {
       {!showHourlyView ? (
         <div className="relative mb-4 xs:mb-6 sm:mb-8">
           {/* Chart Area - Responsive for all screen sizes */}
-          <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0">
-            <div className="flex items-end justify-center min-w-[400px] xs:min-w-[500px] sm:min-w-0 gap-2 xs:gap-3 sm:gap-4 md:gap-6 lg:gap-8 h-56 xs:h-72 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8 pt-8">
+          <div className="relative overflow-x-auto -mx-3 xs:-mx-4 sm:mx-0 px-3 xs:px-4 sm:px-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="flex items-end justify-start min-w-[700px] xs:min-w-[800px] sm:min-w-0 gap-3 xs:gap-4 sm:gap-5 md:gap-6 lg:gap-8 h-56 xs:h-72 sm:h-80 lg:h-96 mb-4 xs:mb-6 sm:mb-8 pt-8 px-4">
               {pierData.map((data, index) => {
                 const isSelected = selectedPier === data.pier
                 const height = getBarHeight(data.flights)
@@ -504,15 +509,15 @@ export function TerminalsChart() {
                       <span className="text-[9px] xs:text-[10px] sm:text-xs text-gray-500 hidden xs:block">flights</span>
                     </div>
                     <div
-                      className={`w-8 xs:w-10 sm:w-12 md:w-16 lg:w-20 rounded-t transition-all duration-200 ${colorClass} ${
+                      className={`w-8 xs:w-9 sm:w-10 md:w-12 lg:w-16 rounded-t transition-all duration-200 ${colorClass} ${
                         isSelected ? "ring-1 xs:ring-2 ring-blue-500 ring-offset-1 xs:ring-offset-2" : ""
                       }`}
                       style={{ height: `${height}px` }}
                       onClick={() => setSelectedPier(isSelected ? null : data.pier)}
                       title={`${data.pier}: ${formatValue(data.flights)} flights (${formatUtilization(data.utilization)}% utilization)`}
                     />
-                    <div className="mt-2 xs:mt-3 text-center">
-                      <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-900 block">
+                    <div className="mt-2 xs:mt-3 text-center max-w-[60px] xs:max-w-[70px] sm:max-w-[80px]">
+                      <span className="text-[8px] xs:text-[9px] sm:text-[10px] font-medium text-gray-900 block whitespace-nowrap">
                         {data.pier}
                       </span>
                       <span
